@@ -35,9 +35,9 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
             this._game = game;
             this._parent_plane = parent_plane;
             this._is_turned_on = true;
-            this._bound_dist = Configuration.alert_bound_dist;
+            this._bound_dist = Config.alert_bound_dist;
             this.destroy_me = false;
-            this._one_state_time = Configuration.alert_freq;
+            this._one_state_time = Config.alert_freq;
             this._change_time = 0;
             this._position = CalculatePosition(plane_start_pos);
             this._texture = _game.Content.Load<Texture2D>("arrival_alert");

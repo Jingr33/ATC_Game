@@ -48,7 +48,7 @@ namespace ATC_Game.Logic
         private void TryAddNewAirplane (GameTime game_time)
         {
             this._airplane_spawn_time += (float)game_time.ElapsedGameTime.TotalSeconds;
-            if (this._airplane_spawn_time >= Configuration.gen_interval)
+            if (this._airplane_spawn_time >= Config.gen_interval)
             {
                 this._game.airplanes = this._trafficGenerator.UpdateTraffic(this._game, this._game.airplanes, game_time);
                 this._airplane_spawn_time = 0;
@@ -82,7 +82,6 @@ namespace ATC_Game.Logic
             }
             foreach (int i in for_removal)
                 this.arrival_alerts.Remove(arrival_alerts[i]);
-            //Console.WriteLine(this.arrival_alerts.Count.ToString());
         }
 
         /// <summary>
@@ -98,7 +97,8 @@ namespace ATC_Game.Logic
             }
             foreach (int i in remove)
             {
-                this._game.airplanes.Remove(this._game.airplanes[i]);
+                this._game.infostripes.Remove(this._game.infostripes[i]); // remove infostrip
+                this._game.airplanes.Remove(this._game.airplanes[i]); // remove airplane
             }
         }
 

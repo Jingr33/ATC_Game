@@ -6,11 +6,18 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 // TODO:
 // přide body vstupů, ke kterým to letí
-// oprav blikani aletru: dole a vpravo se nezobrazuje
 // dodělej info strips
+// generování dsestinací udělej tak aby přiletaly ze stran ze kterých to dává smysl (pokud bude letiště reálné)
+// natoč heading správným směrem airplane.getHeading
+// nefunguje heading
+// predelej speed na ground speed at to neukazuje nereálné čísla
+// přidat time schedule a flight status
+// přidat funkce pro time section
+// udělej stripes jako scrollable panel
 
 namespace ATC_Game
 {
@@ -19,6 +26,7 @@ namespace ATC_Game
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         public List<Airplane> airplanes;
+        public List<InfoStripe> infostripes;
         public AirplaneLogic _airplane_logic;
 
         private RenderTarget2D _game_render_target;
@@ -42,10 +50,11 @@ namespace ATC_Game
         {
             this._game_render_target = new RenderTarget2D(GraphicsDevice, 900, 900);
             this._strips_render_target = new RenderTarget2D(GraphicsDevice, 400, 400);
-            _game_area = new Rectangle(400, 0, 900, 900);
-            _plane_strips_area = new Rectangle(0, 0, 400, 400);
+            this._game_area = new Rectangle(400, 0, 900, 900);
+            this._plane_strips_area = new Rectangle(0, 0, 400, 400);
 
             this.airplanes = new List<Airplane>();
+            this.infostripes = new List<InfoStripe>();
             this._airplane_logic = new AirplaneLogic(this);
             base.Initialize();
         }
@@ -88,7 +97,7 @@ namespace ATC_Game
         {
             this._spriteBatch.Begin();
             this._spriteBatch.Draw(this._game_render_target, this._game_area, this._bg_color);
-            this._spriteBatch.Draw(this._game_render_target, this._plane_strips_area, this._bg_color);
+            this._spriteBatch.Draw(this._strips_render_target, this._plane_strips_area, this._bg_color);
             this._spriteBatch.End();
         }
 
@@ -118,6 +127,10 @@ namespace ATC_Game
         private void DrawPlaneStripsContent()
         {
             this._spriteBatch.Begin();
+            for(int i = 0; i < this.infostripes.Count; i++)
+            {
+                this.infostripes[i].Draw(this._spriteBatch, i);
+            }
             this._spriteBatch.End();
         }
 

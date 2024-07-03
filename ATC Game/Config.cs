@@ -9,17 +9,26 @@ using Color = Microsoft.Xna.Framework.Color;
 
 namespace ATC_Game
 {
-    public class Configuration
+    public class Config
     {
-        public static string[] airplane_types = new string[] {"unknown"};
+        // ICONS
         public static string[] airplane_icons = new string[] {"plane"};
         public static string[] airplane_margin_icons = new string[] { "plane_margin" };
+
+        // AIRPLANE VARIANTS
+        public static string[] airplane_types = new string[] {"UNKNOWN"};
+        public static string[] airplane_weight_cat = new string[] {"A", "B", "C", "D", "E", "S"};
+        public static string[] airplane_callsigns = new string[] { "CSA123" };
+        public static string[] airplane_registration = new string[] { "OK-000" };
+        public static string[] destinations = new string[] { "Brno", "Ostrava" };
 
         //TRAFFIC GENERATION
         public static int gen_interval = 2; // interval between two new airplanes
         public static int gen_probability = 3; // probability of new airplane generation
         public static int min_speed = 50; // minimum speed of airplanes
         public static int max_speed = 101; // maximum speed of airplanes
+        public static int min_altitude = 30; // minimum flight level of arrival ariplane
+        public static int max_altitude = 101; // maximum flight level of departure airplane
         public static int plane_off_distance = 50; //distance between boudaries of a map and spawn point
         public static int min_plane_count = 2; // minimal count of planes in the map
         public static int max_plane_count = 6; // maximu count of planes in the map
@@ -28,6 +37,10 @@ namespace ATC_Game
         public static float alert_freq = 0.5f; // arrival alert blink rate
         //traffic boudaries
         public static int margin_dist = 75; // distance which set mardinal texture
+        // airplane stripe
+        public static int stripe_height = 70; // airplane stripe height in plane stripe area
+        public static int stripe_gap = 5; // space between two plane stripes in plane stripes area
+        public static Color stripe_color = Color.AliceBlue; // airplane stripe color
 
         //COLORS
         public static Color bg_color = Color.Snow; // background color

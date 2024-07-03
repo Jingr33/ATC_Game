@@ -20,7 +20,7 @@ namespace ATC_Game
         public TrafficGenerator(Vector2 screen_size)
         {
             this._screen_size = screen_size;
-            this._off_distance = Configuration.plane_off_distance;
+            this._off_distance = Config.plane_off_distance;
             this.next_id = 0;
         }
 
@@ -33,9 +33,9 @@ namespace ATC_Game
         /// <returns>list of all airplanes in game</returns>
         public List<Airplane> UpdateTraffic(Game1 game, List<Airplane> airplanes, GameTime game_time)
         {
-            int probability = _random.Next(0, Configuration.gen_probability);
-            bool gen_new_plane = (probability == 0) && (airplanes.Count <= Configuration.max_plane_count);
-            bool few_planes = airplanes.Count <= Configuration.min_plane_count;
+            int probability = _random.Next(0, Config.gen_probability);
+            bool gen_new_plane = (probability == 0) && (airplanes.Count <= Config.max_plane_count);
+            bool few_planes = airplanes.Count <= Config.min_plane_count;
             if (gen_new_plane || few_planes)
             {
                 airplanes = AddNewAirplane(game, airplanes);
@@ -53,12 +53,19 @@ namespace ATC_Game
         /// <returns>list of all plane sin game (with new plane)</returns>
         public List<Airplane> AddNewAirplane(Game1 game, List<Airplane> existing_airplanes)
         {
+            OperationType oper_type = OperationType.Arrival;
             Vector2 start_pos = GenerateEntryPosition();
             Vector2 start_direc = GenerateDirection(start_pos);
             int start_speed = GenerateSpeed();
             int type = GenerateType();
-            Airplane new_aiplane = new Airplane(game, this.next_id, start_pos, start_direc, start_speed, type);
-            existing_airplanes.Add(new_aiplane);
+            string dest = GenerateDestination();
+            int altitude = GenerateAltitude();
+            FlightSection flight_section = FlightSection.Approach; // TODO
+            FlightStatus flight_status = GenerateFlightStatus();
+            Airplane new_plane = new Airplane(game, this.next_id, start_pos, start_direc, oper_type, start_speed, type, dest, altitude,
+                                              flight_section, flight_status);
+            existing_airplanes.Add(new_plane);
+            game.infostripes.Add(new_plane.info_strip);
             return existing_airplanes;
         }
 
@@ -104,7 +111,7 @@ namespace ATC_Game
         /// <returns>speed value of an airplane</returns>
         private int GenerateSpeed()
         {
-            return this._random.Next(Configuration.min_speed, Configuration.max_speed);
+            return this._random.Next(Config.min_speed, Config.max_speed);
         }
 
         /// <summary>
@@ -114,7 +121,31 @@ namespace ATC_Game
         private int GenerateType()
         {
             // TODO: tohle se zatím neřeší - nemám typy letadel
-            return this._random.Next(Configuration.airplane_types.Length);
+            return this._random.Next(Config.airplane_types.Length);
+        }
+
+        /// <summary>
+        /// Choose random destination from a destination list
+        /// </summary>
+        /// <returns>target or start destination of airplane</returns>
+        private string GenerateDestination()
+        {
+            int rnd = this._random.Next(Config.destinations.Length);
+            return Config.destinations[rnd];
+        }
+
+        /// <summary>
+        /// Generate random altitude of spawned airplane.
+        /// </summary>
+        /// <returns>altitude value</returns>
+        private int GenerateAltitude()
+        {
+             return this._random.Next(Config.min_altitude, Config.max_altitude) * 100;
+        }
+
+        private FlightStatus GenerateFlightStatus()
+        {
+            return FlightStatus.InTime; // TODO
         }
     }
 }
