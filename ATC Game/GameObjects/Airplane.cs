@@ -37,7 +37,7 @@ namespace ATC_Game.GameObjects
         // FLIGHT STATS
         public string type {  get; set; }
         public Vector2 direction { get; set; } // direction of flight as a vector
-        public string weight_cat { get; set; }
+        public WeightCat weight_cat { get; set; }
         public string callsign { get; set; }
         public string registration { get; set; }
         public OperationType oper_type { get; set; } // arrival or departure
@@ -66,7 +66,7 @@ namespace ATC_Game.GameObjects
             this._center_position = center_position;
             // flight status
             this.direction = direction;
-            this.weight_cat = Config.airplane_weight_cat[this._type_num];
+            this.weight_cat = GetWeightCategory();
             this.callsign = Config.airplane_callsigns[this._type_num];
             this.registration = Config.airplane_registration[this._type_num];
             this.flight_section = flight_section;
@@ -74,12 +74,12 @@ namespace ATC_Game.GameObjects
             this.oper_type = oper_type;
             this.destination = destination;
             this.altitude = altitude;
-            this.heading = GetHeading();
             this.speed = speed;
-            // position
             this._rotation_center = new Vector2(this._texture.Width / 2, this._texture.Height / 2);
             this._rotation = (float)Math.Atan2(this.direction.Y, this.direction.X);
+            this.heading = GetHeading();
             this._trajectory = new List<Vector2> ();
+
             this.destroy_me = false;
             this.time_in_game = 0;
             // aditional alerts
@@ -246,7 +246,19 @@ namespace ATC_Game.GameObjects
         /// <returns>heading in degree</returns>
         private int GetHeading()
         {
-            return (int)(this._rotation * Math.PI / 180);
+            int heading = (int)(Math.Atan2(this.direction.Y, this.direction.X) / Math.PI * 180 + 90);
+            if (heading >= 0)
+                return heading;
+            return heading + 360;
+        }
+
+        /// <summary>
+        /// Get weight catégory of an airplane
+        /// </summary>
+        /// <returns>weight category</returns>
+        private WeightCat GetWeightCategory ()
+        {
+            return WeightCat.A;
         }
     }
 }

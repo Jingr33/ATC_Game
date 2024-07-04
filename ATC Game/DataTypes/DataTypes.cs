@@ -31,3 +31,19 @@ public enum FlightStatus
     Delayed,
     Diverted
 }
+
+public enum WeightCat
+{
+    A, 
+    B, 
+    C, 
+    D
+}
+
+/// <summary>
+/// enumeration of all maps in the game
+/// </summary>
+public enum Maps
+{
+    Prague
+}

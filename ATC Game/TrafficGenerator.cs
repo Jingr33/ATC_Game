@@ -69,6 +69,8 @@ namespace ATC_Game
             return existing_airplanes;
         }
 
+
+
         /// <summary>
         /// Random generate entry position of airplane when entering a game map.
         /// </summary>

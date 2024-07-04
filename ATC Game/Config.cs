@@ -17,7 +17,6 @@ namespace ATC_Game
 
         // AIRPLANE VARIANTS
         public static string[] airplane_types = new string[] {"UNKNOWN"};
-        public static string[] airplane_weight_cat = new string[] {"A", "B", "C", "D", "E", "S"};
         public static string[] airplane_callsigns = new string[] { "CSA123" };
         public static string[] airplane_registration = new string[] { "OK-000" };
         public static string[] destinations = new string[] { "Brno", "Ostrava" };
@@ -25,13 +24,13 @@ namespace ATC_Game
         //TRAFFIC GENERATION
         public static int gen_interval = 2; // interval between two new airplanes
         public static int gen_probability = 3; // probability of new airplane generation
-        public static int min_speed = 50; // minimum speed of airplanes
-        public static int max_speed = 101; // maximum speed of airplanes
+        public static int min_speed = 10; // minimum speed of airplanes
+        public static int max_speed = 21; // maximum speed of airplanes
         public static int min_altitude = 30; // minimum flight level of arrival ariplane
         public static int max_altitude = 101; // maximum flight level of departure airplane
         public static int plane_off_distance = 50; //distance between boudaries of a map and spawn point
-        public static int min_plane_count = 2; // minimal count of planes in the map
-        public static int max_plane_count = 6; // maximu count of planes in the map
+        public static int min_plane_count = 8; // minimal count of planes in the map
+        public static int max_plane_count = 10; // maximu count of planes in the map
         // arrival alert
         public static int alert_bound_dist = 15; // distance of display an arrival alert from boudary of a game map
         public static float alert_freq = 0.5f; // arrival alert blink rate
@@ -44,5 +43,6 @@ namespace ATC_Game
 
         //COLORS
         public static Color bg_color = Color.Snow; // background color
+
     }
 }

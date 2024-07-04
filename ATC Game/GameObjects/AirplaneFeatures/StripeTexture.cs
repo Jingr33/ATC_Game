@@ -37,11 +37,25 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
             return stripe;
         }
 
-        protected virtual void AddStrings (SpriteBatch spriteBatch, Vector2 pos, string type, string w_cat, string callsign, string regis, 
+        /// <summary>
+        /// Add string states of flight info a stripe
+        /// </summary>
+        /// <param name="spriteBatch">spritebatch</param>
+        /// <param name="pos">position of top left coner of a stripe</param>
+        /// <param name="type">airplane type</param>
+        /// <param name="w_cat">weight category</param>
+        /// <param name="callsign">callsign</param>
+        /// <param name="regis">registration number</param>
+        /// <param name="oper_type">operation type (arrival / departure)</param>
+        /// <param name="section">section of flight</param>
+        /// <param name="altitude">actual altitude</param>
+        /// <param name="heading">actual heading</param>
+        /// <param name="g_speed">actual ground speed</param>
+        protected virtual void AddStrings (SpriteBatch spriteBatch, Vector2 pos, string type, WeightCat w_cat, string callsign, string regis, 
                                            OperationType oper_type, FlightSection section, int altitude, int heading, int g_speed)
         {
             int sh = Config.stripe_height; // stripe height
-            string type_weight = string.Format("{0}/{1}", type, w_cat);
+            string type_weight = string.Format("{0}/{1}", type, w_cat.ToString());
             string callsign_str = string.Format("call: {0}", callsign);
             string regis_str = string.Format("reg: {0}", regis);
             string oper_type_str = string.Format("{0}", oper_type.ToString().ToUpper());

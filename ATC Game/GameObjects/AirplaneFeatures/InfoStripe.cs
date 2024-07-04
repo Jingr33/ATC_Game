@@ -15,7 +15,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         public int id;
         private Texture2D _stripe_texture;
         private SpriteFont _font;
-       private Color _color;
+        private Color _color;
 
         public InfoStripe(Game1 game, Airplane parent_airplane) : base(game)
         {
