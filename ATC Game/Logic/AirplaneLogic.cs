@@ -30,7 +30,7 @@ namespace ATC_Game.Logic
         {
             this._airplane_spawn_time = 0;
             this.arrival_alerts = new List<ArrivalAlert>();
-            this._trafficGenerator = new TrafficGenerator(this._game.GetGameAreaSize());
+            this._trafficGenerator = new TrafficGenerator(this._game, this._game.GetGameAreaSize());
         }
 
         public void UpdateAirplanes (GameTime game_time)
@@ -102,5 +102,26 @@ namespace ATC_Game.Logic
             }
         }
 
+        /// <summary>
+        /// Set attribute of Airplane is_active for all airplanes to false and is_active state of info strips to false.
+        /// </summary>
+        public void DeactivateAllPlanes ()
+        {
+            foreach (Airplane plane in this._game.airplanes)
+                plane.is_active = false;
+            foreach (InfoStripe stripe in this._game.infostripes)
+                stripe.is_active = false;
+        }
+
+        /// <summary>
+        /// If there is some active airplane in the game, it return this plane.
+        /// </summary>
+        /// <returns>active airplane</returns>
+        public Airplane GetActiveAirplane ()
+        {
+            foreach (Airplane plane in this._game.airplanes)
+                if (plane.is_active) return plane;
+            return null;
+        }
     }
 }

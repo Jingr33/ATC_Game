@@ -14,6 +14,7 @@ namespace ATC_Game
         // ICONS
         public static string[] airplane_icons = new string[] {"plane"};
         public static string[] airplane_margin_icons = new string[] { "plane_margin" };
+        public static string[] airplane_active_icons = new string[] { "plane_active" };
 
         // AIRPLANE VARIANTS
         public static string[] airplane_types = new string[] {"UNKNOWN"};
@@ -40,6 +41,7 @@ namespace ATC_Game
         public static int stripe_height = 70; // airplane stripe height in plane stripe area
         public static int stripe_gap = 5; // space between two plane stripes in plane stripes area
         public static Color stripe_color = Color.AliceBlue; // airplane stripe color
+        public static Color active_stripe_color = Color.CadetBlue;
 
         //COLORS
         public static Color bg_color = Color.Snow; // background color

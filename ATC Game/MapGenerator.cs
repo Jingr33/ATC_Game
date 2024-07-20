@@ -59,6 +59,22 @@ namespace ATC_Game
             }
         }
 
+        /// <summary>
+        /// Get sum of traffic density of all airports.
+        /// </summary>
+        /// <returns>sum of airports density</returns>
+        public int TraffDensitySum ()
+        {
+            int sum = 0;
+            foreach (Airport airport in this.airports)
+                sum += airport.traffic_density;
+            return sum;
+        }
+
+        /// <summary>
+        /// Draw map objects.
+        /// </summary>
+        /// <param name="spriteBatch"></param>
         public void Draw (SpriteBatch spriteBatch)
         {
             foreach (Airport airport in this.airports)

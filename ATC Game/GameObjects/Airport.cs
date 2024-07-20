@@ -18,11 +18,11 @@ namespace ATC_Game.GameObjects
         private string _name;
         private Texture2D _texture;
         private Vector2 _center_pos;
-        private int _traffic_density; // the higher number, the biiger chance of arriving or departing airplane
+        public int traffic_density; // the higher number, the biiger chance of arriving or departing airplane
         private int _rwy_count; // count of all runways at the airport
-        private List<Runway> runways; // runway numbers (06/24, 09L/27R)
-        private Runway in_use_dep; // runway in use for departures
-        private Runway in_use_arr; // runway in use for arrivals
+        public List<Runway> runways; // runway numbers (06/24, 09L/27R)
+        public Runway in_use_dep; // runway in use for departures
+        public Runway in_use_arr; // runway in use for arrivals
 
         public Airport (Game1 game, string path, string name, Vector2 center_position, int density, List<string> rwy_info) 
             : base (center_position)
@@ -30,9 +30,12 @@ namespace ATC_Game.GameObjects
             this._game = game;
             this._name = name;
             this._center_pos = center_position;
-            this._traffic_density = density;
+            this.traffic_density = density;
             this._texture = GetTexture(path);
             this.runways = CreateRunways(rwy_info);
+            // TODO: provizorni
+            this.in_use_dep = this.runways[0];
+            this.in_use_arr = this.runways[0];
         }
 
         private Texture2D GetTexture (string path)
@@ -62,7 +65,7 @@ namespace ATC_Game.GameObjects
         /// Get vector position of top left coner of airport texture
         /// </summary>
         /// <returns>texture draw position</returns>
-        private Vector2 GetTexturePosition()
+        public Vector2 GetTexturePosition()
         {
             int x_pos = (int)(this._center_pos.X - this._texture.Width / 2);
             int y_pos = (int)(this._center_pos.Y - this._texture.Height / 2);

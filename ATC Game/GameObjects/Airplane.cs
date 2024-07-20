@@ -12,6 +12,7 @@ using Color = Microsoft.Xna.Framework.Color;
 using System.Net.Mime;
 using System.Reflection.Metadata;
 using ATC_Game.GameObjects.AirplaneFeatures;
+using System.Reflection.Metadata.Ecma335;
 
 namespace ATC_Game.GameObjects
 {
@@ -25,14 +26,17 @@ namespace ATC_Game.GameObjects
         private int _type_num;
         private Texture2D _texture;
         private Texture2D _marginal_texture;
+        private Texture2D _active_texture;
         private Vector2 _center_position;
         private Vector2 _draw_position;
         private Vector2 _rotation_center;
         private float _rotation; // direction of flight in radians
         private Vector2[] _last_positions = new Vector2[2];
-        private List<Vector2> _trajectory { get; set; }
+        private int _site_lenght;
+        private Vector2[] _trajectory { get; set; }
         public bool destroy_me;
         public float time_in_game;
+        public bool is_active;
 
         // FLIGHT STATS
         public string type {  get; set; }
@@ -63,7 +67,9 @@ namespace ATC_Game.GameObjects
             this.type = SetTypeName(type_number);
             this._texture = SetTexture(type_number);
             this._marginal_texture = SetMarginalTexture(type_number);
+            this._active_texture = SetActiveTexture(type_number);
             this._center_position = center_position;
+            this._site_lenght = 40;
             // flight status
             this.direction = direction;
             this.weight_cat = GetWeightCategory();
@@ -78,10 +84,11 @@ namespace ATC_Game.GameObjects
             this._rotation_center = new Vector2(this._texture.Width / 2, this._texture.Height / 2);
             this._rotation = (float)Math.Atan2(this.direction.Y, this.direction.X);
             this.heading = GetHeading();
-            this._trajectory = new List<Vector2> ();
+            this._trajectory = new Vector2[] { };
 
             this.destroy_me = false;
             this.time_in_game = 0;
+            this.is_active = false;
             // aditional alerts
             this._arrival_alert = AddArrivalAlert();
             this.info_strip = new InfoStripe(this._game, this);
@@ -94,7 +101,7 @@ namespace ATC_Game.GameObjects
         /// <param name="game_time"></param>
         public void Update (GameTime game_time)
         {
-            if (_trajectory.Count > 0)
+            if (_trajectory.Length > 0)
             {
                 // zadaná trajektorie
             }
@@ -157,6 +164,16 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
+        ///  Set a Texture2D icon for specific type of airplane.
+        /// </summary>
+        /// <param name="type_number">number of a specific airplane type</param>
+        /// <returns>airplane type texture</returns>
+        private Texture2D SetActiveTexture (int type_number)
+        {
+            return _game.Content.Load<Texture2D>(Config.airplane_active_icons[type_number]);
+        }
+
+        /// <summary>
         /// Draw object into the game canvas.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
@@ -165,6 +182,14 @@ namespace ATC_Game.GameObjects
             spriteBatch.Draw(this._texture, this._draw_position, null, Config.bg_color, this._rotation, this._rotation_center, 1.0f, SpriteEffects.None, 0f);
         }
 
+        /// <summary>
+        /// Draw active airplane into a canvas
+        /// </summary>
+        /// <param name="spriteBatch">spritebatch</param>
+        public void ActiveDraw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(this._active_texture, this._draw_position, null, Config.bg_color, this._rotation, this._rotation_center, 1.0f, SpriteEffects.None, 0f);
+        }
 
         /// <summary>
         /// Mthod from draw a plane object if its position is on the edge of game map.
@@ -175,6 +200,36 @@ namespace ATC_Game.GameObjects
             spriteBatch.Draw(this._marginal_texture, this._draw_position, null, Config.bg_color, this._rotation, this._rotation_center, 1.0f, SpriteEffects.None, 0f);
         }
 
+        /// <summary>
+        /// Get a rectangle of space which is occupeited by an airplane.
+        /// </summary>
+        /// <returns>occupied space</returns>
+        public Rectangle GetAirplaneSquare ()
+        {
+            int x = (int)this._center_position.X - this._site_lenght + 400;
+            int y  = (int)this._center_position.Y - this._site_lenght + 50;
+            return new Rectangle(x, y, this._site_lenght, this._site_lenght);
+        }
+
+        /// <summary>
+        /// Activate this airplane (is_active state to true)
+        /// </summary>
+        public void Activate ()
+        {
+            this.is_active = true;
+            this.info_strip.is_active = true;
+            this._game.control_panel.airplane = this;
+        }
+
+        /// <summary>
+        /// Deactivate this airplane (is_active to false)
+        /// </summary>
+        public void Deactivate ()
+        {
+            this.is_active = false;
+            this.info_strip.is_active = false;
+            this._game.control_panel.airplane = null;
+        }
 
         /// <summary>
         /// Check if an airplane is in game map or  out of game map

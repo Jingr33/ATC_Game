@@ -12,16 +12,26 @@ namespace ATC_Game
     /// </summary>
     internal class TrafficGenerator
     {
+        private Game1 _game;
         private Vector2 _screen_size;
         private Random _random = new Random();
         private float _off_distance; // the distance beyond the edge at which the plane is generated
         private int next_id;
+        private List<Airplane> airplanes;
+        private int _plane_count;
+        private int _arrive_plane_count;
+        private int _depart_plane_count;
 
-        public TrafficGenerator(Vector2 screen_size)
+        public TrafficGenerator(Game1 game, Vector2 screen_size)
         {
+            this._game = game;
             this._screen_size = screen_size;
             this._off_distance = Config.plane_off_distance;
+            this.airplanes = game.airplanes;
             this.next_id = 0;
+            this._plane_count = 0;
+            this._arrive_plane_count = 0;
+            this._depart_plane_count = 0;
         }
 
         /// <summary>
@@ -53,14 +63,24 @@ namespace ATC_Game
         /// <returns>list of all plane sin game (with new plane)</returns>
         public List<Airplane> AddNewAirplane(Game1 game, List<Airplane> existing_airplanes)
         {
+            int arr_dep = this._random.Next(2);
+            if (arr_dep == 1)
+                AddArrivalAirplane(game, existing_airplanes);
+            else
+                AddDepartAirplane(game, existing_airplanes);
+            return existing_airplanes;
+        }
+
+        public List<Airplane> AddArrivalAirplane(Game1 game, List<Airplane> existing_airplanes)
+        {
             OperationType oper_type = OperationType.Arrival;
-            Vector2 start_pos = GenerateEntryPosition();
-            Vector2 start_direc = GenerateDirection(start_pos);
-            int start_speed = GenerateSpeed();
+            Vector2 start_pos = GenArrivalEntryPos();
+            Vector2 start_direc = GenArrivalDirection(start_pos);
+            int start_speed = GenArrivalSpeed();
             int type = GenerateType();
             string dest = GenerateDestination();
-            int altitude = GenerateAltitude();
-            FlightSection flight_section = FlightSection.Approach; // TODO
+            int altitude = GenArrivalAltitude();
+            FlightSection flight_section = FlightSection.Approach;
             FlightStatus flight_status = GenerateFlightStatus();
             Airplane new_plane = new Airplane(game, this.next_id, start_pos, start_direc, oper_type, start_speed, type, dest, altitude,
                                               flight_section, flight_status);
@@ -69,13 +89,31 @@ namespace ATC_Game
             return existing_airplanes;
         }
 
-
+        public List<Airplane> AddDepartAirplane(Game1 game, List<Airplane> existing_airplanes)
+        {
+            OperationType oper_type = OperationType.Departure;
+            Airport airport = ChooseDepartAirport(); // elected airport
+            Runway runway = airport.in_use_dep; // rwy in use for departures
+            Vector2 start_pos = SetRunwayDeparturePos(runway);
+            Vector2 direction = runway.direction;
+            int speed = 0;
+            int type = GenerateType(); // TODO - ať vzlítají jen typy které přiletěly
+            string dest = GenerateDestination();
+            int altitude = 0; // TODO - ať se mění výška letadla pokud je v modelu take-off
+            FlightSection flight_section = FlightSection.TakeOff;
+            FlightStatus flight_status = GenerateFlightStatus();
+            Airplane new_plane = new Airplane(game, this.next_id, start_pos, direction, oper_type, speed, type, dest, altitude,
+                                              flight_section, flight_status);
+            existing_airplanes.Add(new_plane);
+            game.infostripes.Add(new_plane.info_strip);
+            return existing_airplanes;
+        }
 
         /// <summary>
         /// Random generate entry position of airplane when entering a game map.
         /// </summary>
         /// <returns> position coordinates of entry point</returns>
-        private Vector2 GenerateEntryPosition()
+        private Vector2 GenArrivalEntryPos()
         {
             int rnd_site = _random.Next(0, 4);
             int rnd_height = _random.Next(0, (int)_screen_size.Y);
@@ -95,11 +133,23 @@ namespace ATC_Game
         }
 
         /// <summary>
+        /// Set departure position of a starting airplane from a runaway
+        /// </summary>
+        /// <param name="rwy">departure runway</param>
+        /// <returns>position of airplane spawn</returns>
+        private Vector2 SetRunwayDeparturePos (Runway rwy)
+        {
+            Vector2 airport_pos = rwy.GetMyAirport().GetTexturePosition();
+            Vector2 rwy_pos = rwy.position;
+            return airport_pos + rwy_pos;
+        }
+
+        /// <summary>
         /// Generation of entry direciton (heading) of an airplane.
         /// </summary>
         /// <param name="start_pos">coordinates of entry point in canvas.</param>
         /// <returns>vector of direction</returns>
-        private Vector2 GenerateDirection(Vector2 start_pos)
+        private Vector2 GenArrivalDirection(Vector2 start_pos)
         {
             Vector2 center = new Vector2(_screen_size.X / 2, _screen_size.Y / 2);
             Vector2 long_direction = new Vector2(center.X - start_pos.X, center.Y - start_pos.Y);
@@ -111,7 +161,7 @@ namespace ATC_Game
         /// Random generation of entry velocity of an airplane.
         /// </summary>
         /// <returns>speed value of an airplane</returns>
-        private int GenerateSpeed()
+        private int GenArrivalSpeed()
         {
             return this._random.Next(Config.min_speed, Config.max_speed);
         }
@@ -140,14 +190,64 @@ namespace ATC_Game
         /// Generate random altitude of spawned airplane.
         /// </summary>
         /// <returns>altitude value</returns>
-        private int GenerateAltitude()
+        private int GenArrivalAltitude()
         {
              return this._random.Next(Config.min_altitude, Config.max_altitude) * 100;
         }
 
         private FlightStatus GenerateFlightStatus()
         {
-            return FlightStatus.InTime; // TODO
+            return FlightStatus.InTime; // TODO - náhodný flightstatus s pravděpodobností
+        }
+
+        /// <summary>
+        /// Choose random airport (according to its traffic density) and add departure to this airport.
+        /// </summary>
+        /// <returns>one of the airports on the map</returns>
+        private Airport ChooseDepartAirport ()
+        {
+            int rnd_dens = this._random.Next(this._game._map_generator.TraffDensitySum()); // random num from density sum
+            int actual_range = 0;
+            foreach (Airport airport in this._game._map_generator.airports)
+            {
+                actual_range += airport.traffic_density;
+                if (rnd_dens < actual_range)
+                    return airport;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Return count of airplanes in the game.
+        /// </summary>
+        /// <returns>count of airplanes</returns>
+        public int GetAirplanesCount()
+        {
+            return this._plane_count;
+        }
+
+        /// <summary>
+        /// Retrun actual count of arriving airplanes.
+        /// </summary>
+        /// <returns>count of arrivals</returns>
+        public int GetArriveAirplanesCount()
+        {
+            int count = 0;
+            foreach (Airplane airplane in this.airplanes)
+                if (airplane.oper_type == OperationType.Arrival) count++;
+            return count;
+        }
+
+        /// <summary>
+        /// Return actual count of departing airplanes.
+        /// </summary>
+        /// <returns>count of departures</returns>
+        public int GetDepartAirplanescount()
+        {
+            int count = 0;
+            foreach (Airplane airplane in this.airplanes)
+                if (airplane.oper_type == OperationType.Departure) count++;
+            return count;
         }
     }
 }
