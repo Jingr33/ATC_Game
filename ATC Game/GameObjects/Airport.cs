@@ -55,7 +55,7 @@ namespace ATC_Game.GameObjects
             {
                 string[] rwy_ar = rwy.Split(';');
                 Runway runway = new Runway(this._game, this, rwy_ar[0], General.FileDataToVector2(rwy_ar[1]), 
-                                        General.FileDataToVector2(rwy_ar[2]), Convert.ToInt32(rwy_ar[3]), Convert.ToInt32(rwy_ar[4]));
+                                        Convert.ToInt32(rwy_ar[2]), Convert.ToInt32(rwy_ar[3]), Convert.ToInt32(rwy_ar[4]));
                 runways.Add(runway);
             }
             return runways;

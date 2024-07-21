@@ -82,21 +82,21 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Event for incrementation the value in the seq button.
+        /// Event for incrementation the value in the seq button
         /// </summary>
         private void IncreaseEvent ()
         {
-            Rectangle button_zone = new Rectangle((int)this._position.X + 0, (int)this._position.Y + 0, 34, this._height);
+            Rectangle button_zone = new Rectangle((int)this._position.X + this._width - 34, (int)this._position.Y + 0, 34, this._height);
             if (button_zone.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
                 this.value++;
         }
 
         /// <summary>
-        /// Event for decrementation the value in the seq button
+        /// Event for decrementation the value in the seq button.
         /// </summary>
-        private void DecreaseEvent ()
+        private void DecreaseEvent()
         {
-            Rectangle button_zone = new Rectangle((int)this._position.X + this._width - 34, (int)this._position.Y + 0, 34, this._height);
+            Rectangle button_zone = new Rectangle((int)this._position.X + 0, (int)this._position.Y + 0, 34, this._height);
             if (button_zone.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
                 this.value--;
         }
@@ -108,10 +108,10 @@ namespace ATC_Game.GameObjects
         public void Draw (SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(this._texture, new Rectangle((int)this._position.X, (int)this._position.Y, this._width, _height), Color.White);
-            spriteBatch.DrawString(this._font, "+", new Vector2(this._position.X +  7, this._position.Y - 5), Color.DarkGray, 0, Vector2.Zero, 3f, SpriteEffects.None, 0);
+            spriteBatch.DrawString(this._font, "-", new Vector2(this._position.X +  11, this._position.Y - 10), Color.DarkGray, 0, Vector2.Zero, 3f, SpriteEffects.None, 0);
             spriteBatch.DrawString(this._font, this.value.ToString(), new Vector2(this._position.X + this._width/2 - 10, this._position.Y + 15), Color.Black, 0, Vector2.Zero, 1.4f, SpriteEffects.None, 0);
             spriteBatch.DrawString(this._font, this._title.ToUpper(), new Vector2(this._position.X + 43, this._position.Y + 3), Color.Black, 0, Vector2.Zero, 0.7f, SpriteEffects.None, 0);
-            spriteBatch.DrawString(this._font, "-", new Vector2(this._position.X + this._width - 23, this._position.Y - 12), Color.Gray, 0, Vector2.Zero, 3f, SpriteEffects.None, 0);
+            spriteBatch.DrawString(this._font, "+", new Vector2(this._position.X + this._width - 27, this._position.Y - 5), Color.Gray, 0, Vector2.Zero, 3f, SpriteEffects.None, 0);
         }
 
     }

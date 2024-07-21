@@ -45,7 +45,6 @@ namespace ATC_Game
         /// </summary>
         private void LoadAirports ()
         {
-            Console.WriteLine(this._path);
             foreach (string file in Directory.EnumerateFiles(this._path + "/airports/", "*.txt"))
             {
                 string[] con = File.ReadAllLines(file);
@@ -53,7 +52,6 @@ namespace ATC_Game
                 List<string> rwy_info = new List<string>();
                 for (int i = 3; i < con.Length; i++)
                     rwy_info.Add(con[i]);
-                Console.WriteLine(string.Format("{0}/{1}/{2}/{3}", con[0], con[1], con[2], con[3]));
                 Airport airport = new Airport(this._game, this._path, con[0], General.FileDataToVector2(con[1]), Convert.ToInt32(con[2]), rwy_info);
                 this.airports.Add(airport);
             }

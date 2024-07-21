@@ -64,6 +64,7 @@ namespace ATC_Game
         public List<Airplane> AddNewAirplane(Game1 game, List<Airplane> existing_airplanes)
         {
             int arr_dep = this._random.Next(2);
+            //arr_dep = 2;
             if (arr_dep == 1)
                 AddArrivalAirplane(game, existing_airplanes);
             else
@@ -75,14 +76,14 @@ namespace ATC_Game
         {
             OperationType oper_type = OperationType.Arrival;
             Vector2 start_pos = GenArrivalEntryPos();
-            Vector2 start_direc = GenArrivalDirection(start_pos);
+            int start_heading = GenArrivalHeading(start_pos);
             int start_speed = GenArrivalSpeed();
             int type = GenerateType();
             string dest = GenerateDestination();
             int altitude = GenArrivalAltitude();
             FlightSection flight_section = FlightSection.Approach;
             FlightStatus flight_status = GenerateFlightStatus();
-            Airplane new_plane = new Airplane(game, this.next_id, start_pos, start_direc, oper_type, start_speed, type, dest, altitude,
+            Airplane new_plane = new Airplane(game, this.next_id, start_pos, start_heading, oper_type, start_speed, type, dest, altitude,
                                               flight_section, flight_status);
             existing_airplanes.Add(new_plane);
             game.infostripes.Add(new_plane.info_strip);
@@ -95,14 +96,14 @@ namespace ATC_Game
             Airport airport = ChooseDepartAirport(); // elected airport
             Runway runway = airport.in_use_dep; // rwy in use for departures
             Vector2 start_pos = SetRunwayDeparturePos(runway);
-            Vector2 direction = runway.direction;
+            int heading = runway.heading;
             int speed = 0;
             int type = GenerateType(); // TODO - ať vzlítají jen typy které přiletěly
             string dest = GenerateDestination();
             int altitude = 0; // TODO - ať se mění výška letadla pokud je v modelu take-off
             FlightSection flight_section = FlightSection.TakeOff;
             FlightStatus flight_status = GenerateFlightStatus();
-            Airplane new_plane = new Airplane(game, this.next_id, start_pos, direction, oper_type, speed, type, dest, altitude,
+            Airplane new_plane = new Airplane(game, this.next_id, start_pos, heading, oper_type, speed, type, dest, altitude,
                                               flight_section, flight_status);
             existing_airplanes.Add(new_plane);
             game.infostripes.Add(new_plane.info_strip);
@@ -145,16 +146,20 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Generation of entry direciton (heading) of an airplane.
+        /// Generation of entry direciton (start_heading) of an airplane.
         /// </summary>
         /// <param name="start_pos">coordinates of entry point in canvas.</param>
-        /// <returns>vector of direction</returns>
-        private Vector2 GenArrivalDirection(Vector2 start_pos)
+        /// <returns>vector of start_heading</returns>
+        private int GenArrivalHeading(Vector2 start_pos)
         {
             Vector2 center = new Vector2(_screen_size.X / 2, _screen_size.Y / 2);
             Vector2 long_direction = new Vector2(center.X - start_pos.X, center.Y - start_pos.Y);
-            float lenght = (float)Math.Sqrt(Math.Pow(long_direction.X, 2) + Math.Pow(long_direction.Y, 2));
-            return new Vector2(long_direction.X / lenght, long_direction.Y / lenght);
+            //float lenght = (float)Math.Sqrt(Math.Pow(long_direction.X, 2) + Math.Pow(long_direction.Y, 2));
+            //Vector2 direc = new Vector2(long_direction.X / lenght, long_direction.Y / lenght);
+            int heading = (int)(Math.Atan2(long_direction.Y, long_direction.X) / Math.PI * 180 + 90);
+            if (heading >= 0)
+                return heading;
+            return heading + 360;
         }
 
         /// <summary>

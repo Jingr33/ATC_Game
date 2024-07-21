@@ -21,19 +21,20 @@ namespace ATC_Game.GameObjects
         private Airport _airport;
         private string _number; // (06, 24L, 9C, ...)
         public Vector2 position; // positon in airport area
+        public int heading; // direction of runway in degree
         public Vector2 direction; // direction of runway in vector
         public float rotation; // direction of rwy in float
         private int _rwy_lenght; // runway lenght in meters
         private int _rwy_width; // runway width in meters
         private WeightCat _max_category; // maximum weight category
 
-        public Runway(Game1 game, Airport airport, string rwy_number, Vector2 start_pos, Vector2 direction, int lenght, int width)
+        public Runway(Game1 game, Airport airport, string rwy_number, Vector2 start_pos, int heading, int lenght, int width)
         {
             this._game = game;
             this._airport = airport;
             this._number = rwy_number;
             this.position = start_pos;
-            this.direction = direction;
+            this.heading = heading;
             this._rwy_lenght = lenght;
             this._rwy_width = width;
         }

@@ -57,7 +57,7 @@ namespace ATC_Game.GameObjects
         public InfoStripe info_strip;
         public bool in_margin;
 
-        public Airplane (Game1 game, int id, Vector2 center_position, Vector2 direction, OperationType oper_type, int speed, int type_number, 
+        public Airplane (Game1 game, int id, Vector2 center_position, int heading, OperationType oper_type, int speed, int type_number, 
                         string destination, int altitude, FlightSection flight_section, FlightStatus flight_status)
             : base (center_position)
         {
@@ -71,7 +71,8 @@ namespace ATC_Game.GameObjects
             this._center_position = center_position;
             this._site_lenght = 40;
             // flight status
-            this.direction = direction;
+            this.heading = heading;
+            this.direction = GetDirection(this.heading);
             this.weight_cat = GetWeightCategory();
             this.callsign = Config.airplane_callsigns[this._type_num];
             this.registration = Config.airplane_registration[this._type_num];
@@ -82,8 +83,7 @@ namespace ATC_Game.GameObjects
             this.altitude = altitude;
             this.speed = speed;
             this._rotation_center = new Vector2(this._texture.Width / 2, this._texture.Height / 2);
-            this._rotation = (float)Math.Atan2(this.direction.Y, this.direction.X);
-            this.heading = GetHeading();
+            this._rotation = GetRotation(this.direction);
             this._trajectory = new Vector2[] { };
 
             this.destroy_me = false;
@@ -107,6 +107,8 @@ namespace ATC_Game.GameObjects
             }
             else
             {
+                this.direction = GetDirection(this.heading);
+                this._rotation = GetRotation(this.direction);
                 this._center_position = NewCoordStraightOn(game_time);
                 this._draw_position = GetTexturePosition(this._center_position, this._texture);
             }
@@ -296,7 +298,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Get a direciton of flight (heading) int degree.
+        /// Get a direciton of flight (heading) in degree.
         /// </summary>
         /// <returns>heading in degree</returns>
         private int GetHeading()
@@ -305,6 +307,31 @@ namespace ATC_Game.GameObjects
             if (heading >= 0)
                 return heading;
             return heading + 360;
+        }
+
+        /// <summary>
+        /// Get a direction of a flight in vector
+        /// </summary>
+        /// <param name="heading">heading of the airplane (0-360)</param>
+        /// <returns>normal vector direction</returns>
+        private Vector2 GetDirection (int heading)
+        {
+            heading -= 90;
+            if (heading < 0)
+                heading += 360;
+            double x = Math.Cos(heading * Math.PI / 180);
+            double y = Math.Sin(heading * Math.PI / 180);
+            return new Vector2((float)x, (float)y);
+        }
+
+        /// <summary>
+        /// Get a rotation (direction of the airplane) in radians.
+        /// </summary>
+        /// <param name="direction">normal vector of the airplane</param>
+        /// <returns>direction in radinans</returns>
+        private float GetRotation (Vector2 direction)
+        {
+            return (float)Math.Atan2(this.direction.Y, this.direction.X);
         }
 
         /// <summary>
