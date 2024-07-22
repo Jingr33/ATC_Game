@@ -18,6 +18,8 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         public int desired_speed;
         SpeedEqualizer _speed_equal;
         // altitude
+        public int desired_alt;
+        AltitudeEqualizer _alt_equal;
         // heading
 
         public ReactionDelayer(Game1 game, Airplane airplane)
@@ -26,6 +28,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
             this._airplane = airplane;
             this.desired_speed = this._airplane.speed;
             this._speed_equal = new SpeedEqualizer(this._airplane);
+            this._alt_equal = new AltitudeEqualizer(this._airplane);
         }
 
         /// <summary>
@@ -34,6 +37,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         public void UpdateReaction (GameTime game_time)
         {
             UpdateSpeed(game_time);
+            UpdateAltitude(game_time);
         }
 
         /// <summary>
@@ -43,6 +47,12 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         {
             if (this.desired_speed != this._airplane.speed)
                 this._speed_equal.EqualizeSpeed(game_time, this.desired_speed);
+        }
+
+        private void UpdateAltitude (GameTime game_time)
+        {
+            if (this.desired_alt != this._airplane.altitude)
+                this._alt_equal.EqualizeAltitude(game_time, this.desired_alt);
         }
     }
 }

@@ -17,25 +17,24 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         private Airplane _airplane;
         private int _desired_speed;
         private float time;
-        private MouseState mouseState;
 
         public SpeedEqualizer(Airplane airplane)
         {
             this._airplane = airplane;
             this._desired_speed = this._airplane.speed;
+            this.time = 0;
         }
 
         /// <summary>
         /// Equalize actual airplane speed with desired speed in time
         /// </summary>
         /// <param name="game_time">game time</param>
+        /// <param name="desired_speed">setted speed in speed controler</param>
         public void EqualizeSpeed (GameTime game_time, int desired_speed)
         {
             this.time += (float)game_time.ElapsedGameTime.TotalSeconds;
             this._desired_speed = desired_speed;
-            this.mouseState = Mouse.GetState();
-            bool mouse = this.mouseState.LeftButton == ButtonState.Released;
-            if (this.time >= Config.speed_step_time && mouse)
+            if (this.time >= Config.speed_step_time)
             {
                 int diff = Math.Abs(this._desired_speed - this._airplane.speed);
                 // fast equalizing
@@ -49,7 +48,6 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
                 {
                     this._airplane.speed += OneStepChange();
                     time = 0;
-                    Console.WriteLine("Menim pomalu");
                 }
             }
         }

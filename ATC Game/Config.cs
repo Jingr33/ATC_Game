@@ -49,5 +49,6 @@ namespace ATC_Game
 
         // REACTION DELAY
         public static float speed_step_time = 0.4f; // one knot change of speed duration
+        public static float alt_step_time = 0.5f; // one flight level (100 feet) of altitude duration
     }
 }

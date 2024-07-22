@@ -32,7 +32,7 @@ namespace ATC_Game
         private void LoadControlButtons ()
         {
             this._speed_sbtn = new SequentialButton(this._game, new Vector2(10, 5), "speed", 140);
-            this._altitude_sbtn = new SequentialButton(this._game, new Vector2(300, 5), "altitude", 160, 100, false);
+            this._altitude_sbtn = new SequentialButton(this._game, new Vector2(300, 5), "altitude", 160, 300, false);
             this._heading_sbtn = new SequentialButton(this._game, new Vector2(600, 5), "heading", 152);
         }
 
@@ -44,10 +44,10 @@ namespace ATC_Game
             if (this.airplane != null)
             {
                 this._speed_sbtn.value = this.airplane.delayer.desired_speed;
-                this._altitude_sbtn.value = this.airplane.altitude;
+                this._altitude_sbtn.value = this.airplane.delayer.desired_alt;
                 this._heading_sbtn.value = this.airplane.heading;
                 this.airplane.delayer.desired_speed = this._speed_sbtn.Update();
-                this.airplane.altitude = this._altitude_sbtn.Update();
+                this.airplane.delayer.desired_alt = this._altitude_sbtn.Update();
                 this.airplane.heading = this._heading_sbtn.Update();
             }
             else
