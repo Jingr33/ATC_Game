@@ -25,16 +25,19 @@ namespace ATC_Game.GameObjects
         private Vector2 _position;
         private SpriteFont _font;
         public int value { get; set; }
+        private bool smooth;
 
         private Rectangle _increase_btn;
         private Rectangle _decrease_btn;
+        private MouseState _last_state;
 
-        public SequentialButton(Game1 game, Vector2 position, string title, int width, int difference = 1)
+        public SequentialButton(Game1 game, Vector2 position, string title, int width, int difference = 1, bool smooth = true)
         {
             this._game = game;
             this._position = position;
             this._title = title;
             this._difference = difference;
+            this.smooth = smooth;
             this._width = width;
             this._height = 40;
             this._bg_color = Color.AliceBlue;
@@ -42,6 +45,7 @@ namespace ATC_Game.GameObjects
             this._font = game.Content.Load<SpriteFont>("font");
             this._texture = CreateSeqButtonTex(this._game.GraphicsDevice);
             this.value = 0;
+            this._last_state = Mouse.GetState();
             LoadChangeButtons();
         }
 
@@ -89,8 +93,17 @@ namespace ATC_Game.GameObjects
         /// <returns>value in the button</returns>
         public int Update()
         {
-            IncreaseEvent();
-            DecreaseEvent();
+            if (smooth)
+            {
+                IncreaseEvent();
+                DecreaseEvent();
+            }
+            else
+            {
+                IncreaseEvent(this._difference);
+                DecreaseEvent(this._difference);
+                this._last_state = Mouse.GetState();
+            }
             return this.value;
         }
 
@@ -102,6 +115,13 @@ namespace ATC_Game.GameObjects
             if (this._increase_btn.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
                 this.value += this._difference;
         }
+        private void IncreaseEvent (int diff)
+        {
+            if (this._increase_btn.Contains(this._game.mouse.Position)
+                && this._game.mouse.LeftButton == ButtonState.Released
+                && this._last_state.LeftButton == ButtonState.Pressed)
+                this.value += diff;
+        }
 
         /// <summary>
         /// Event for decrementation the value in the seq button.
@@ -110,6 +130,13 @@ namespace ATC_Game.GameObjects
         {
             if (this._decrease_btn.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
                 this.value -= this._difference;
+        }
+        private void DecreaseEvent(int diff)
+        {
+            if (this._decrease_btn.Contains(this._game.mouse.Position)
+                && this._game.mouse.LeftButton == ButtonState.Released
+                && this._last_state.LeftButton == ButtonState.Pressed)
+                this.value -= diff;
         }
 
         /// <summary>
@@ -120,7 +147,7 @@ namespace ATC_Game.GameObjects
         {
             spriteBatch.Draw(this._texture, new Rectangle((int)this._position.X, (int)this._position.Y, this._width, _height), Color.White);
             spriteBatch.DrawString(this._font, "-", new Vector2(this._position.X +  11, this._position.Y - 10), Color.DarkGray, 0, Vector2.Zero, 3f, SpriteEffects.None, 0);
-            spriteBatch.DrawString(this._font, this.value.ToString(), new Vector2(this._position.X + this._width/2 - 10, this._position.Y + 15), Color.Black, 0, Vector2.Zero, 1.4f, SpriteEffects.None, 0);
+            spriteBatch.DrawString(this._font, this.value.ToString(), new Vector2(this._position.X + this._width/2 - 17, this._position.Y + 15), Color.Black, 0, Vector2.Zero, 1.4f, SpriteEffects.None, 0);
             spriteBatch.DrawString(this._font, this._title.ToUpper(), new Vector2(this._position.X + 43, this._position.Y + 3), Color.Black, 0, Vector2.Zero, 0.7f, SpriteEffects.None, 0);
             spriteBatch.DrawString(this._font, "+", new Vector2(this._position.X + this._width - 27, this._position.Y - 5), Color.Gray, 0, Vector2.Zero, 3f, SpriteEffects.None, 0);
         }
