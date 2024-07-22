@@ -18,8 +18,7 @@ using System.Runtime.CompilerServices;
 // udělej stripes jako scrollable panel
 // tlačítka na posouvání stripeama
 // přidej zrychlování letadel pokud mají status take-off
-// vymen plus a minus v seq btn
-// at heading nemeni rychlost letadla
+// limity (hranice) nastavení tech control buttonů
 
 namespace ATC_Game
 {

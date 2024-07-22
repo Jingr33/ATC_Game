@@ -13,6 +13,7 @@ using System.Net.Mime;
 using System.Reflection.Metadata;
 using ATC_Game.GameObjects.AirplaneFeatures;
 using System.Reflection.Metadata.Ecma335;
+using ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay;
 
 namespace ATC_Game.GameObjects
 {
@@ -56,6 +57,8 @@ namespace ATC_Game.GameObjects
         private ArrivalAlert _arrival_alert;
         public InfoStripe info_strip;
         public bool in_margin;
+        // reaction delay
+        public ReactionDelayer delayer;
 
         public Airplane (Game1 game, int id, Vector2 center_position, int heading, OperationType oper_type, int speed, int type_number, 
                         string destination, int altitude, FlightSection flight_section, FlightStatus flight_status)
@@ -93,6 +96,9 @@ namespace ATC_Game.GameObjects
             this._arrival_alert = AddArrivalAlert();
             this.info_strip = new InfoStripe(this._game, this);
             this.in_margin = false;
+
+            //reaction delay
+            this.delayer = new ReactionDelayer(this._game,this);
         }
 
         /// <summary>
@@ -112,11 +118,11 @@ namespace ATC_Game.GameObjects
                 this._center_position = NewCoordStraightOn(game_time);
                 this._draw_position = GetTexturePosition(this._center_position, this._texture);
             }
+            this.delayer.UpdateReaction(game_time);
             SaveLastPositions();
 
             this.time_in_game += (float)game_time.ElapsedGameTime.TotalSeconds;
             this.IsMissedAirplane();
-
             this.in_margin = IsInMargin();
         }
 

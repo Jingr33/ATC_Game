@@ -26,7 +26,10 @@ namespace ATC_Game.GameObjects
         private SpriteFont _font;
         public int value { get; set; }
 
-        public SequentialButton(Game1 game, Vector2 position, string title, int difference, int width)
+        private Rectangle _increase_btn;
+        private Rectangle _decrease_btn;
+
+        public SequentialButton(Game1 game, Vector2 position, string title, int width, int difference = 1)
         {
             this._game = game;
             this._position = position;
@@ -39,6 +42,7 @@ namespace ATC_Game.GameObjects
             this._font = game.Content.Load<SpriteFont>("font");
             this._texture = CreateSeqButtonTex(this._game.GraphicsDevice);
             this.value = 0;
+            LoadChangeButtons();
         }
 
         /// <summary>
@@ -71,6 +75,15 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
+        /// Load the buttons for increase or decrease the value.
+        /// </summary>
+        private void LoadChangeButtons ()
+        {
+            this._increase_btn = new Rectangle((int)this._position.X + this._width - 34, (int)this._position.Y + 0, 34, this._height);
+            this._decrease_btn = new Rectangle((int)this._position.X + 0, (int)this._position.Y + 0, 34, this._height);
+        }
+
+        /// <summary>
         /// Update value in the seq button in every moment (check if the value in button was change and return actual value.
         /// </summary>
         /// <returns>value in the button</returns>
@@ -86,9 +99,8 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void IncreaseEvent ()
         {
-            Rectangle button_zone = new Rectangle((int)this._position.X + this._width - 34, (int)this._position.Y + 0, 34, this._height);
-            if (button_zone.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
-                this.value++;
+            if (this._increase_btn.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
+                this.value += this._difference;
         }
 
         /// <summary>
@@ -96,9 +108,8 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void DecreaseEvent()
         {
-            Rectangle button_zone = new Rectangle((int)this._position.X + 0, (int)this._position.Y + 0, 34, this._height);
-            if (button_zone.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
-                this.value--;
+            if (this._decrease_btn.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
+                this.value -= this._difference;
         }
 
         /// <summary>

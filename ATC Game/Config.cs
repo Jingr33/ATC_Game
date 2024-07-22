@@ -46,5 +46,8 @@ namespace ATC_Game
         //COLORS
         public static Color bg_color = Color.Snow; // background color
 
+
+        // REACTION DELAY
+        public static float speed_step_time = 0.4f; // one knot change of speed duration
     }
 }
