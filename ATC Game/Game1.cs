@@ -19,6 +19,7 @@ using System.Runtime.CompilerServices;
 // tlačítka na posouvání stripeama
 // přidej zrychlování letadel pokud mají status take-off
 // limity (hranice) nastavení tech control buttonů
+// vymaz get direction z airplane, je to v general
 
 namespace ATC_Game
 {

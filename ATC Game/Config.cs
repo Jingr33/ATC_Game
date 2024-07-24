@@ -30,8 +30,8 @@ namespace ATC_Game
         public static int min_altitude = 30; // minimum flight level of arrival ariplane
         public static int max_altitude = 101; // maximum flight level of departure airplane
         public static int plane_off_distance = 50; //distance between boudaries of a map and spawn point
-        public static int min_plane_count = 8; // minimal count of planes in the map
-        public static int max_plane_count = 10; // maximu count of planes in the map
+        public static int min_plane_count = 1; // minimal count of planes in the map
+        public static int max_plane_count = 1; // maximu count of planes in the map
         // arrival alert
         public static int alert_bound_dist = 15; // distance of display an arrival alert from boudary of a game map
         public static float alert_freq = 0.5f; // arrival alert blink rate

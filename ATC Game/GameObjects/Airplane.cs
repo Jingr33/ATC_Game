@@ -14,6 +14,7 @@ using System.Reflection.Metadata;
 using ATC_Game.GameObjects.AirplaneFeatures;
 using System.Reflection.Metadata.Ecma335;
 using ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay;
+using System.Collections.Concurrent;
 
 namespace ATC_Game.GameObjects
 {
@@ -28,13 +29,15 @@ namespace ATC_Game.GameObjects
         private Texture2D _texture;
         private Texture2D _marginal_texture;
         private Texture2D _active_texture;
-        private Vector2 _center_position;
+        public Vector2 center_position;
         private Vector2 _draw_position;
         private Vector2 _rotation_center;
         private float _rotation; // direction of flight in radians
         private Vector2[] _last_positions = new Vector2[2];
         private int _site_lenght;
-        private Vector2[] _trajectory { get; set; }
+        public ConcurrentQueue<Vector2> trajectory { get; set; }
+        public ConcurrentQueue<int> heading_queue { get; set; }
+        //private float traj_frame_time;
         public bool destroy_me;
         public float time_in_game;
         public bool is_active;
@@ -71,7 +74,7 @@ namespace ATC_Game.GameObjects
             this._texture = SetTexture(type_number);
             this._marginal_texture = SetMarginalTexture(type_number);
             this._active_texture = SetActiveTexture(type_number);
-            this._center_position = center_position;
+            this.center_position = center_position;
             this._site_lenght = 40;
             // flight status
             this.heading = heading;
@@ -87,7 +90,9 @@ namespace ATC_Game.GameObjects
             this.speed = speed;
             this._rotation_center = new Vector2(this._texture.Width / 2, this._texture.Height / 2);
             this._rotation = GetRotation(this.direction);
-            this._trajectory = new Vector2[] { };
+            this.trajectory = new ConcurrentQueue<Vector2> { };
+            this.heading_queue = new ConcurrentQueue<int> { };
+            //this.traj_frame_time = 0;
 
             this.destroy_me = false;
             this.time_in_game = 0;
@@ -107,23 +112,44 @@ namespace ATC_Game.GameObjects
         /// <param name="game_time"></param>
         public void Update (GameTime game_time)
         {
-            if (_trajectory.Length > 0)
-            {
-                // zadaná trajektorie
-            }
+            if (!this.trajectory.IsEmpty)
+                SetNextPosition(game_time);
             else
-            {
-                this.direction = GetDirection(this.heading);
-                this._rotation = GetRotation(this.direction);
-                this._center_position = NewCoordStraightOn(game_time);
-                this._draw_position = GetTexturePosition(this._center_position, this._texture);
-            }
+                this.center_position = NewCoordStraightOn(game_time);
+
+            this._rotation = GetRotation(this.direction);
+            this.direction = GetDirection(this.heading);
+            this._draw_position = GetTexturePosition(this.center_position, this._texture);
             this.delayer.UpdateReaction(game_time);
             SaveLastPositions();
 
             this.time_in_game += (float)game_time.ElapsedGameTime.TotalSeconds;
             this.IsMissedAirplane();
             this.in_margin = IsInMargin();
+        }
+
+        /// <summary>
+        /// Set next position of an airplane  in trajectory list of points.
+        /// </summary>
+        private void SetNextPosition (GameTime game_time)
+        {
+            //this.traj_frame_time += (float)game_time.ElapsedGameTime.TotalSeconds;
+            //if (this.traj_frame_time < 0.025) return;
+
+            for (int i = 0; i < this.speed; i++)
+            {
+                if (this.trajectory.TryDequeue(out Vector2 next_pos)
+                    && this.heading_queue.TryDequeue(out int next_heading))
+                /* explaination - if the ConcurrentQueue<Vector2> is empty, TryDequeue return false
+                 *                if the ConcurrentQueue<Vector2> isnt empty, TryDeququ reaturn true and call first element in the queue
+                 *                after use remove the element
+                 */
+                {
+                    this.center_position = next_pos;
+                    this.heading = next_heading;
+                    //this.traj_frame_time = 0;
+                }
+            }
         }
 
         /// <summary>
@@ -134,7 +160,7 @@ namespace ATC_Game.GameObjects
         {
             float x_pos_diff = this.direction.X * this.speed * (float)game_time.ElapsedGameTime.TotalSeconds;
             float y_pos_diff = this.direction.Y * this.speed * (float)game_time.ElapsedGameTime.TotalSeconds;
-            return new Vector2(this._center_position.X + x_pos_diff, this._center_position.Y + y_pos_diff);
+            return new Vector2(this.center_position.X + x_pos_diff, this.center_position.Y + y_pos_diff);
         }
 
         /// <summary>
@@ -143,7 +169,7 @@ namespace ATC_Game.GameObjects
         private void SaveLastPositions()
         {
             this._last_positions[0] = this._last_positions[1];
-            this._last_positions[1] = this._center_position;
+            this._last_positions[1] = this.center_position;
         }
 
         /// <summary>
@@ -214,8 +240,8 @@ namespace ATC_Game.GameObjects
         /// <returns>occupied space</returns>
         public Rectangle GetAirplaneSquare ()
         {
-            int x = (int)this._center_position.X - this._site_lenght + 400;
-            int y  = (int)this._center_position.Y - this._site_lenght + 50;
+            int x = (int)this.center_position.X - this._site_lenght + 400;
+            int y  = (int)this.center_position.Y - this._site_lenght + 50;
             return new Rectangle(x, y, this._site_lenght, this._site_lenght);
         }
 
@@ -245,15 +271,15 @@ namespace ATC_Game.GameObjects
         /// <returns>true or false</returns>
         public bool IsInGameMap()
         {
-            bool x_check = (this._center_position.X >= 0) && (this._center_position.X <= this._game.GetGameAreaSize().X);
-            bool y_check = (this._center_position.Y >= 0) && (this._center_position.Y <= this._game.GetGameAreaSize().Y);
+            bool x_check = (this.center_position.X >= 0) && (this.center_position.X <= this._game.GetGameAreaSize().X);
+            bool y_check = (this.center_position.Y >= 0) && (this.center_position.Y <= this._game.GetGameAreaSize().Y);
             if (x_check && y_check) return true;
             return false;
         }
         public bool IsInGameMap(int boundary_overlap)
         {
-            bool x_check = (this._center_position.X + boundary_overlap >= 0) && (this._center_position.X - boundary_overlap <= this._game.GetGameAreaSize().X);
-            bool y_check = (this._center_position.Y + boundary_overlap >= 0) && (this._center_position.Y - boundary_overlap <= this._game.GetGameAreaSize().Y);
+            bool x_check = (this.center_position.X + boundary_overlap >= 0) && (this.center_position.X - boundary_overlap <= this._game.GetGameAreaSize().X);
+            bool y_check = (this.center_position.Y + boundary_overlap >= 0) && (this.center_position.Y - boundary_overlap <= this._game.GetGameAreaSize().Y);
             if (x_check && y_check) return true;
             return false;
         }
@@ -284,8 +310,8 @@ namespace ATC_Game.GameObjects
         /// <returns>true or false</returns>
         private bool IsInMargin()
         {
-            bool x_coord = IsInGameMap(new Vector2(this._center_position.X + this.direction.X * Config.margin_dist, 10));
-            bool y_coord = IsInGameMap(new Vector2(10, this._center_position.Y + this.direction.Y * Config.margin_dist));
+            bool x_coord = IsInGameMap(new Vector2(this.center_position.X + this.direction.X * Config.margin_dist, 10));
+            bool y_coord = IsInGameMap(new Vector2(10, this.center_position.Y + this.direction.Y * Config.margin_dist));
             if (x_coord && y_coord)
                 return false;
             return true;
@@ -298,7 +324,7 @@ namespace ATC_Game.GameObjects
         /// <returns>arrival alert object</returns>
         private ArrivalAlert AddArrivalAlert()
         {
-            ArrivalAlert alert = new ArrivalAlert(this._game, this, this._center_position);
+            ArrivalAlert alert = new ArrivalAlert(this._game, this, this.center_position);
             this._game._airplane_logic.arrival_alerts.Add(alert);
             return alert;
         }

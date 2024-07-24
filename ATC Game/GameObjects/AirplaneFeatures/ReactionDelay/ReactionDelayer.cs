@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +22,23 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         public int desired_alt;
         AltitudeEqualizer _alt_equal;
         // heading
+        public int desired_heading;
+        private int _setted_heading;
+        HeadingEqualizer _heading_equal;
+        // mouse
+        private MouseState mouse;
 
         public ReactionDelayer(Game1 game, Airplane airplane)
         {
             this._game = game;
             this._airplane = airplane;
             this.desired_speed = this._airplane.speed;
+            this.desired_alt = this._airplane.altitude;
+            this.desired_heading = this._airplane.heading;
+            this._setted_heading = this.desired_heading;
             this._speed_equal = new SpeedEqualizer(this._airplane);
             this._alt_equal = new AltitudeEqualizer(this._airplane);
+            this._heading_equal = new HeadingEqualizer(this._airplane);
         }
 
         /// <summary>
@@ -38,6 +48,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         {
             UpdateSpeed(game_time);
             UpdateAltitude(game_time);
+            UpdateHeading();
         }
 
         /// <summary>
@@ -53,6 +64,16 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         {
             if (this.desired_alt != this._airplane.altitude)
                 this._alt_equal.EqualizeAltitude(game_time, this.desired_alt);
+        }
+
+        private void UpdateHeading ()
+        {
+            this.mouse = Mouse.GetState();
+            if (this.desired_heading != this._setted_heading && this.mouse.LeftButton == ButtonState.Released)
+            {
+                this._heading_equal.Equalize(this.desired_heading);
+                this._setted_heading = this.desired_heading;
+            }
         }
     }
 }
