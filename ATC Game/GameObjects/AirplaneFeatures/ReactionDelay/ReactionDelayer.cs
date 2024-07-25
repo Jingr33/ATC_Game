@@ -48,7 +48,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         {
             UpdateSpeed(game_time);
             UpdateAltitude(game_time);
-            UpdateHeading();
+            UpdateHeading(game_time);
         }
 
         /// <summary>
@@ -66,14 +66,18 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
                 this._alt_equal.EqualizeAltitude(game_time, this.desired_alt);
         }
 
-        private void UpdateHeading ()
+        private void UpdateHeading (GameTime game_time)
         {
             this.mouse = Mouse.GetState();
             if (this.desired_heading != this._setted_heading && this.mouse.LeftButton == ButtonState.Released)
             {
-                this._heading_equal.Equalize(this.desired_heading);
+                this._airplane.heading_enabled = false;
+                this._heading_equal.Equalize(this.desired_heading, game_time);
                 this._setted_heading = this.desired_heading;
             }
+            // enabled controler of heading if the heading is already equalized
+            if (this.desired_heading == this._airplane.heading)
+                this._airplane.heading_enabled = true;
         }
     }
 }

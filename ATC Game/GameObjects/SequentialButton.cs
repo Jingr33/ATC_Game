@@ -12,6 +12,9 @@ using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace ATC_Game.GameObjects
 {
+    /// <summary>
+    /// Class for creating a sequential buttons.
+    /// </summary>
     internal class SequentialButton
     {
         private Game1 _game;
@@ -151,6 +154,21 @@ namespace ATC_Game.GameObjects
             spriteBatch.DrawString(this._font, this._title.ToUpper(), new Vector2(this._position.X + 43, this._position.Y + 3), Color.Black, 0, Vector2.Zero, 0.7f, SpriteEffects.None, 0);
             spriteBatch.DrawString(this._font, "+", new Vector2(this._position.X + this._width - 27, this._position.Y - 5), Color.Gray, 0, Vector2.Zero, 3f, SpriteEffects.None, 0);
         }
-
+        /// <summary>
+        /// Draw a Sequential button depending on an enabled or disabled state.
+        /// </summary>
+        /// <param name="spriteBatch">spritebatch</param>
+        /// <param name="enabled">true, if it enabled</param>
+        public void Draw(SpriteBatch spriteBatch, bool enabled)
+        {
+            if (enabled)
+                Draw(spriteBatch);
+            else
+            {
+                spriteBatch.Draw(this._texture, new Rectangle((int)this._position.X, (int)this._position.Y, this._width, _height), Color.White);
+                spriteBatch.DrawString(this._font, this.value.ToString(), new Vector2(this._position.X + this._width / 2 - 17, this._position.Y + 15), Color.DarkGray, 0, Vector2.Zero, 1.4f, SpriteEffects.None, 0);
+                spriteBatch.DrawString(this._font, this._title.ToUpper(), new Vector2(this._position.X + 43, this._position.Y + 3), Color.Black, 0, Vector2.Zero, 0.7f, SpriteEffects.None, 0);
+            }
+        }
     }
 }

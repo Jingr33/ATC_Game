@@ -31,14 +31,14 @@ namespace ATC_Game.GameObjects
             this._name = name;
             this._center_pos = center_position;
             this.traffic_density = density;
-            this._texture = GetTexture(path);
+            this._texture = GetTexture();
             this.runways = CreateRunways(rwy_info);
             // TODO: provizorni
             this.in_use_dep = this.runways[0];
             this.in_use_arr = this.runways[0];
         }
 
-        private Texture2D GetTexture (string path)
+        private Texture2D GetTexture ()
         {
             string tex_name = this._name.ToLower() + "-texture";
             return this._game.Content.Load<Texture2D>(tex_name);

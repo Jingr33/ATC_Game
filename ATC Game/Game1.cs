@@ -20,6 +20,7 @@ using System.Runtime.CompilerServices;
 // přidej zrychlování letadel pokud mají status take-off
 // limity (hranice) nastavení tech control buttonů
 // vymaz get direction z airplane, je to v general
+// predelej event kliknuti na letadlo do airplanu z game
 
 namespace ATC_Game
 {

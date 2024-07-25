@@ -24,12 +24,14 @@ namespace ATC_Game
 
         //MAP ITEMS
         public List<Airport> airports;
+        public List<Waypoint> waypoints;
 
         public MapGenerator(Game1 game, Maps map)
         {
             this._game = game;
             this._map = map;
             this.airports = new List<Airport>();
+            this.waypoints = new List<Waypoint>();
             Init();
         }
 
@@ -38,6 +40,7 @@ namespace ATC_Game
             this._map_name = this._map.ToString();
             this._path = string.Format("maps/{0}", this._map.ToString().ToLower());
             LoadAirports();
+            LoadWaypoints();
         }
 
         /// <summary>
@@ -48,7 +51,6 @@ namespace ATC_Game
             foreach (string file in Directory.EnumerateFiles(this._path + "/airports/", "*.txt"))
             {
                 string[] con = File.ReadAllLines(file);
-                Console.WriteLine(con);
                 List<string> rwy_info = new List<string>();
                 for (int i = 3; i < con.Length; i++)
                     rwy_info.Add(con[i]);
@@ -70,15 +72,33 @@ namespace ATC_Game
         }
 
         /// <summary>
+        /// Load all waypoints of the map. Create their instances.
+        /// </summary>
+        private void LoadWaypoints ()
+        {
+            using (StreamReader sr = new StreamReader(this._path + "/waypoints.csv"))
+            {
+                string one_wp = sr.ReadLine();
+                while ((one_wp = sr.ReadLine()) != null)
+                {
+                    string[] data_wp = one_wp.Split(';');
+                    Waypoint waypoint = new Waypoint(this._game, General.FileDataToVector2(data_wp[0]), data_wp[1]);
+                    Console.WriteLine(data_wp[0] + "   " +  data_wp[1]);
+                    this.waypoints.Add(waypoint);
+                }
+            }
+        }
+
+        /// <summary>
         /// Draw map objects.
         /// </summary>
         /// <param name="spriteBatch"></param>
         public void Draw (SpriteBatch spriteBatch)
         {
             foreach (Airport airport in this.airports)
-            {
                 airport.Draw(spriteBatch);
-            }
+            foreach (Waypoint wp in this.waypoints)
+                wp.Draw(spriteBatch);
         }
     }
 }

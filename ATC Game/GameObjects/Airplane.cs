@@ -62,6 +62,7 @@ namespace ATC_Game.GameObjects
         public bool in_margin;
         // reaction delay
         public ReactionDelayer delayer;
+        public bool heading_enabled;
 
         public Airplane (Game1 game, int id, Vector2 center_position, int heading, OperationType oper_type, int speed, int type_number, 
                         string destination, int altitude, FlightSection flight_section, FlightStatus flight_status)
@@ -103,6 +104,7 @@ namespace ATC_Game.GameObjects
             this.in_margin = false;
 
             //reaction delay
+            this.heading_enabled = true;
             this.delayer = new ReactionDelayer(this._game,this);
         }
 
@@ -113,7 +115,7 @@ namespace ATC_Game.GameObjects
         public void Update (GameTime game_time)
         {
             if (!this.trajectory.IsEmpty)
-                SetNextPosition(game_time);
+                SetNextPosition();
             else
                 this.center_position = NewCoordStraightOn(game_time);
 
@@ -131,7 +133,7 @@ namespace ATC_Game.GameObjects
         /// <summary>
         /// Set next position of an airplane  in trajectory list of points.
         /// </summary>
-        private void SetNextPosition (GameTime game_time)
+        private void SetNextPosition ()
         {
             //this.traj_frame_time += (float)game_time.ElapsedGameTime.TotalSeconds;
             //if (this.traj_frame_time < 0.025) return;
@@ -145,8 +147,8 @@ namespace ATC_Game.GameObjects
                  *                after use remove the element
                  */
                 {
-                    this.center_position = next_pos;
                     this.heading = next_heading;
+                    this.center_position = next_pos;
                     //this.traj_frame_time = 0;
                 }
             }

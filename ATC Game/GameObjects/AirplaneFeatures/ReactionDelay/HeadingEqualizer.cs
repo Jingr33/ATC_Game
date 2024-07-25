@@ -31,7 +31,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         /// <summary>
         /// Equalize a desired and actual heading of a plane. Create all trajectory of a turn.
         /// </summary>
-        public void Equalize (int desire_heading)
+        public void Equalize (int desire_heading, GameTime game_time)
         {
             this.desire_heading = desire_heading;
             this._airplane.trajectory = new ConcurrentQueue<Vector2> { };
@@ -42,7 +42,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
         /// Generate async all points of trajectory of a turn of the airplane.
         /// </summary>
         /// <param name="heading_step"></param>
-        private void GenerateTrajectoryAsync (float heading_step = 0.03f)
+        private void GenerateTrajectoryAsync (float heading_step = 0.02f)
         {
             float one_step = OneHeadingChange(heading_step);
             this._actual_heading = this._airplane.heading;
