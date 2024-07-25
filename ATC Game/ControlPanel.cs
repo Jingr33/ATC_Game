@@ -15,6 +15,8 @@ namespace ATC_Game
         private Game1 _game;
         public Airplane airplane;
         public bool is_active;
+        private bool _speed_enabled;
+        private bool _alt_enabled;
         private bool _head_enabled; // set heading control to enabled or disabled state
         //seq buttons
         private SequentialButton _speed_sbtn;
@@ -28,6 +30,8 @@ namespace ATC_Game
         {
             this._game = game;
             this.airplane = null;
+            this._speed_enabled = true;
+            this._alt_enabled = true;
             this._head_enabled = true;
             LoadControlButtons();
         }
@@ -51,7 +55,9 @@ namespace ATC_Game
         {
             if (this.airplane != null)
             {
-                this._head_enabled = this.airplane.heading_enabled; // disabled heading seq button if the airplane is just in turn
+                this._speed_enabled = !this.airplane.autopilot_on; // disabled speed seq button if autopilot is on
+                this._alt_enabled = !this.airplane.autopilot_on; // disabled altitude seq button if autopilot is on
+                this._head_enabled = this.airplane.heading_enabled && !this.airplane.autopilot_on; // disabled heading seq button if the airplane is just in turn or autopilot is on
                 this._speed_sbtn.value = this.airplane.delayer.desired_speed;
                 this._altitude_sbtn.value = this.airplane.delayer.desired_alt;
                 this._heading_sbtn.value = this.airplane.delayer.desired_heading;
@@ -61,6 +67,8 @@ namespace ATC_Game
             }
             else
             {
+                this._speed_enabled = true; // enabled speed control if there is no plane to control
+                this._alt_enabled = true; // enabled altitude control if there is no plane to control
                 this._head_enabled = true; // enabled heading control if there is no plane to control
                 this._speed_sbtn.value = 0;
                 this._altitude_sbtn.value = 0;
@@ -74,8 +82,8 @@ namespace ATC_Game
         /// <param name="spriteBatch">spritebatch</param>
         public void Draw(SpriteBatch spriteBatch)
         {
-            this._speed_sbtn.Draw(spriteBatch);
-            this._altitude_sbtn.Draw(spriteBatch);
+            this._speed_sbtn.Draw(spriteBatch, this._speed_enabled);
+            this._altitude_sbtn.Draw(spriteBatch, this._alt_enabled);
             this._heading_sbtn.Draw(spriteBatch, this._head_enabled);
             this._left_turn_btn.Draw(spriteBatch);
             this._right_turn_btn.Draw(spriteBatch);

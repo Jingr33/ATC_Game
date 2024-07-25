@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using ATC_Game.GameObjects;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
+namespace ATC_Game.Control
 {
     /// <summary>
     /// this class create delay if the player change flight values.
@@ -30,53 +31,64 @@ namespace ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay
 
         public ReactionDelayer(Game1 game, Airplane airplane)
         {
-            this._game = game;
-            this._airplane = airplane;
-            this.desired_speed = this._airplane.speed;
-            this.desired_alt = this._airplane.altitude;
-            this.desired_heading = this._airplane.heading;
-            this._setted_heading = this.desired_heading;
-            this._speed_equal = new SpeedEqualizer(this._airplane);
-            this._alt_equal = new AltitudeEqualizer(this._airplane);
-            this._heading_equal = new HeadingEqualizer(this._airplane);
+            _game = game;
+            _airplane = airplane;
+            SetActualFlightState();
+            _speed_equal = new SpeedEqualizer(_airplane);
+            _alt_equal = new AltitudeEqualizer(_airplane);
+            _heading_equal = new HeadingEqualizer(_airplane);
+        }
+
+        /// <summary>
+        /// Set actual flight values (speed, altitude and heading) of the airplane as desired values for airplanes controls.
+        /// </summary>
+        public void SetActualFlightState ()
+        {
+            desired_speed = _airplane.speed;
+            desired_alt = _airplane.altitude;
+            desired_heading = _airplane.heading;
+            _setted_heading = desired_heading;
         }
 
         /// <summary>
         /// Check if any flight value was changed.
         /// </summary>
-        public void UpdateReaction (GameTime game_time)
+        public void UpdateReaction(GameTime game_time)
         {
-            UpdateSpeed(game_time);
-            UpdateAltitude(game_time);
-            UpdateHeading(game_time);
+            if (!this._airplane.autopilot_on)
+            {
+                UpdateSpeed(game_time);
+                UpdateAltitude(game_time);
+                UpdateHeading(game_time);
+            }
         }
 
         /// <summary>
         /// Check if speed value was changed. Start the speed equalizer.
         /// </summary>
-        private void UpdateSpeed (GameTime game_time)
+        private void UpdateSpeed(GameTime game_time)
         {
             if (this.desired_speed != this._airplane.speed)
                 this._speed_equal.EqualizeSpeed(game_time, this.desired_speed);
         }
 
-        private void UpdateAltitude (GameTime game_time)
+        private void UpdateAltitude(GameTime game_time)
         {
             if (this.desired_alt != this._airplane.altitude)
                 this._alt_equal.EqualizeAltitude(game_time, this.desired_alt);
         }
 
-        private void UpdateHeading (GameTime game_time)
+        private void UpdateHeading(GameTime game_time)
         {
-            this.mouse = Mouse.GetState();
-            if (this.desired_heading != this._setted_heading && this.mouse.LeftButton == ButtonState.Released)
+            mouse = Mouse.GetState();
+            if (this.desired_heading != this._setted_heading && mouse.LeftButton == ButtonState.Released)
             {
                 this._airplane.heading_enabled = false;
-                this._heading_equal.Equalize(this.desired_heading, game_time);
-                this._setted_heading = this.desired_heading;
+                this._heading_equal.Equalize(desired_heading, game_time);
+                this._setted_heading = desired_heading;
             }
             // enabled controler of heading if the heading is already equalized
-            if (this.desired_heading == this._airplane.heading)
+            if (this.desired_heading == _airplane.heading)
                 this._airplane.heading_enabled = true;
         }
     }

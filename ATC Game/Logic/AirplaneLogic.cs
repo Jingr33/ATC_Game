@@ -44,7 +44,7 @@ namespace ATC_Game.Logic
         /// <summary>
         /// Addnew airplane with some probability if there the conditions are for add new airplane met.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         private void TryAddNewAirplane (GameTime game_time)
         {
             this._airplane_spawn_time += (float)game_time.ElapsedGameTime.TotalSeconds;
@@ -59,7 +59,7 @@ namespace ATC_Game.Logic
         /// <summary>
         /// Update state and atributttes of all airplanes in the game.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         private void UpdateAllAirplanes (GameTime game_time)
         {
             foreach (Airplane airplane in this._game.airplanes)

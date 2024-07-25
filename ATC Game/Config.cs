@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -31,7 +32,7 @@ namespace ATC_Game
         public static int max_altitude = 101; // maximum flight level of departure airplane
         public static int plane_off_distance = 50; //distance between boudaries of a map and spawn point
         public static int min_plane_count = 1; // minimal count of planes in the map
-        public static int max_plane_count = 1; // maximu count of planes in the map
+        public static int max_plane_count = 3; // maximu count of planes in the map
         // arrival alert
         public static int alert_bound_dist = 15; // distance of display an arrival alert from boudary of a game map
         public static float alert_freq = 0.5f; // arrival alert blink rate
@@ -46,9 +47,13 @@ namespace ATC_Game
         //COLORS
         public static Color bg_color = Color.Snow; // background color
 
-
         // REACTION DELAY
         public static float speed_step_time = 0.4f; // one knot change of speed duration
         public static float alt_step_time = 0.5f; // one flight level (100 feet) of altitude duration
+
+        //AUTOPILOT
+        public static int after_takeoff_speed = 15; // speed after takeoff
+        public static int min_takeoff_speed = 6; // airplane start to increase the altitude in this speed
+        public static int after_takeoff_alt = 3000; // altitude after takeoff
     }
 }

@@ -14,7 +14,7 @@ using System.Runtime.CompilerServices;
 // dodělej info strips
 // generování dsestinací udělej tak aby přiletaly ze stran ze kterých to dává smysl (pokud bude letiště reálné)
 // predelej speed na ground speed at to neukazuje nereálné čísla
-// přidat funkce pro time section
+// přidat funkce pro _time section
 // udělej stripes jako scrollable panel
 // tlačítka na posouvání stripeama
 // přidej zrychlování letadel pokud mají status take-off

@@ -13,8 +13,8 @@ using System.Net.Mime;
 using System.Reflection.Metadata;
 using ATC_Game.GameObjects.AirplaneFeatures;
 using System.Reflection.Metadata.Ecma335;
-using ATC_Game.GameObjects.AirplaneFeatures.ReactionDelay;
 using System.Collections.Concurrent;
+using ATC_Game.Control;
 
 namespace ATC_Game.GameObjects
 {
@@ -63,6 +63,9 @@ namespace ATC_Game.GameObjects
         // reaction delay
         public ReactionDelayer delayer;
         public bool heading_enabled;
+        // autopilot
+        public bool autopilot_on;
+        private Autopilot _autopilot;
 
         public Airplane (Game1 game, int id, Vector2 center_position, int heading, OperationType oper_type, int speed, int type_number, 
                         string destination, int altitude, FlightSection flight_section, FlightStatus flight_status)
@@ -106,6 +109,9 @@ namespace ATC_Game.GameObjects
             //reaction delay
             this.heading_enabled = true;
             this.delayer = new ReactionDelayer(this._game,this);
+            // autopilot
+            this._autopilot = new Autopilot(this._game, this);
+            this.autopilot_on = SetAutopilotAtSpawn();
         }
 
         /// <summary>
@@ -114,6 +120,9 @@ namespace ATC_Game.GameObjects
         /// <param name="game_time"></param>
         public void Update (GameTime game_time)
         {
+            if (autopilot_on)
+                this._autopilot.Update(game_time);
+
             if (!this.trajectory.IsEmpty)
                 SetNextPosition();
             else
@@ -164,6 +173,7 @@ namespace ATC_Game.GameObjects
             float y_pos_diff = this.direction.Y * this.speed * (float)game_time.ElapsedGameTime.TotalSeconds;
             return new Vector2(this.center_position.X + x_pos_diff, this.center_position.Y + y_pos_diff);
         }
+
 
         /// <summary>
         /// Set last two positions to an array.
@@ -375,6 +385,20 @@ namespace ATC_Game.GameObjects
         private WeightCat GetWeightCategory ()
         {
             return WeightCat.A;
+        }
+
+        /// <summary>
+        /// Switch on an autopilot, if the airplane is generated as a departure flight.
+        /// </summary>
+        /// <returns>true if autpilot is on</returns>
+        private bool SetAutopilotAtSpawn ()
+        {
+            if (this.flight_section == FlightSection.TakeOff)
+            {
+                this._autopilot.operation = AutopilotOperation.TakeOff;
+                return true;
+            }
+            return false;
         }
     }
 }

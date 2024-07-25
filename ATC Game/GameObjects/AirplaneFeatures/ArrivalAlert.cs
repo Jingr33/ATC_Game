@@ -28,7 +28,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         private int _bound_dist; // distance from boundaries of a game map
         private bool _is_turned_on;
         private float _one_state_time;
-        private float _change_time; // elapsed time from last switch of alert state
+        private float _change_time; // elapsed _time from last switch of alert state
 
         public ArrivalAlert(Game1 game, Airplane parent_plane, Vector2 plane_start_pos)
         {

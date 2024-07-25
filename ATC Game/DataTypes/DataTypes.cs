@@ -23,7 +23,7 @@ public enum FlightSection
 }
 
 /// <summary>
-/// Characteristic of flight according to time schedule
+/// Characteristic of flight according to _time schedule
 /// </summary>
 public enum FlightStatus
 {
@@ -46,4 +46,16 @@ public enum WeightCat
 public enum Maps
 {
     Prague
+}
+
+/// <summary>
+/// Possibilities of autopilot control.
+/// </summary>
+public enum AutopilotOperation
+{
+    Unknown,
+    TakeOff,
+    Landing,
+    LeftTurn,
+    RightTurn,
 }
