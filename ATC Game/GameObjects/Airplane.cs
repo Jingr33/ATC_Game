@@ -55,6 +55,7 @@ namespace ATC_Game.GameObjects
         public int altitude { get; set; }
         public int heading { get; set; } // direction of flight in degree + 90°
         public int speed { get; set; } // means ground speed
+        public Airport airport { get; set; }
         
         // ADITIONAL FEATURES
         private ArrivalAlert _arrival_alert;
@@ -68,7 +69,7 @@ namespace ATC_Game.GameObjects
         private Autopilot _autopilot;
 
         public Airplane (Game1 game, int id, Vector2 center_position, int heading, OperationType oper_type, int speed, int type_number, 
-                        string destination, int altitude, FlightSection flight_section, FlightStatus flight_status)
+                        string destination, int altitude, FlightSection flight_section, FlightStatus flight_status, Airport airport)
             : base (center_position)
         {
             this.id = id;
@@ -88,6 +89,7 @@ namespace ATC_Game.GameObjects
             this.registration = Config.airplane_registration[this._type_num];
             this.flight_section = flight_section;
             this.flight_status = flight_status;
+            this.airport = airport;
             this.oper_type = oper_type;
             this.destination = destination;
             this.altitude = altitude;
@@ -130,7 +132,7 @@ namespace ATC_Game.GameObjects
 
             this._rotation = GetRotation(this.direction);
             this.direction = GetDirection(this.heading);
-            this._draw_position = GetTexturePosition(this.center_position, this._texture);
+            this._draw_position = this.center_position; // GetTexturePosition(this.center_position, this._texture);
             this.delayer.UpdateReaction(game_time);
             SaveLastPositions();
 
@@ -252,8 +254,8 @@ namespace ATC_Game.GameObjects
         /// <returns>occupied space</returns>
         public Rectangle GetAirplaneSquare ()
         {
-            int x = (int)this.center_position.X - this._site_lenght + 400;
-            int y  = (int)this.center_position.Y - this._site_lenght + 50;
+            int x = (int)this.center_position.X - this._site_lenght/2 + 400;
+            int y  = (int)this.center_position.Y - this._site_lenght/2 + 50;
             return new Rectangle(x, y, this._site_lenght, this._site_lenght);
         }
 
@@ -337,7 +339,7 @@ namespace ATC_Game.GameObjects
         private ArrivalAlert AddArrivalAlert()
         {
             ArrivalAlert alert = new ArrivalAlert(this._game, this, this.center_position);
-            this._game._airplane_logic.arrival_alerts.Add(alert);
+            this._game.airplane_logic.arrival_alerts.Add(alert);
             return alert;
         }
 

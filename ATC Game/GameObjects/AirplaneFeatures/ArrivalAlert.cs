@@ -107,7 +107,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         /// </summary>
         private void DestroySelf()
         {
-            _game._airplane_logic.arrival_alerts.Remove(this);
+            _game.airplane_logic.arrival_alerts.Remove(this);
         }
     }
 }

@@ -29,18 +29,25 @@ namespace ATC_Game.GameObjects
         private SpriteFont _font;
         public int value { get; set; }
         private bool smooth;
+        private int _min_value;
+        private int _max_value;
+        private bool _repeatable;
 
         private Rectangle _increase_btn;
         private Rectangle _decrease_btn;
         private MouseState _last_state;
 
-        public SequentialButton(Game1 game, Vector2 position, string title, int width, int difference = 1, bool smooth = true)
+        public SequentialButton(Game1 game, Vector2 position, string title, int width, int min_val, int max_val, bool repeatable = false, 
+                                int difference = 1, bool smooth = true)
         {
             this._game = game;
             this._position = position;
             this._title = title;
             this._difference = difference;
             this.smooth = smooth;
+            this._min_value = min_val;
+            this._max_value = max_val;
+            this._repeatable = repeatable;
             this._width = width;
             this._height = 40;
             this._bg_color = Color.AliceBlue;
@@ -116,14 +123,14 @@ namespace ATC_Game.GameObjects
         private void IncreaseEvent ()
         {
             if (this._increase_btn.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
-                this.value += this._difference;
+                this.value = ChangeSeqBtnValue(this._difference);
         }
         private void IncreaseEvent (int diff)
         {
             if (this._increase_btn.Contains(this._game.mouse.Position)
                 && this._game.mouse.LeftButton == ButtonState.Released
                 && this._last_state.LeftButton == ButtonState.Pressed)
-                this.value += diff;
+                this.value = ChangeSeqBtnValue(diff);
         }
 
         /// <summary>
@@ -132,14 +139,36 @@ namespace ATC_Game.GameObjects
         private void DecreaseEvent()
         {
             if (this._decrease_btn.Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed)
-                this.value -= this._difference;
+                this.value = ChangeSeqBtnValue(this._difference, true);
         }
         private void DecreaseEvent(int diff)
         {
             if (this._decrease_btn.Contains(this._game.mouse.Position)
                 && this._game.mouse.LeftButton == ButtonState.Released
                 && this._last_state.LeftButton == ButtonState.Pressed)
-                this.value -= diff;
+                this.value  = ChangeSeqBtnValue(diff, true);
+        }
+
+        /// <summary>
+        /// Set new value into the sequential button and check whether or not it exceeded the min or max border value.
+        /// If it is repeatable seq button, it set value from max to min value and conversely.
+        /// </summary>
+        /// <param name="difference">one step difference between values</param>
+        /// <param name="substraction">optional argument if the value is ti be added or substracted, default is addition</param>
+        /// <returns>new sequential button value</returns>
+        private int ChangeSeqBtnValue(int difference, bool substraction = false)
+        {
+            //new value calculation
+            int new_value;
+            new_value = this.value + difference;
+            if (substraction)
+                new_value = this.value - difference;
+            // new value conditions
+            if (new_value <= this._max_value && new_value >= this._min_value) return new_value;
+            else if (new_value > this._max_value && this._repeatable) return this._min_value;
+            else if (new_value < this._min_value && this._repeatable) return this._max_value;
+            else return this.value;
+            
         }
 
         /// <summary>

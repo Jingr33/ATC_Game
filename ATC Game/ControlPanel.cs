@@ -41,9 +41,9 @@ namespace ATC_Game
         /// </summary>
         private void LoadControlButtons ()
         {
-            this._speed_sbtn = new SequentialButton(this._game, new Vector2(10, 5), "speed", 140);
-            this._altitude_sbtn = new SequentialButton(this._game, new Vector2(300, 5), "altitude", 160, 300, false);
-            this._heading_sbtn = new SequentialButton(this._game, new Vector2(600, 5), "heading", 152);
+            this._speed_sbtn = new SequentialButton(this._game, new Vector2(10, 5), "speed", 140, Config.min_control_speed, Config.max_control_speed);
+            this._altitude_sbtn = new SequentialButton(this._game, new Vector2(300, 5), "altitude", 160, Config.min_control_alt, Config.max_control_alt, false, 300, false);
+            this._heading_sbtn = new SequentialButton(this._game, new Vector2(600, 5), "heading", 152, 0, 360, true);
             this._left_turn_btn = new Button(this._game, new Vector2(800, 5), "left turn", 116);
             this._right_turn_btn = new Button(this._game, new Vector2(1000, 5), "right turn", 122);
         }
@@ -63,7 +63,8 @@ namespace ATC_Game
                 this._heading_sbtn.value = this.airplane.delayer.desired_heading;
                 this.airplane.delayer.desired_speed = this._speed_sbtn.Update();
                 this.airplane.delayer.desired_alt = this._altitude_sbtn.Update();
-                this.airplane.delayer.desired_heading = this._heading_sbtn.Update();
+                if (this._head_enabled)
+                    this.airplane.delayer.desired_heading = this._heading_sbtn.Update();
             }
             else
             {

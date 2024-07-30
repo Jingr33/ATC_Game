@@ -30,8 +30,8 @@ namespace ATC_Game
         private SpriteBatch _spriteBatch;
         public List<Airplane> airplanes;
         public List<InfoStripe> infostripes;
-        public AirplaneLogic _airplane_logic;
-        public MapGenerator _map_generator;
+        public AirplaneLogic airplane_logic;
+        public MapGenerator map_generator;
         public ControlPanel control_panel;
 
         private RenderTarget2D _game_render_target;
@@ -64,7 +64,7 @@ namespace ATC_Game
             // game area
             this._game_render_target = new RenderTarget2D(GraphicsDevice, 900, 900);
             this._game_area = new Rectangle(400, 50, 900, 900);
-            this._map_generator = new MapGenerator(this, Maps.Prague);
+            this.map_generator = new MapGenerator(this, Maps.Prague);
             // plane stripes area
             this._strips_render_target = new RenderTarget2D(GraphicsDevice, 400, 450);
             this._plane_stripes_area = new Rectangle(0, 50, 400, 450);
@@ -77,7 +77,7 @@ namespace ATC_Game
 
             this.airplanes = new List<Airplane>();
             this.infostripes = new List<InfoStripe>();
-            this._airplane_logic = new AirplaneLogic(this);
+            this.airplane_logic = new AirplaneLogic(this);
             base.Initialize();
         }
 
@@ -88,9 +88,9 @@ namespace ATC_Game
 
         protected override void Update(GameTime game_time)
         {
-            this._airplane_logic.UpdateAirplanes(game_time);
+            this.airplane_logic.UpdateAirplanes(game_time);
             UpdateScrollablePanel();
-            UpdateGameArea();
+            UpdateGameArea(game_time);
             UpdateControlPanel();
             base.Update(game_time);
         }
@@ -115,7 +115,7 @@ namespace ATC_Game
         /// <summary>
         /// Update events states in the game panel.
         /// </summary>
-        private void UpdateGameArea ()
+        private void UpdateGameArea (GameTime game_time)
         {
             this.mouse = Mouse.GetState();
             foreach(Airplane plane in this.airplanes)
@@ -124,7 +124,7 @@ namespace ATC_Game
                 {
                     if (!plane.is_active)
                     {
-                        this._airplane_logic.DeactivateAllPlanes();
+                        this.airplane_logic.DeactivateAllPlanes();
                         plane.Activate();
                     }
                     else
@@ -132,6 +132,32 @@ namespace ATC_Game
                 }
             }
             this._previous_state = this.mouse.LeftButton;
+            UpdateAirports(game_time);
+            UpdateWaypoints();
+        }
+
+        /// <summary>
+        /// Update airports animations in the game area.
+        /// </summary>
+        private void UpdateAirports (GameTime game_time)
+        {
+            foreach (Airport airport in this.map_generator.airports)
+                airport.Update(game_time);
+        }
+
+        /// <summary>
+        /// Update waypoint and landing point events and animations in the game area.
+        /// </summary>
+        private void UpdateWaypoints()
+        {
+            // waypoints
+            foreach (Waypoint wp in this.map_generator.waypoints)
+                wp.UpdateEvent();
+            // landing points
+            foreach (LandingWaypoint lwp in this.map_generator.landpoints)
+            {
+                lwp.UpdateEvent();
+            }
         }
 
         /// <summary>
@@ -183,7 +209,7 @@ namespace ATC_Game
         private void DrawGameArea()
         {
             this._spriteBatch.Begin();
-            this._map_generator.Draw(this._spriteBatch); // draw a game map
+            this.map_generator.Draw(this._spriteBatch); // draw a game map
             foreach (Airplane airplane in this.airplanes)
             {
                 if (airplane.is_active)
@@ -193,7 +219,7 @@ namespace ATC_Game
                 else 
                     airplane.Draw(this._spriteBatch);
             }
-            foreach (ArrivalAlert alert in this._airplane_logic.arrival_alerts)
+            foreach (ArrivalAlert alert in this.airplane_logic.arrival_alerts)
             {
                 alert.DrawArrivalAlert(this._spriteBatch);
             }

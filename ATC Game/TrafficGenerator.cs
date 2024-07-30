@@ -74,6 +74,7 @@ namespace ATC_Game
         public List<Airplane> AddArrivalAirplane(Game1 game, List<Airplane> existing_airplanes)
         {
             OperationType oper_type = OperationType.Arrival;
+            Airport airport = ChooseArrDepAirport(); // elected airport
             Vector2 start_pos = GenArrivalEntryPos();
             int start_heading = GenArrivalHeading(start_pos);
             int start_speed = GenArrivalSpeed();
@@ -83,7 +84,7 @@ namespace ATC_Game
             FlightSection flight_section = FlightSection.Approach;
             FlightStatus flight_status = GenerateFlightStatus();
             Airplane new_plane = new Airplane(game, this.next_id, start_pos, start_heading, oper_type, start_speed, type, dest, altitude,
-                                              flight_section, flight_status);
+                                              flight_section, flight_status, airport);
             existing_airplanes.Add(new_plane);
             game.infostripes.Add(new_plane.info_strip);
             return existing_airplanes;
@@ -92,7 +93,7 @@ namespace ATC_Game
         public List<Airplane> AddDepartAirplane(Game1 game, List<Airplane> existing_airplanes)
         {
             OperationType oper_type = OperationType.Departure;
-            Airport airport = ChooseDepartAirport(); // elected airport
+            Airport airport = ChooseArrDepAirport(); // elected airport
             Runway runway = airport.in_use_dep; // rwy in use for departures
             Vector2 start_pos = SetRunwayDeparturePos(runway);
             int heading = runway.heading;
@@ -103,7 +104,7 @@ namespace ATC_Game
             FlightSection flight_section = FlightSection.TakeOff;
             FlightStatus flight_status = GenerateFlightStatus();
             Airplane new_plane = new Airplane(game, this.next_id, start_pos, heading, oper_type, speed, type, dest, altitude,
-                                              flight_section, flight_status);
+                                              flight_section, flight_status, airport);
             existing_airplanes.Add(new_plane);
             game.infostripes.Add(new_plane.info_strip);
             return existing_airplanes;
@@ -139,9 +140,7 @@ namespace ATC_Game
         /// <returns>position of airplane spawn</returns>
         private Vector2 SetRunwayDeparturePos (Runway rwy)
         {
-            Vector2 airport_pos = rwy.GetMyAirport().GetTexturePosition();
-            Vector2 rwy_pos = rwy.position;
-            return airport_pos + rwy_pos;
+            return rwy.map_position;
         }
 
         /// <summary>
@@ -201,18 +200,19 @@ namespace ATC_Game
 
         private FlightStatus GenerateFlightStatus()
         {
-            return FlightStatus.InTime; // TODO - náhodný flightstatus s pravděpodobností
+            return FlightStatus.OnTime; // TODO - náhodný flightstatus s pravděpodobností
         }
 
+
         /// <summary>
-        /// Choose random airport (according to its traffic density) and add departure to this airport.
+        /// Choose random airport (according to its traffic density) for arrival or departing airplane.
         /// </summary>
         /// <returns>one of the airports on the map</returns>
-        private Airport ChooseDepartAirport ()
+        private Airport ChooseArrDepAirport ()
         {
-            int rnd_dens = this._random.Next(this._game._map_generator.TraffDensitySum()); // random num from density sum
+            int rnd_dens = this._random.Next(this._game.map_generator.TraffDensitySum()); // random num from density sum
             int actual_range = 0;
-            foreach (Airport airport in this._game._map_generator.airports)
+            foreach (Airport airport in this._game.map_generator.airports)
             {
                 actual_range += airport.traffic_density;
                 if (rnd_dens < actual_range)

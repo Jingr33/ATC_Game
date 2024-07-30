@@ -18,6 +18,8 @@ public enum FlightSection
     Landing,
     MissedApproach,
     GoAround,
+    Landed,
+    OnGround,
     TakeOff,
     Departure,
 }
@@ -27,7 +29,7 @@ public enum FlightSection
 /// </summary>
 public enum FlightStatus
 {
-    InTime,
+    OnTime,
     Delayed,
     Diverted
 }

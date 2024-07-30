@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 using Color = Microsoft.Xna.Framework.Color;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 
 namespace ATC_Game.GameObjects
 {
@@ -62,6 +63,14 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
+        /// Update airplanes stats in time.
+        /// </summary>
+        public void Update (GameTime game_time)
+        {
+            this.in_use_arr.UpdateLandingLights(game_time);
+        }
+
+        /// <summary>
         /// Get vector position of top left coner of airport texture
         /// </summary>
         /// <returns>texture draw position</returns>
@@ -91,12 +100,18 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Draw an airport texture.
+        /// Draw an airport texture and all subordinate objects.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         public void Draw (SpriteBatch spriteBatch)
         {
+            // airport texture
             spriteBatch.Draw(this._texture, GetTexturePosition(), Config.bg_color);
+            // runway texture
+            foreach (var runway in this.runways)
+                runway.Draw(spriteBatch);
+            // rwy in use for arrival lights
+            this.in_use_arr.DrawLights(spriteBatch);
         }
 
         /// <summary>

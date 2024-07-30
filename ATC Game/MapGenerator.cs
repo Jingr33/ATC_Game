@@ -25,6 +25,7 @@ namespace ATC_Game
         //MAP ITEMS
         public List<Airport> airports;
         public List<Waypoint> waypoints;
+        public List<LandingWaypoint> landpoints;
 
         public MapGenerator(Game1 game, Maps map)
         {
@@ -32,6 +33,7 @@ namespace ATC_Game
             this._map = map;
             this.airports = new List<Airport>();
             this.waypoints = new List<Waypoint>();
+            this.landpoints = new List<LandingWaypoint>();
             Init();
         }
 
@@ -41,6 +43,7 @@ namespace ATC_Game
             this._path = string.Format("maps/{0}", this._map.ToString().ToLower());
             LoadAirports();
             LoadWaypoints();
+            LoadLandpoints();
         }
 
         /// <summary>
@@ -83,10 +86,20 @@ namespace ATC_Game
                 {
                     string[] data_wp = one_wp.Split(';');
                     Waypoint waypoint = new Waypoint(this._game, General.FileDataToVector2(data_wp[0]), data_wp[1]);
-                    Console.WriteLine(data_wp[0] + "   " +  data_wp[1]);
                     this.waypoints.Add(waypoint);
                 }
             }
+        }
+
+        /// <summary>
+        /// Add element to a landing points list.
+        /// </summary>
+        /// <param name="LWP">one landing point</param>
+        public void LoadLandpoints ()
+        {
+            foreach (Airport airport in this.airports)
+                foreach (Runway rwy in airport.runways)
+                    this.landpoints.Add(rwy.land_waypoint);
         }
 
         /// <summary>
@@ -99,6 +112,8 @@ namespace ATC_Game
                 airport.Draw(spriteBatch);
             foreach (Waypoint wp in this.waypoints)
                 wp.Draw(spriteBatch);
+            foreach(LandingWaypoint lwp in this.landpoints)
+                lwp.Draw(spriteBatch);
         }
     }
 }

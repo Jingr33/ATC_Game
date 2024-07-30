@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -51,7 +52,7 @@ namespace ATC_Game.Control
             _actual_y_pos = _airplane.center_position.Y;
             while ((int)_actual_heading != desire_heading)
             {
-                _actual_heading = _actual_heading + one_step;
+                _actual_heading = HeadingBordersCheck(_actual_heading + one_step);
                 Vector2 direction = General.GetDirection((int)_actual_heading);
                 _actual_x_pos = _actual_x_pos + direction.X * 0.0166667f; // last number is const due to fps optimalization
                 _actual_y_pos = _actual_y_pos + direction.Y * 0.0166667f;
@@ -67,8 +68,35 @@ namespace ATC_Game.Control
         /// <returns></returns>
         private float OneHeadingChange(float step)
         {
-            if (_airplane.heading <= desire_heading) return step;
-            return -step;
+            if (this._airplane.heading <= this.desire_heading)
+            {
+                float right_turn = this.desire_heading - this._airplane.heading;
+                float left_turn = this._airplane.heading + 360 - desire_heading;
+                if (right_turn <= left_turn) return step;
+                return -step;
+            }
+            else
+            {
+                float left_turn = this._airplane.heading - this.desire_heading;
+                float right_turn = 360 - this._airplane.heading + this.desire_heading;
+                if (left_turn <= right_turn) return -step;
+                return step;
+            }
+            //TODO
+            //if (_airplane.heading <= desire_heading) return step;
+            //return -step;
+        }
+
+        /// <summary>
+        /// Check if the heading value is between 0 and 360, return modied value if it is necessary.
+        /// </summary>
+        /// <param name="heading">heading value for check</param>
+        /// <returns>check resp. modified heading value</returns>
+        private float HeadingBordersCheck (float heading)
+        {
+            if (heading >= 0 && heading < 360) return heading;
+            else if (heading < 0) return heading + 360;
+            else return heading - 360;
         }
     }
 }

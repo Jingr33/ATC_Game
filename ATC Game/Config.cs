@@ -46,6 +46,10 @@ namespace ATC_Game
 
         //COLORS
         public static Color bg_color = Color.Snow; // background color
+        public static int min_control_speed = 8; // minimum adjustable speed of an airplane in knots
+        public static int max_control_speed = 100; // maximum adjustable speed of an airplane in knots
+        public static int min_control_alt = 2000; // minimum adjustable altitude of an airplane in feet
+        public static int max_control_alt = 15000; // maximum adjustable altitude of an airplane in feet
 
         // REACTION DELAY
         public static float speed_step_time = 0.4f; // one knot change of speed duration
@@ -55,5 +59,10 @@ namespace ATC_Game
         public static int after_takeoff_speed = 15; // speed after takeoff
         public static int min_takeoff_speed = 6; // airplane start to increase the altitude in this speed
         public static int after_takeoff_alt = 3000; // altitude after takeoff
+
+        //AIRPORT
+        // lights
+        public static int land_lights_number = 1; // number of runnig landing lights
+        public static int land_lights_speed = 200; // moving speed of landing lights
     }
 }

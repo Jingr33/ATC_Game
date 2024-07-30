@@ -1,7 +1,8 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -20,6 +21,10 @@ namespace ATC_Game.GameObjects
         private Vector2 _position;
         private string _name;
         private bool _is_active;
+        // state (active/deactive)
+        public bool is_active;
+        private ButtonState _previous_state;
+
 
         /// <summary>
         /// Class for waypoints.
@@ -31,7 +36,8 @@ namespace ATC_Game.GameObjects
             this._name = name;
             this._texture = GetTexture();
             this._active_texture = GetActiveTexture();
-            this._is_active = false;
+            this.is_active = false;
+            this._previous_state = Mouse.GetState().LeftButton;
         }
 
         /// <summary>
@@ -56,18 +62,32 @@ namespace ATC_Game.GameObjects
         /// Create square of waypoint space for event of waypoint activation.
         /// </summary>
         /// <returns>rectangle of a waypoint space</returns>
-        private Rectangle GetWPSquare()
+        protected virtual Rectangle GetWPSquare()
         {
-            return new Rectangle((int)this._position.X - 12, (int)this._position.Y - 12, 24, 24);
+            return new Rectangle((int)this._position.X - 12 + 400, (int)this._position.Y - 12 + 50, 24, 24);
         }
 
         /// <summary>
-        /// Update state of the waypoint (Event).
+        /// Update click event state of the landing waypoint.
         /// </summary>
-        public void Update ()
+        public virtual void UpdateEvent()
         {
-            //TODO
+            if (GetWPSquare().Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed && this._previous_state == ButtonState.Released)
+                SwitchState();
+            this._previous_state = this._game.mouse.LeftButton;
         }
+
+        /// <summary>
+        /// Switch active state between true and false if you call this method.
+        /// </summary>
+        protected virtual void SwitchState()
+        {
+            if (this.is_active)
+                this.is_active = false;
+            else
+                this.is_active = true;
+        }
+
 
         /// <summary>
         /// Return position of top left corner of the texture.
@@ -84,9 +104,12 @@ namespace ATC_Game.GameObjects
         /// Draw a waypoint texture.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
-        public void Draw(SpriteBatch spriteBatch)
+        public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(this._texture, GetTexturePos(), Config.bg_color);
+            if (this.is_active)
+                spriteBatch.Draw(this._active_texture, GetTexturePos(), Config.bg_color);
+            else
+                spriteBatch.Draw(this._texture, GetTexturePos(), Config.bg_color);
         }
 
     }
