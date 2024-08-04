@@ -89,7 +89,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Draw a Button.
+        /// TexDraw a Button.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         public void Draw(SpriteBatch spriteBatch)

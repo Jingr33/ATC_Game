@@ -73,7 +73,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         }
 
         /// <summary>
-        /// Draw a arrival alert into a game map
+        /// TexDraw a arrival alert into a game map
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         public void DrawArrivalAlert(SpriteBatch spriteBatch)

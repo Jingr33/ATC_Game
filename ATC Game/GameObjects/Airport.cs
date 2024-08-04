@@ -100,7 +100,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Draw an airport texture and all subordinate objects.
+        /// TexDraw an airport texture and all subordinate objects.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         public void Draw (SpriteBatch spriteBatch)

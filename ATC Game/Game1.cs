@@ -19,7 +19,7 @@ using System.Runtime.CompilerServices;
 // tlačítka na posouvání stripeama
 // přidej zrychlování letadel pokud mají status take-off
 // limity (hranice) nastavení tech control buttonů
-// vymaz get direction z airplane, je to v general
+// vymaz get direction a get heading z airplane, je to v general
 // predelej event kliknuti na letadlo do airplanu z game
 
 namespace ATC_Game
@@ -150,8 +150,8 @@ namespace ATC_Game
         /// </summary>
         private void UpdateWaypoints()
         {
-            // waypoints
-            foreach (Waypoint wp in this.map_generator.waypoints)
+            // all_waypoints
+            foreach (Waypoint wp in this.map_generator.all_waypoints)
                 wp.UpdateEvent();
             // landing points
             foreach (LandingWaypoint lwp in this.map_generator.landpoints)
@@ -191,7 +191,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Draw main layout of a game.
+        /// TexDraw main layout of a game.
         /// </summary>
         private void DrawMainLayout()
         {
@@ -204,30 +204,21 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Draw game area content.
+        /// TexDraw game area content.
         /// </summary>
         private void DrawGameArea()
         {
             this._spriteBatch.Begin();
             this.map_generator.Draw(this._spriteBatch); // draw a game map
             foreach (Airplane airplane in this.airplanes)
-            {
-                if (airplane.is_active)
-                    airplane.ActiveDraw(_spriteBatch);
-                else if (airplane.in_margin) // if a plane is on the edge of game map
-                    airplane.MarginalDraw(this._spriteBatch);
-                else 
-                    airplane.Draw(this._spriteBatch);
-            }
+                airplane.Draw(this._spriteBatch);
             foreach (ArrivalAlert alert in this.airplane_logic.arrival_alerts)
-            {
                 alert.DrawArrivalAlert(this._spriteBatch);
-            }
             this._spriteBatch.End();
         }
 
         /// <summary>
-        /// Draw plane strips area content.
+        /// TexDraw plane strips area content.
         /// </summary>
         private void DrawPlaneStripsContent()
         {
@@ -240,7 +231,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Draw control panel area content.
+        /// TexDraw control panel area content.
         /// </summary>
         private void DrawcontrolArea()
         {

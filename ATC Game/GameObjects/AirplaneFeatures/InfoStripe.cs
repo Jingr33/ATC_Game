@@ -31,7 +31,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         }
 
         /// <summary>
-        /// Draw a info stripe for a given airplane (it depends on the is_active state).
+        /// TexDraw a info stripe for a given airplane (it depends on the is_active state).
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         /// <param name="y_pos">row (position) of a stripe in plane sptripe area</param>

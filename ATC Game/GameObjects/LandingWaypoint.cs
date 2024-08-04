@@ -77,7 +77,7 @@ namespace ATC_Game.GameObjects
                 this.is_active = true;
         }
         /// <summary>
-        /// Draw a landing waypoint.
+        /// TexDraw a landing waypoint.
         /// </summary>
         /// <param name="spriteBatch">sprite batch</param>
         public override void Draw(SpriteBatch spriteBatch)
@@ -86,7 +86,6 @@ namespace ATC_Game.GameObjects
                 spriteBatch.Draw(this._active_texture, this._draw_position, Config.bg_color);
             else
                 spriteBatch.Draw(this._texture, this._draw_position, Config.bg_color);
-            Console.WriteLine(this.is_active.ToString());
         }
     }
 }

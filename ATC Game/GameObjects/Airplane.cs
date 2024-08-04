@@ -15,6 +15,9 @@ using ATC_Game.GameObjects.AirplaneFeatures;
 using System.Reflection.Metadata.Ecma335;
 using System.Collections.Concurrent;
 using ATC_Game.Control;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using ATC_Game.Drawing;
 
 namespace ATC_Game.GameObjects
 {
@@ -37,10 +40,10 @@ namespace ATC_Game.GameObjects
         private int _site_lenght;
         public ConcurrentQueue<Vector2> trajectory { get; set; }
         public ConcurrentQueue<int> heading_queue { get; set; }
-        //private float traj_frame_time;
         public bool destroy_me;
         public float time_in_game;
         public bool is_active;
+        private bool _last_state;
 
         // FLIGHT STATS
         public string type {  get; set; }
@@ -67,6 +70,9 @@ namespace ATC_Game.GameObjects
         // autopilot
         public bool autopilot_on;
         private Autopilot _autopilot;
+        public List<Waypoint> waypoints;
+        // drawing
+        private TrajectoryDrawer _traj_drawer;
 
         public Airplane (Game1 game, int id, Vector2 center_position, int heading, OperationType oper_type, int speed, int type_number, 
                         string destination, int altitude, FlightSection flight_section, FlightStatus flight_status, Airport airport)
@@ -98,11 +104,11 @@ namespace ATC_Game.GameObjects
             this._rotation = GetRotation(this.direction);
             this.trajectory = new ConcurrentQueue<Vector2> { };
             this.heading_queue = new ConcurrentQueue<int> { };
-            //this.traj_frame_time = 0;
 
             this.destroy_me = false;
             this.time_in_game = 0;
             this.is_active = false;
+            this._last_state = false;
             // aditional alerts
             this._arrival_alert = AddArrivalAlert();
             this.info_strip = new InfoStripe(this._game, this);
@@ -114,6 +120,9 @@ namespace ATC_Game.GameObjects
             // autopilot
             this._autopilot = new Autopilot(this._game, this);
             this.autopilot_on = SetAutopilotAtSpawn();
+            this.waypoints = new List<Waypoint>();
+            // drawing
+            this._traj_drawer = new TrajectoryDrawer(this._game, this);
         }
 
         /// <summary>
@@ -122,23 +131,101 @@ namespace ATC_Game.GameObjects
         /// <param name="game_time"></param>
         public void Update (GameTime game_time)
         {
-            if (autopilot_on)
-                this._autopilot.Update(game_time);
+            UpdateAutopilot(game_time); // autopilot
 
-            if (!this.trajectory.IsEmpty)
+            if (!this.trajectory.IsEmpty) { // trajectory generation
                 SetNextPosition();
-            else
+                this.heading_enabled = false;
+            }
+            else {
                 this.center_position = NewCoordStraightOn(game_time);
+                this.heading_enabled = true;
+            }
 
             this._rotation = GetRotation(this.direction);
             this.direction = GetDirection(this.heading);
-            this._draw_position = this.center_position; // GetTexturePosition(this.center_position, this._texture);
+            this._draw_position = this.center_position;
             this.delayer.UpdateReaction(game_time);
             SaveLastPositions();
 
             this.time_in_game += (float)game_time.ElapsedGameTime.TotalSeconds;
             this.IsMissedAirplane();
             this.in_margin = IsInMargin();
+            UpdateWaypoints();
+            this._last_state = this.is_active;
+        }
+
+        private void UpdateWaypoints ()
+        {
+            WaypointReached();
+            if (this.is_active)
+            {
+                SetAirplaneWPs(); // if the aircraft has just been activated
+                DeactiveAirplaneWps(); // if the airplane has just been deactivated
+                // add new waypoint
+                foreach (Waypoint wp in this._game.map_generator.GetActiveWaypoints())
+                    if (!this.waypoints.Contains(wp)) 
+                        this.waypoints.Add(wp);
+                // remove deactivated all_waypoints
+                for (int i = 0; i < this.waypoints.Count; i++)
+                    if (!this.waypoints[i].is_active)
+                        this.waypoints.Remove(this.waypoints[i]); return;
+            }
+        }
+
+        /// <summary>
+        /// Remove waypoint from flight plan (waypoint list) if the waypoint position was reached.
+        /// </summary>
+        private void WaypointReached ()
+        {
+            for (int i = 0; i < this.waypoints.Count; i++)
+            {
+                if (General.ObjectReachedPoint(this.center_position, this.waypoints[i].position))
+                {
+                    this.waypoints[i].is_active = false;
+                    this.waypoints.Remove(this.waypoints[i]);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set an airplane all_waypoints to asctual state, if the plane was activated.
+        /// </summary>
+        private void SetAirplaneWPs ()
+        {
+            if (this.is_active && !this._last_state)
+            {
+                this._game.map_generator.DeactiveAllWaypoints();
+                foreach (Waypoint wp in this.waypoints)
+                    wp.is_active = true;
+            }
+        }
+
+        /// <summary>
+        /// Deactivate all airplane all_waypoints if the plane has been just deactivated.
+        /// </summary>
+        private void DeactiveAirplaneWps ()
+        {
+            if (!this.is_active && this._last_state)
+                this._game.map_generator.DeactiveAllWaypoints();
+        }
+
+        /// <summary>
+        /// Update autopilot state this.autopilot_on in every moment.
+        /// </summary>
+        private void UpdateAutopilot(GameTime game_time)
+        {
+            if (this.autopilot_on) // autopilot for completly autopiloted functions
+                this._autopilot.Update(game_time);
+
+            if (this.waypoints.Count > 0 && !autopilot_on) // autopilot for heading piloted functions
+            {
+                this.autopilot_on = true;
+                this._autopilot.ToWaypoint();
+            }
+            else if (this.trajectory.IsEmpty && this.autopilot_on && this._autopilot.operation == AutopilotOperation.Unknown)
+                this.autopilot_on = false;
         }
 
         /// <summary>
@@ -146,9 +233,6 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void SetNextPosition ()
         {
-            //this.traj_frame_time += (float)game_time.ElapsedGameTime.TotalSeconds;
-            //if (this.traj_frame_time < 0.025) return;
-
             for (int i = 0; i < this.speed; i++)
             {
                 if (this.trajectory.TryDequeue(out Vector2 next_pos)
@@ -222,19 +306,34 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Draw object into the game canvas.
+        /// Draw all airplanes textures.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch _spriteBatch)
+        {
+            if (this.is_active)
+                this.ActiveDraw(_spriteBatch);
+            else if (this.in_margin) // if a plane is on the edge of game map
+                this.MarginalDraw(_spriteBatch);
+            else
+                this.TexDraw(_spriteBatch);
+
+        }
+
+        /// <summary>
+        /// TexDraw object into the game canvas.
+        /// </summary>
+        /// <param name="spriteBatch">spritebatch</param>
+        private void TexDraw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(this._texture, this._draw_position, null, Config.bg_color, this._rotation, this._rotation_center, 1.0f, SpriteEffects.None, 0f);
         }
 
         /// <summary>
-        /// Draw active airplane into a canvas
+        /// TexDraw active airplane into a canvas
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
-        public void ActiveDraw(SpriteBatch spriteBatch)
+        private void ActiveDraw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(this._active_texture, this._draw_position, null, Config.bg_color, this._rotation, this._rotation_center, 1.0f, SpriteEffects.None, 0f);
         }
@@ -243,9 +342,14 @@ namespace ATC_Game.GameObjects
         /// Mthod from draw a plane object if its position is on the edge of game map.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
-        public void MarginalDraw(SpriteBatch spriteBatch)
+        private void MarginalDraw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(this._marginal_texture, this._draw_position, null, Config.bg_color, this._rotation, this._rotation_center, 1.0f, SpriteEffects.None, 0f);
+        }
+
+        private void DrawTrajectory ()
+        {
+            foreach ()
         }
 
         /// <summary>

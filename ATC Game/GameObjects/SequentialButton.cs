@@ -172,7 +172,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Draw a Squential Button.
+        /// TexDraw a Squential Button.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         public void Draw (SpriteBatch spriteBatch)
@@ -184,7 +184,7 @@ namespace ATC_Game.GameObjects
             spriteBatch.DrawString(this._font, "+", new Vector2(this._position.X + this._width - 27, this._position.Y - 5), Color.Gray, 0, Vector2.Zero, 3f, SpriteEffects.None, 0);
         }
         /// <summary>
-        /// Draw a Sequential button depending on an enabled or disabled state.
+        /// TexDraw a Sequential button depending on an enabled or disabled state.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         /// <param name="enabled">true, if it enabled</param>

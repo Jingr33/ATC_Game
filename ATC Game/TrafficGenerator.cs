@@ -64,6 +64,7 @@ namespace ATC_Game
         public List<Airplane> AddNewAirplane(Game1 game, List<Airplane> existing_airplanes)
         {
             int arr_dep = this._random.Next(2);
+            arr_dep = 1;
             if (arr_dep == 1)
                 AddArrivalAirplane(game, existing_airplanes);
             else

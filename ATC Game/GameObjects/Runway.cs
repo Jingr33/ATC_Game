@@ -138,7 +138,7 @@ namespace ATC_Game.GameObjects
             for (int i = 0; i < this._light_pos.Length; i++)
             {
                 this._light_pos[i] = General.NextFramePosInHeading(game_time, this._light_pos[i], this.direction, Config.land_lights_speed);
-                if (General.IsObejctOverIt(this._light_pos[i], this._land_lights_end_pos, this.direction))
+                if (General.ObjectReachedPoint(this._light_pos[i], this._land_lights_end_pos))
                     this._light_pos[i] = this._land_lights_start_pos;
             }
         }
@@ -153,7 +153,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Draw runway texture.
+        /// TexDraw runway texture.
         /// </summary>
         /// <param name="sprite_batch">sprite batch</param>
         public void Draw (SpriteBatch sprite_batch)
@@ -162,7 +162,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Draw actual state of rwy lights.
+        /// TexDraw actual state of rwy lights.
         /// </summary>
         /// <param name="sprite_batch">sprite batch</param>
         public void DrawLights (SpriteBatch sprite_batch)

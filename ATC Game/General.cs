@@ -44,6 +44,20 @@ namespace ATC_Game
         }
 
         /// <summary>
+        /// Get a direciton of flight (heading) in degree.
+        /// </summary>
+        /// <param name="direction">direction of flight in vector</param>
+        /// <returns>heading in degree</returns>
+        public static int GetHeading(Vector2 direction)
+        {
+            int heading = (int)(Math.Atan2(direction.Y, direction.X) / Math.PI * 180 + 90);
+            if (heading >= 0)
+                return heading;
+            return heading + 360;
+        }
+
+
+        /// <summary>
         /// Set next point in specified direction in specified distance from original point.
         /// </summary>
         /// <param name="position">original point position</param>
@@ -87,17 +101,17 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Check if some obejct (center) position is in overtake some position in the game map.
+        /// Check if some obejct (center) position reached some position in the game map.
         /// </summary>
-        /// <param name="object_pos">a moving object position</param>
-        /// <param name="reference_pos">a reference position for check</param>
-        /// <param name="direction">direction of straight move of an object</param>
+        /// <param name="obj_pos">a moving object position</param>
+        /// <param name="ref_pos">a reference position for check</param>
+        /// <param name="circle_dist">direction of straight move of an object</param>
         /// <returns></returns>
-        public static bool IsObejctOverIt (Vector2 object_pos, Vector2 reference_pos, Vector2 direction)
+        public static bool ObjectReachedPoint (Vector2 obj_pos, Vector2 ref_pos, int circle_dist = 10)
         {
-            bool x_cond = (object_pos.X - reference_pos.X) * direction.X >= 0;
-            bool y_cond = (object_pos.Y - reference_pos.Y) * direction.Y >= 0;
-            if (x_cond && y_cond) return true;
+            bool cond = Math.Pow(obj_pos.X - ref_pos.X, 2) + Math.Pow(obj_pos.Y - ref_pos.Y, 2) <= circle_dist * circle_dist;
+            if (cond)
+                return true;
             return false;
         }
 

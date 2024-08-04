@@ -18,7 +18,7 @@ namespace ATC_Game.GameObjects
         private Game1 _game;
         private Texture2D _texture;
         private Texture2D _active_texture;
-        private Vector2 _position;
+        public Vector2 position;
         private string _name;
         private bool _is_active;
         // state (active/deactive)
@@ -27,12 +27,12 @@ namespace ATC_Game.GameObjects
 
 
         /// <summary>
-        /// Class for waypoints.
+        /// Class for all_waypoints.
         /// </summary>
         public Waypoint(Game1 game, Vector2 position, string name)
         {
             this._game = game;
-            this._position = position;
+            this.position = position;
             this._name = name;
             this._texture = GetTexture();
             this._active_texture = GetActiveTexture();
@@ -64,7 +64,7 @@ namespace ATC_Game.GameObjects
         /// <returns>rectangle of a waypoint space</returns>
         protected virtual Rectangle GetWPSquare()
         {
-            return new Rectangle((int)this._position.X - 12 + 400, (int)this._position.Y - 12 + 50, 24, 24);
+            return new Rectangle((int)this.position.X - 12 + 400, (int)this.position.Y - 12 + 50, 24, 24);
         }
 
         /// <summary>
@@ -95,13 +95,13 @@ namespace ATC_Game.GameObjects
         /// <returns></returns>
         private Vector2 GetTexturePos ()
         {
-            float x_pos = this._position.X - this._texture.Width / 2;
-            float y_pos = this._position.Y - this._texture.Height / 2;
+            float x_pos = this.position.X - this._texture.Width / 2;
+            float y_pos = this.position.Y - this._texture.Height / 2;
             return new Vector2(x_pos, y_pos);
         }
 
         /// <summary>
-        /// Draw a waypoint texture.
+        /// TexDraw a waypoint texture.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         public virtual void Draw(SpriteBatch spriteBatch)

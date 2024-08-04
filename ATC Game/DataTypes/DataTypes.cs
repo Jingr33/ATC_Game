@@ -60,4 +60,5 @@ public enum AutopilotOperation
     Landing,
     LeftTurn,
     RightTurn,
+    ToWaypoint,
 }

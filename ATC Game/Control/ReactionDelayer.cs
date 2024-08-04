@@ -25,7 +25,7 @@ namespace ATC_Game.Control
         // heading
         public int desired_heading;
         private int _setted_heading;
-        HeadingEqualizer _heading_equal;
+        public HeadingEqualizer heading_equal;
         // mouse
         private MouseState mouse;
 
@@ -36,7 +36,7 @@ namespace ATC_Game.Control
             SetActualFlightState();
             _speed_equal = new SpeedEqualizer(_airplane);
             _alt_equal = new AltitudeEqualizer(_airplane);
-            _heading_equal = new HeadingEqualizer(_airplane);
+            heading_equal = new HeadingEqualizer(_airplane);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace ATC_Game.Control
             if (this.desired_heading != this._setted_heading && mouse.LeftButton == ButtonState.Released)
             {
                 this._airplane.heading_enabled = false;
-                this._heading_equal.Equalize(desired_heading, game_time);
+                this.heading_equal.Equalize(desired_heading, game_time);
                 this._setted_heading = desired_heading;
             }
             // enabled controler of heading if the heading is already equalized

@@ -35,17 +35,26 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
+        /// Update methid for autopilot.
+        /// </summary>
+        /// <param name="game_time">game time</param>
+        public void Update(GameTime game_time)
+        {
+            StartAutopilot(game_time);
+        }
+
+        /// <summary>
         /// Call right autopilot function depending on the operation.
         /// </summary>
         /// <param name="game_time">game _time</param>
-        public void Update(GameTime game_time)
+        private void StartAutopilot (GameTime game_time)
         {
-            switch(this.operation)
+            switch (this.operation)
             {
                 case AutopilotOperation.TakeOff:
                     TakeOff(game_time);
                     break;
-                default: 
+                default:
                     break;
             }
         }
@@ -68,14 +77,44 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Switch of the autopilot, enable manual control of the plane.
+        /// Start autopilot control for toWaypoint operation. Create trajectory of flight to elected waypoint. 
         /// </summary>
-        private void SwitchAPOff()
+        public void ToWaypoint ()
+        {
+            FlyAwayFromWPArea();
+            this._airplane.delayer.heading_equal.GenToWPTrajectory(this._airplane.waypoints[0]);
+            SwitchAPOff(false);
+        }
+
+        /// <summary>
+        /// If the airplane position is in the neighborhood of waypoint. It fly away from this zone.
+        /// </summary>
+        /// <param name="destination_wp">waypoint object of flight destination</param>
+        private void FlyAwayFromWPArea ()
+        {
+            int neighborhood = 80;
+            Waypoint dest_wp = this._airplane.waypoints[0];
+            if (General.ObjectReachedPoint(this._airplane.center_position, dest_wp.position, neighborhood))
+            {
+                // create auxiliary point for exit the waypoint neighborhood
+                Vector2 pos = new Vector2(this._airplane.center_position.X + this._airplane.direction.X*neighborhood, 
+                                          this._airplane.center_position.Y + this._airplane.direction.Y*neighborhood);
+                Waypoint aux_wp = new Waypoint(this._game, pos, "");
+                this._airplane.waypoints.Insert(0, aux_wp);
+            }
+        }
+
+        /// <summary>
+        /// Switch of the autopilot, enable manual control of the plane.
+        /// <param name="switch_off">If it is true, set airplane attribute autopilot_on to false.</param>
+        /// </summary>
+        private void SwitchAPOff(bool switch_off = true)
         {
             this._time = 0;
             this.operation = AutopilotOperation.Unknown;
             this._airplane.delayer.SetActualFlightState();
-            this._airplane.autopilot_on = false;
+            if (switch_off)
+                this._airplane.autopilot_on = false;
         }
     }
 }

@@ -78,7 +78,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Draw all elements in control panel.
+        /// TexDraw all elements in control panel.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         public void Draw(SpriteBatch spriteBatch)

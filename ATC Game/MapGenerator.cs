@@ -12,7 +12,7 @@ using System.Numerics;
 namespace ATC_Game
 {
     /// <summary>
-    /// Class for generation static object (airports and their runways, waypoints, ...) and all game map items.
+    /// Class for generation static object (airports and their runways, all_waypoints, ...) and all game map items.
     /// </summary>
     public class MapGenerator
     {
@@ -24,7 +24,7 @@ namespace ATC_Game
 
         //MAP ITEMS
         public List<Airport> airports;
-        public List<Waypoint> waypoints;
+        public List<Waypoint> all_waypoints;
         public List<LandingWaypoint> landpoints;
 
         public MapGenerator(Game1 game, Maps map)
@@ -32,7 +32,7 @@ namespace ATC_Game
             this._game = game;
             this._map = map;
             this.airports = new List<Airport>();
-            this.waypoints = new List<Waypoint>();
+            this.all_waypoints = new List<Waypoint>();
             this.landpoints = new List<LandingWaypoint>();
             Init();
         }
@@ -75,7 +75,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Load all waypoints of the map. Create their instances.
+        /// Load all all_waypoints of the map. Create their instances.
         /// </summary>
         private void LoadWaypoints ()
         {
@@ -86,7 +86,7 @@ namespace ATC_Game
                 {
                     string[] data_wp = one_wp.Split(';');
                     Waypoint waypoint = new Waypoint(this._game, General.FileDataToVector2(data_wp[0]), data_wp[1]);
-                    this.waypoints.Add(waypoint);
+                    this.all_waypoints.Add(waypoint);
                 }
             }
         }
@@ -103,14 +103,36 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Draw map objects.
+        /// Deactivate all all_waypoints in the game map.
+        /// </summary>
+        public void DeactiveAllWaypoints ()
+        {
+            foreach (Waypoint wp in this.all_waypoints)
+                wp.is_active = false;
+        }
+
+        /// <summary>
+        /// Return all active all_waypoints right now.
+        /// </summary>
+        /// <returns>list of active all_waypoints</returns>
+        public List<Waypoint> GetActiveWaypoints()
+        {
+            List<Waypoint> list = new List<Waypoint>();
+            foreach (Waypoint wp in this.all_waypoints)
+                if (wp.is_active)
+                    list.Add(wp);
+            return list;
+        }
+
+        /// <summary>
+        /// TexDraw map objects.
         /// </summary>
         /// <param name="spriteBatch"></param>
         public void Draw (SpriteBatch spriteBatch)
         {
             foreach (Airport airport in this.airports)
                 airport.Draw(spriteBatch);
-            foreach (Waypoint wp in this.waypoints)
+            foreach (Waypoint wp in this.all_waypoints)
                 wp.Draw(spriteBatch);
             foreach(LandingWaypoint lwp in this.landpoints)
                 lwp.Draw(spriteBatch);
