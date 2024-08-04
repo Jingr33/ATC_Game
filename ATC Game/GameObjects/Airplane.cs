@@ -317,7 +317,7 @@ namespace ATC_Game.GameObjects
                 this.MarginalDraw(_spriteBatch);
             else
                 this.TexDraw(_spriteBatch);
-
+            DrawTrajectory(_spriteBatch);
         }
 
         /// <summary>
@@ -347,9 +347,10 @@ namespace ATC_Game.GameObjects
             spriteBatch.Draw(this._marginal_texture, this._draw_position, null, Config.bg_color, this._rotation, this._rotation_center, 1.0f, SpriteEffects.None, 0f);
         }
 
-        private void DrawTrajectory ()
+        private void DrawTrajectory (SpriteBatch spriteBatch)
         {
-            foreach ()
+            if (!this.trajectory.IsEmpty)
+                this._traj_drawer.Draw(spriteBatch, this.trajectory);
         }
 
         /// <summary>

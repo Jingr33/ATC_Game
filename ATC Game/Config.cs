@@ -46,6 +46,9 @@ namespace ATC_Game
 
         //COLORS
         public static Color bg_color = Color.Snow; // background color
+        public static Color traj_color = Color.LightBlue; // color of a trajectory
+
+        // CONTROLS
         public static int min_control_speed = 8; // minimum adjustable speed of an airplane in knots
         public static int max_control_speed = 100; // maximum adjustable speed of an airplane in knots
         public static int min_control_alt = 2000; // minimum adjustable altitude of an airplane in feet
