@@ -11,16 +11,16 @@ using System.Runtime.CompilerServices;
 
 // TODO:
 // přide body vstupů, ke kterým to letí
-// dodělej info strips
 // generování dsestinací udělej tak aby přiletaly ze stran ze kterých to dává smysl (pokud bude letiště reálné)
-// predelej speed na ground speed at to neukazuje nereálné čísla
-// přidat funkce pro _time section
+// stripy nemaji klikací eventy
+// predelej na ground speed at to neukazuje nereálné čísla
 // udělej stripes jako scrollable panel
 // tlačítka na posouvání stripeama
-// přidej zrychlování letadel pokud mají status take-off
-// limity (hranice) nastavení tech control buttonů
 // vymaz get direction a get heading z airplane, je to v general
 // predelej event kliknuti na letadlo do airplanu z game
+// pri ceste na lwp se na konci nezmeni heading v control panelu
+// zase nefunguje prepinani mezi letadlama ... mizi wp
+
 
 namespace ATC_Game
 {
@@ -152,12 +152,10 @@ namespace ATC_Game
         {
             // all_waypoints
             foreach (Waypoint wp in this.map_generator.all_waypoints)
-                wp.UpdateEvent();
+                wp.UpdateState();
             // landing points
-            foreach (LandingWaypoint lwp in this.map_generator.landpoints)
-            {
-                lwp.UpdateEvent();
-            }
+            foreach (LandingWaypoint lwp in this.map_generator.all_landpoints)
+                lwp.UpdateState();
         }
 
         /// <summary>
@@ -186,6 +184,14 @@ namespace ATC_Game
 
             GraphicsDevice.SetRenderTarget(null);
             DrawMainLayout();
+
+            this._spriteBatch.Begin();
+
+            foreach (Airplane airplane in this.airplanes)
+            {
+                airplane.delayer.heading_equal.Draw(this._spriteBatch);
+            }
+            this._spriteBatch.End();
 
             base.Draw(gameTime);
         }

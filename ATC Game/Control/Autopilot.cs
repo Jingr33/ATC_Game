@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -81,8 +82,28 @@ namespace ATC_Game.Control
         /// </summary>
         public void ToWaypoint ()
         {
-            FlyAwayFromWPArea();
+            this.operation = AutopilotOperation.ToWaypoint;
+            FlyAwayFromWPArea(this._airplane.waypoints[0].position);
             this._airplane.delayer.heading_equal.GenToWPTrajectory(this._airplane.waypoints[0]);
+            SwitchAPOff(false);
+        }
+
+        /// <summary>
+        /// Start autopilot heading control for ToLandpoint operation. Create trajectory of a flight to a landpoint for elected runway
+        /// and prepare heading a position of a plane for landing.
+        /// </summary>
+        public void ToLandpoint()
+        {
+            this.operation = AutopilotOperation.ToWaypoint;
+            //FlyAwayFromWPArea(this._airplane.landpoint.position, 110);
+            if (!General.ObjectReachedPoint(this._airplane.center_position, this._airplane.landpoint.position, 110))
+                this._airplane.delayer.heading_equal.GetToLWPTrajectory(this._airplane.landpoint);
+            else
+            {
+                this._airplane.landpoint.is_active = false;
+                this._airplane.landpoint = null;
+                Console.WriteLine("Landing Point nebyl přiřazen.");
+            }
             SwitchAPOff(false);
         }
 
@@ -90,11 +111,9 @@ namespace ATC_Game.Control
         /// If the airplane position is in the neighborhood of waypoint. It fly away from this zone.
         /// </summary>
         /// <param name="destination_wp">waypoint object of flight destination</param>
-        private void FlyAwayFromWPArea ()
+        private void FlyAwayFromWPArea (Vector2 wp_dest, int neighborhood = 80)
         {
-            int neighborhood = 80;
-            Waypoint dest_wp = this._airplane.waypoints[0];
-            if (General.ObjectReachedPoint(this._airplane.center_position, dest_wp.position, neighborhood))
+            if (General.ObjectReachedPoint(this._airplane.center_position, wp_dest, neighborhood))
             {
                 // create auxiliary point for exit the waypoint neighborhood
                 Vector2 pos = new Vector2(this._airplane.center_position.X + this._airplane.direction.X*neighborhood, 
@@ -102,6 +121,11 @@ namespace ATC_Game.Control
                 Waypoint aux_wp = new Waypoint(this._game, pos, "");
                 this._airplane.waypoints.Insert(0, aux_wp);
             }
+        }
+
+        private void Landing ()
+        {
+
         }
 
         /// <summary>

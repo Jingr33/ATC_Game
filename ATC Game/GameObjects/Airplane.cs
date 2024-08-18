@@ -27,7 +27,7 @@ namespace ATC_Game.GameObjects
     public class Airplane : GameObject
     {
         public int id;
-        private Game1 _game;
+        public Game1 _game; // TODO: dej na private
         private int _type_num;
         private Texture2D _texture;
         private Texture2D _marginal_texture;
@@ -71,6 +71,7 @@ namespace ATC_Game.GameObjects
         public bool autopilot_on;
         private Autopilot _autopilot;
         public List<Waypoint> waypoints;
+        public LandingWaypoint landpoint;
         // drawing
         private TrajectoryDrawer _traj_drawer;
 
@@ -121,6 +122,7 @@ namespace ATC_Game.GameObjects
             this._autopilot = new Autopilot(this._game, this);
             this.autopilot_on = SetAutopilotAtSpawn();
             this.waypoints = new List<Waypoint>();
+            this.landpoint = null;
             // drawing
             this._traj_drawer = new TrajectoryDrawer(this._game, this);
         }
@@ -152,16 +154,20 @@ namespace ATC_Game.GameObjects
             this.IsMissedAirplane();
             this.in_margin = IsInMargin();
             UpdateWaypoints();
+            UpdateLandpoint();
             this._last_state = this.is_active;
         }
 
+        /// <summary>
+        /// It updates active states of waypoints setted for this airplane.
+        /// </summary>
         private void UpdateWaypoints ()
         {
             WaypointReached();
+            DeactiveAirplaneWPs(); // if the airplane has just been deactivated
             if (this.is_active)
             {
                 SetAirplaneWPs(); // if the aircraft has just been activated
-                DeactiveAirplaneWps(); // if the airplane has just been deactivated
                 // add new waypoint
                 foreach (Waypoint wp in this._game.map_generator.GetActiveWaypoints())
                     if (!this.waypoints.Contains(wp)) 
@@ -178,19 +184,55 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void WaypointReached ()
         {
-            for (int i = 0; i < this.waypoints.Count; i++)
+            //for (int i = 0; i < this.waypoints.Count; i++)
+            //{
+            if (this.waypoints.Count > 0)
             {
-                if (General.ObjectReachedPoint(this.center_position, this.waypoints[i].position))
+                if (General.ObjectReachedPoint(this.center_position, this.waypoints[0].position, 5))
                 {
-                    this.waypoints[i].is_active = false;
-                    this.waypoints.Remove(this.waypoints[i]);
-                    break;
+                    this.waypoints[0].is_active = false;
+                    this.waypoints.Remove(this.waypoints[0]);
+                    //break;
                 }
+            }
+            //}
+        }
+
+        /// <summary>
+        /// Remove landing waypoint from flight plan if the landing waypoint position was rached.
+        /// </summary>
+        private void UpdateLandpoint ()
+        {
+            LandpointReached();
+            DeactiveAirplaneLWPs();
+            if (this.is_active)
+            {
+                SetAirplaneLWPs();
+                // add landing waypoint
+                foreach (LandingWaypoint lwp in this._game.map_generator.all_landpoints)
+                    if (lwp != this.landpoint && lwp.is_active)
+                        this.landpoint = lwp;
+                // remove landing waypoint
+                if (this.landpoint != null && !this.landpoint.is_active)
+                    this.landpoint = null;
             }
         }
 
         /// <summary>
-        /// Set an airplane all_waypoints to asctual state, if the plane was activated.
+        /// It updates active states of landing waypoint setted for this airplane.
+        /// </summary>
+        private void LandpointReached ()
+        {
+            if (this.landpoint == null) return;
+            if (General.ObjectReachedPoint(this.center_position, this.landpoint.position, 2))
+            {
+                this.landpoint.is_active = false;
+                this.landpoint = null;
+            }
+        }
+
+        /// <summary>
+        /// Set an airplane waypoints to actual state, if the plane was activated.
         /// </summary>
         private void SetAirplaneWPs ()
         {
@@ -203,12 +245,34 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Deactivate all airplane all_waypoints if the plane has been just deactivated.
+        /// Set an airplane landing waypoint to active state if the landpoint is assigned when the airplane is activated.
         /// </summary>
-        private void DeactiveAirplaneWps ()
+        private void SetAirplaneLWPs()
+        {
+            if (this.is_active && !this._last_state)
+            {
+                this._game.map_generator.DeactiveAllLandpoints();
+                if (this.landpoint != null)
+                    this.landpoint.is_active = true;
+            }
+        }
+
+        /// <summary>
+        /// Deactivate all airplane waypoints if the plane has been just deactivated.
+        /// </summary>
+        private void DeactiveAirplaneWPs ()
         {
             if (!this.is_active && this._last_state)
                 this._game.map_generator.DeactiveAllWaypoints();
+        }
+
+        /// <summary>
+        /// Deactive all landing waypoints if the plane has been just deactivated.
+        /// </summary>
+        private void DeactiveAirplaneLWPs ()
+        {
+            if (!this.is_active && this._last_state && this.landpoint != null)
+                this.landpoint.is_active = false;
         }
 
         /// <summary>
@@ -222,10 +286,26 @@ namespace ATC_Game.GameObjects
             if (this.waypoints.Count > 0 && !autopilot_on) // autopilot for heading piloted functions
             {
                 this.autopilot_on = true;
+                vypiswp();
                 this._autopilot.ToWaypoint();
             }
-            else if (this.trajectory.IsEmpty && this.autopilot_on && this._autopilot.operation == AutopilotOperation.Unknown)
+            else if (this.landpoint != null && !autopilot_on)
+            {
+                this.autopilot_on = true;
+                this._autopilot.ToLandpoint();
+            }
+            else if (this.trajectory.IsEmpty && this.autopilot_on && this._autopilot.operation == AutopilotOperation.Unknown && this.landpoint == null)
                 this.autopilot_on = false;
+        }
+
+        private void vypiswp ()
+        {
+            int pocet = 0;
+            foreach(Waypoint waypoint in this.waypoints)
+            {
+                pocet++;
+                Console.WriteLine(pocet + ": " + waypoint.position.ToString());
+            }
         }
 
         /// <summary>

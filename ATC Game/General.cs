@@ -33,14 +33,15 @@ namespace ATC_Game
         /// </summary>
         /// <param name="heading">heading of the airplane (0-360)</param>
         /// <returns>normal vector direction</returns>
-        public static Vector2 GetDirection(int heading)
+        public static Vector2 GetDirection(float heading)
         {
             heading -= 90;
             if (heading < 0)
                 heading += 360;
             double x = Math.Cos(heading * Math.PI / 180);
             double y = Math.Sin(heading * Math.PI / 180);
-            return new Vector2((float)x, (float)y);
+            Vector2 direction = new Vector2((float)x, (float)y);
+            return Vector2.Normalize(direction);
         }
 
         /// <summary>
@@ -101,6 +102,30 @@ namespace ATC_Game
         }
 
         /// <summary>
+        /// Check if the heading value is between 0 and 360, return modied value if it is necessary.
+        /// </summary>
+        /// <param name="heading">heading value for check</param>
+        /// <returns>check resp. modified heading value</returns>
+        public static float HeadingBordersCheck(float heading)
+        {
+            if (heading >= 0 && heading < 360) return heading;
+            else if (heading < 0) return heading + 360;
+            else return heading - 360;
+        }
+
+        /// <summary>
+        /// Get a heading of straight flight from actual position to the waypoint position.
+        /// </summary>
+        /// <param name="actual_pos">actual position of an object</param>
+        /// <param name="wp_pos">a position of the waypoint</param>
+        /// <returns>heading to the waypoint</returns>
+        public static float HeadingToWaypoint (Vector2 actual_pos, Vector2 wp_pos)
+        {
+            Vector2 direction = Vector2.Normalize(wp_pos - actual_pos); // normal vector with direction of the flight
+            return GetHeading(direction);
+        }
+
+        /// <summary>
         /// Check if some obejct (center) position reached some position in the game map.
         /// </summary>
         /// <param name="obj_pos">a moving object position</param>
@@ -137,6 +162,30 @@ namespace ATC_Game
             for (int i = 0; i < center_pos.Length; i++)
                 draw_pos[i] = new Vector2(center_pos[i].X - texture.Width / 2, center_pos[i].Y - texture.Height / 2);
             return draw_pos;
+        }
+
+        /// <summary>
+        /// It calculate a guideline of line in some direction.
+        /// </summary>
+        /// <param name="heading">heading of direction</param>
+        /// <returns>guideline value</returns>
+        public static float GetGuideline (float heading)
+        {
+            float degree = HeadingBordersCheck(heading + 90);
+            return (float)Math.Tan(MathHelper.ToRadians(degree)); // ??? heading to stupne
+        }
+
+        /// <summary>
+        /// Calculate distance between point and line.
+        /// </summary>
+        /// <param name="point">point coordinates</param>
+        /// <param name="line_a">a parameter of line</param>
+        /// <param name="line_b">b parameter of line</param>
+        /// <param name="line_c">c parameter of line</param>
+        /// <returns>distance between line and point</returns>
+        public static double PointAndLineDist (Vector2 point, float line_a, float line_b, float line_c)
+        {
+            return Math.Abs(line_a*point.X + line_b*point.Y + line_c) / Math.Sqrt(Math.Pow(line_a, 2) + Math.Pow(line_b, 2));
         }
     }
 }

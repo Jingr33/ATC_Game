@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Numerics;
+using System.Net;
 
 namespace ATC_Game
 {
@@ -25,7 +26,7 @@ namespace ATC_Game
         //MAP ITEMS
         public List<Airport> airports;
         public List<Waypoint> all_waypoints;
-        public List<LandingWaypoint> landpoints;
+        public List<LandingWaypoint> all_landpoints;
 
         public MapGenerator(Game1 game, Maps map)
         {
@@ -33,7 +34,7 @@ namespace ATC_Game
             this._map = map;
             this.airports = new List<Airport>();
             this.all_waypoints = new List<Waypoint>();
-            this.landpoints = new List<LandingWaypoint>();
+            this.all_landpoints = new List<LandingWaypoint>();
             Init();
         }
 
@@ -99,16 +100,25 @@ namespace ATC_Game
         {
             foreach (Airport airport in this.airports)
                 foreach (Runway rwy in airport.runways)
-                    this.landpoints.Add(rwy.land_waypoint);
+                    this.all_landpoints.Add(rwy.land_waypoint);
         }
 
         /// <summary>
-        /// Deactivate all all_waypoints in the game map.
+        /// Deactivate all waypoints in the game map.
         /// </summary>
         public void DeactiveAllWaypoints ()
         {
             foreach (Waypoint wp in this.all_waypoints)
                 wp.is_active = false;
+        }
+
+        /// <summary>
+        /// Deactivate all waypoints in the game map.
+        /// </summary>
+        public void DeactiveAllLandpoints ()
+        {
+            foreach (LandingWaypoint lwp in this.all_landpoints)
+                lwp.is_active = false;
         }
 
         /// <summary>
@@ -134,7 +144,7 @@ namespace ATC_Game
                 airport.Draw(spriteBatch);
             foreach (Waypoint wp in this.all_waypoints)
                 wp.Draw(spriteBatch);
-            foreach(LandingWaypoint lwp in this.landpoints)
+            foreach(LandingWaypoint lwp in this.all_landpoints)
                 lwp.Draw(spriteBatch);
         }
     }

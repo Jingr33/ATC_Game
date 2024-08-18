@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Media;
 
 
 
@@ -22,14 +23,14 @@ namespace ATC_Game.GameObjects
     public class LandingWaypoint : Waypoint
     {
         private Game1 _game;
-        private Vector2 _position;
+        public Vector2 position;
         private Vector2 _draw_position;
         private Texture2D _texture;
         private Texture2D _active_texture;
         private string _name;
-        private Runway _runway;
+        public Runway runway;
         private int _heading;
-        // state (active/deactive)
+        public Vector2[] turn_center_pos;
         public bool is_active;
         private ButtonState _previous_state;
 
@@ -37,13 +38,14 @@ namespace ATC_Game.GameObjects
             : base(game, position, name)
         {
             this._game = game;
-            this._position = position;
+            this.position = position;
             this._name = name;
             this._texture = GetTexture();
             this._active_texture = GetActiveTexture();
-            this._draw_position = General.GetDrawPosition(this._position, this._texture);
-            this._runway = runway;
+            this._draw_position = General.GetDrawPosition(this.position, this._texture);
+            this.runway = runway;
             this._heading = runway.heading;
+            this.turn_center_pos = new Vector2[2];
             this.is_active = false;
             this._previous_state = Mouse.GetState().LeftButton;
         }
@@ -64,6 +66,19 @@ namespace ATC_Game.GameObjects
         private Texture2D GetActiveTexture()
         {
             return this._game.Content.Load<Texture2D>("landing_waypoint_active");
+        }
+
+        /// <summary>
+        /// It sets the final turn center points of the landing waypoint on both sides of the lwp.
+        /// </summary>
+        /// <param name="turn_radius">radius of the final turn</param>
+        public void SetTurnCenterPositions(float turn_radius)
+        {
+            Vector2 rwy_direciton = General.GetDirection(this.runway.heading);
+            Vector2 direction0 = new Vector2(-rwy_direciton.Y, rwy_direciton.X);
+            Vector2 direction1 = new Vector2(rwy_direciton.Y, -rwy_direciton.X);
+            this.turn_center_pos[0] = new Vector2(this.position.X + turn_radius * direction0.X, this.position.Y + turn_radius * direction0.Y);
+            this.turn_center_pos[1] = new Vector2(this.position.X + turn_radius * direction1.X, this.position.Y + turn_radius * direction1.Y);
         }
         
         /// <summary>

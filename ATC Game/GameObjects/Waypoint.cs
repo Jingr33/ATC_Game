@@ -70,7 +70,7 @@ namespace ATC_Game.GameObjects
         /// <summary>
         /// Update click event state of the landing waypoint.
         /// </summary>
-        public virtual void UpdateEvent()
+        public virtual void UpdateState()
         {
             if (GetWPSquare().Contains(this._game.mouse.Position) && this._game.mouse.LeftButton == ButtonState.Pressed && this._previous_state == ButtonState.Released)
                 SwitchState();
