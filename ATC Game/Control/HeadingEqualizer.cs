@@ -25,6 +25,7 @@ namespace ATC_Game.Control
         private float _actual_heading;
         private float _actual_x_pos;
         private float _actual_y_pos;
+        private float _time;
 
         public List<Texture2D> texture;
         public List<Vector2> posit;
@@ -36,6 +37,7 @@ namespace ATC_Game.Control
             _actual_heading = _airplane.heading;
             _actual_x_pos = _airplane.center_position.X;
             _actual_y_pos = _airplane.center_position.Y;
+            this._time = 0;
 
             this.texture = new List<Texture2D>();
             this.posit = new List<Vector2>();
@@ -46,7 +48,7 @@ namespace ATC_Game.Control
         /// </summary>
         /// <param name="desire_heading">desired actual_head for straight flight of the airpolane to the destination wyapoint.</param>
         /// <param name="game_time"> game time</param>
-        public void Equalize(int desire_heading, GameTime game_time)
+        public void Equalize(int desire_heading)
         {
             this.desired_heading = desire_heading;
             _airplane.trajectory = new ConcurrentQueue<Vector2> { };
@@ -75,6 +77,24 @@ namespace ATC_Game.Control
             SetActualAirplaneState();
             this.desired_heading = HeadingToWP(LWP.position);
             Task.Run(() => GenToLWPTrajectoryAsync(LWP, heading_step));
+        }
+
+        /// <summary>
+        /// Change heading of the airplane in time to lead it to the its runway.
+        /// </summary>
+        /// <param name="airplane_pos">actual position of the airplane</param>
+        /// <param name="rwy_pos">position of the treshold of the runway</param>
+        /// <param name="game_time">game time</param>
+        public void LeadToRunway (Vector2 airplane_pos, Vector2 rwy_pos, GameTime game_time)
+        {
+            this._time += (float)game_time.ElapsedGameTime.TotalSeconds;
+            float head_to_rwy = General.GetHeading(rwy_pos - airplane_pos); // tady zkus udelat neco lepsiho
+            if (this._time > 0.4 && head_to_rwy != this._airplane.heading)
+            {
+                int heading_change = (int)OneHeadingChange(1, this._airplane.heading, head_to_rwy);
+                this._airplane.heading += heading_change;
+                this._time = 0;
+            }
         }
 
         private void SetActualAirplaneState()
@@ -128,14 +148,8 @@ namespace ATC_Game.Control
         {
             float turn_radius = CalcRadiusOfTurn(heading_step); // RADIUS of final turn
             (Vector2 final_center_pos, bool is_left_turn) = FindCenterPosOfTurn(turn_radius, LWP);
-
-            ///////////////////////////
-            this.texture.Add(CreateTexture(this._airplane._game.GraphicsDevice));
-            this.posit.Add(new Vector2(final_center_pos.X + 400, final_center_pos.Y + 50));
-            //////////////////////////////
-
             Vector2 turn_point = FindFinalTurnPoint(LWP, turn_radius, heading_step, final_center_pos, is_left_turn); // final start turn act_position of final turn
-
+            // points of the trajectory
             this.desired_heading = HeadingToWP(new Vector2(LWP.position.X - 50, LWP.position.Y - 50)); // desired actual_head is setted to the final turn start act_position
             GenToWPTrajectoryAsync(turn_point, heading_step); // generate first part of trajectory
             this.desired_heading = LWP.runway.heading; // the final turn start act_position is setted to the runway actual_head
@@ -322,27 +336,6 @@ namespace ATC_Game.Control
             return turn_point;
         }
 
-        private Texture2D CreateTexture(GraphicsDevice graphicsDevice)
-        {
-            Texture2D stripe = new Texture2D(graphicsDevice, 5, 5);
-            Color[] color_data = new Color[5*5];
-            for (int i = 0; i < color_data.Length; i++)
-                color_data[i] = Color.Red;
-            stripe.SetData(color_data);
-            return stripe;
-        }
-
-        public void Draw(SpriteBatch sb)
-        {
-            if (this.texture.Count == 0 || this.posit.Count == 0) return;
-            for (int i = 0; i < this.texture.Count; i++)
-            {
-                sb.Draw(this.texture[i], this.posit[i], Color.White);
-            }
-
-        }
-
-
         /// <summary>
         /// Calculate the angle rotation in the turn (actual_head change of turn).
         /// </summary>
@@ -366,30 +359,14 @@ namespace ATC_Game.Control
         /// <returns>center position of circle and bool value, if the final turn os to left or to right site (left = true)</returns>
         private (Vector2, bool) FindCenterPosOfTurn (float turn_radius, LandingWaypoint LWP)
         {
-            //bool left_turn = IsLeftTurnFirst(new Vector2(this._actual_x_pos, this._actual_y_pos), LWP_pos);
-            //Console.WriteLine(left_turn.ToString());
-            //Vector2 rwy_direc = General.GetDirection(rwy_heading);
-            //if (left_turn)
-            //    return new Vector2(LWP_pos.X + turn_radius * rwy_direc.X, LWP_pos.Y + turn_radius * rwy_direc.Y); // center of turn is above the LWP
-            //return new Vector2(LWP_pos.X - rwy_direc.X * turn_radius, LWP_pos.Y - turn_radius * rwy_direc.Y); // center of turn is under the LWP
-
             Vector2 flight_direc = Vector2.Normalize(new Vector2(this._actual_x_pos, this._actual_y_pos) - LWP.position);
             Vector2 rwy_direc = General.GetDirection(General.HeadingBordersCheck(this._actual_heading));
             float determinant = VectorDeterminant(rwy_direc, flight_direc);
             LWP.SetTurnCenterPositions(turn_radius);
             Vector2 center_pos = determinant > 0 ? LWP.turn_center_pos[0] : LWP.turn_center_pos[1];
             bool is_left_turn = determinant <= 0;
-            Console.WriteLine(is_left_turn.ToString() + " " + determinant.ToString());
+            //Console.WriteLine(is_left_turn.ToString() + " " + determinant.ToString());
             return (center_pos, is_left_turn);
-
-
-            //float k = General.GetGuideline(rwy_heading);
-            //float b = - LWP_pos.X * k + LWP_pos.Y;
-            //float plane_pos_projection = k * this._airplane.center_position.X + b;
-            //Vector2 rwy_direc = General.GetDirection(rwy_heading);
-            //if (this._airplane.center_position.Y > plane_pos_projection)
-            //    return new Vector2(LWP_pos.X + turn_radius * rwy_direc.X, LWP_pos.Y + turn_radius * rwy_direc.Y); // center of turn is above the LWP
-            //return new Vector2(LWP_pos.X - rwy_direc.X * turn_radius, LWP_pos.Y - turn_radius * rwy_direc.Y); // center of turn is under the LWP
         }
 
         /// <summary>
@@ -458,76 +435,6 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Calculates normalized vector for a line between start act_position and end act_position of a Beziers curve.
-        /// </summary>
-        /// <param name="P0">start act_position of the curve</param>
-        /// <param name="P3">end act_position of the curve</param>
-        /// <returns>get normalized vector</returns>
-        private Vector2 FirstLastPointsLineNormal (Vector2 P0, Vector2 P3)
-        {
-            Vector2 unit_direc = Vector2.Normalize(P3 - P0);
-            return new Vector2(-unit_direc.Y, unit_direc.X);
-        }
-
-        /// <summary>
-        /// Method for calculation inner points of bezier curve.
-        /// </summary>
-        /// <param name="P0">first act_position of a curve</param>
-        /// <param name="D0">start vector of a curve</param>
-        /// <param name="P3">last act_position of a curve</param>
-        /// <param name="D3">final act_position of a curve</param>
-        /// <param name="turn_intens">radius od a turn you want</param>
-        /// <returns>vector2 array of two points</returns>
-        private Vector2[] GetInnerPointsOfBezier(Vector2 P0, Vector2 D0, Vector2 P3, Vector2 D3, float turn_intens)
-        {
-            float k1 = turn_intens; // a turn parameter for every turn in the curve
-            float k2 = turn_intens;
-            Vector2 P1 = P0 + D0 * turn_intens;
-            Vector2 P2 = P3 - D3 * turn_intens; // inner vectors
-            float kappa_start = 0;
-            float kappa_end = 100; // curvatures
-
-            for (int a = 0; a < 100; a++)
-            {
-                // inner points
-                P1 = P0 + D0 * turn_intens;
-                P2 = P3 - D3 * turn_intens;
-                // some points on the curve
-                List<Vector2> curve_points = new List<Vector2>();
-                for (int t = 0; t < 100; t++)
-                    curve_points.Add(BezierCurvePoint(t, P0, P1, P2, P3));
-                // derivates (directions) for a curves
-                List<Vector2> derivates = new List<Vector2>();
-                for (int i = 1; i < curve_points.Count; i++)
-                    derivates.Add(curve_points[i] - curve_points[i - 1]);
-                // calculation of curvatures of the points
-                List<float> curvatures = new List<float>();
-                for (int j = 1; j < derivates.Count; j++)
-                {
-                    Vector2 tangent = derivates[j - 1];
-                    Vector2 tangent_next = curve_points[j];
-                    float curvature = Vector2.Distance(Vector2.Zero, tangent) > 0
-                    ? Math.Abs(VectorDeterminant(tangent, tangent_next)) / (float)Math.Pow(Vector2.Distance(Vector2.Zero, tangent), 3)
-                    : 0.0f;
-                    curvatures.Add(curvature);
-                }
-                // average curvature at the start and end of the curve
-                kappa_start = curvatures.Take(10).Average();
-                kappa_end = curvatures.Skip(Math.Max(0, curvatures.Count - 10)).Average();
-                // change of curve parameters
-                if (kappa_start > kappa_end)
-                    k1 *= 0.99f;
-                else
-                    k2 *= 0.99f;
-                //Console.WriteLine("a: " + a.ToString());
-                Console.WriteLine(a + ": " + k1);
-                //Console.WriteLine(kappa_start + " start");
-                //Console.WriteLine(kappa_end + " end");
-            }
-            return new Vector2[] {P1, P2};
-        }
-
-        /// <summary>
         /// Calculates vector product of two 2D vectors.
         /// </summary>
         /// <param name="A">first vector</param>
@@ -538,6 +445,77 @@ namespace ATC_Game.Control
             return A.X * B.Y - A.Y * B.X;
         }
 
+
+        /// <summary>
+        /// Calculates normalized vector for a line between start act_position and end act_position of a Beziers curve.
+        /// </summary>
+        /// <param name="P0">start act_position of the curve</param>
+        /// <param name="P3">end act_position of the curve</param>
+        /// <returns>get normalized vector</returns>
+        //private Vector2 FirstLastPointsLineNormal (Vector2 P0, Vector2 P3)
+        //{
+        //    Vector2 unit_direc = Vector2.Normalize(P3 - P0);
+        //    return new Vector2(-unit_direc.Y, unit_direc.X);
+        //}
+
+        /// <summary>
+        /// Method for calculation inner points of bezier curve.
+        /// </summary>
+        /// <param name="P0">first act_position of a curve</param>
+        /// <param name="D0">start vector of a curve</param>
+        /// <param name="P3">last act_position of a curve</param>
+        /// <param name="D3">final act_position of a curve</param>
+        /// <param name="turn_intens">radius od a turn you want</param>
+        /// <returns>vector2 array of two points</returns>
+        //private Vector2[] GetInnerPointsOfBezier(Vector2 P0, Vector2 D0, Vector2 P3, Vector2 D3, float turn_intens)
+        //{
+        //    float k1 = turn_intens; // a turn parameter for every turn in the curve
+        //    float k2 = turn_intens;
+        //    Vector2 P1 = P0 + D0 * turn_intens;
+        //    Vector2 P2 = P3 - D3 * turn_intens; // inner vectors
+        //    float kappa_start = 0;
+        //    float kappa_end = 100; // curvatures
+
+        //    for (int a = 0; a < 100; a++)
+        //    {
+        //        // inner points
+        //        P1 = P0 + D0 * turn_intens;
+        //        P2 = P3 - D3 * turn_intens;
+        //        // some points on the curve
+        //        List<Vector2> curve_points = new List<Vector2>();
+        //        for (int t = 0; t < 100; t++)
+        //            curve_points.Add(BezierCurvePoint(t, P0, P1, P2, P3));
+        //        // derivates (directions) for a curves
+        //        List<Vector2> derivates = new List<Vector2>();
+        //        for (int i = 1; i < curve_points.Count; i++)
+        //            derivates.Add(curve_points[i] - curve_points[i - 1]);
+        //        // calculation of curvatures of the points
+        //        List<float> curvatures = new List<float>();
+        //        for (int j = 1; j < derivates.Count; j++)
+        //        {
+        //            Vector2 tangent = derivates[j - 1];
+        //            Vector2 tangent_next = curve_points[j];
+        //            float curvature = Vector2.Distance(Vector2.Zero, tangent) > 0
+        //            ? Math.Abs(VectorDeterminant(tangent, tangent_next)) / (float)Math.Pow(Vector2.Distance(Vector2.Zero, tangent), 3)
+        //            : 0.0f;
+        //            curvatures.Add(curvature);
+        //        }
+        //        // average curvature at the start and end of the curve
+        //        kappa_start = curvatures.Take(10).Average();
+        //        kappa_end = curvatures.Skip(Math.Max(0, curvatures.Count - 10)).Average();
+        //        // change of curve parameters
+        //        if (kappa_start > kappa_end)
+        //            k1 *= 0.99f;
+        //        else
+        //            k2 *= 0.99f;
+        //        //Console.WriteLine("a: " + a.ToString());
+        //        Console.WriteLine(a + ": " + k1);
+        //        //Console.WriteLine(kappa_start + " start");
+        //        //Console.WriteLine(kappa_end + " end");
+        //    }
+        //    return new Vector2[] {P1, P2};
+        //}
+
         /// <summary>
         /// It calculates one act_position of Bezier curve.
         /// </summary>
@@ -547,10 +525,10 @@ namespace ATC_Game.Control
         /// <param name="P2">second inner act_position</param>
         /// <param name="P3">final act_position</param>
         /// <returns>one act_position on the Bezier curve</returns>
-        private Vector2 BezierCurvePoint (float param, Vector2 P0, Vector2 P1, Vector2 P2, Vector2 P3)
-        {
-            return (float)Math.Pow(1 - param, 3) * P0 + 3 * (float)Math.Pow(1 - param, 2) * param * P1 + 3 * (1 - param) * (float)Math.Pow(param, 2) * P2 + (float)Math.Pow(param, 3) * P3;
-        }
+        //private Vector2 BezierCurvePoint (float param, Vector2 P0, Vector2 P1, Vector2 P2, Vector2 P3)
+        //{
+        //    return (float)Math.Pow(1 - param, 3) * P0 + 3 * (float)Math.Pow(1 - param, 2) * param * P1 + 3 * (1 - param) * (float)Math.Pow(param, 2) * P2 + (float)Math.Pow(param, 3) * P3;
+        //}
 
         /// <summary>
         /// It calculates vector act_direction in the ont act_position of Bezier curve.
@@ -561,10 +539,10 @@ namespace ATC_Game.Control
         /// <param name="P2">last inner act_position</param>
         /// <param name="P3">last act_position</param>
         /// <returns>one vector of act_direction in the curve</returns>
-        private Vector2 BezierCurveTangent (float param, Vector2 P0, Vector2 P1, Vector2 P2, Vector2 P3)
-        {
-            return 3 * (float)Math.Pow(1 - param, 2) * (P1 - P0) + 6 * (1 - param) * param * (P2 - P1) + 3 * (float)Math.Pow(param, 2) * (P3 - P2);
-        }
+        //private Vector2 BezierCurveTangent (float param, Vector2 P0, Vector2 P1, Vector2 P2, Vector2 P3)
+        //{
+        //    return 3 * (float)Math.Pow(1 - param, 2) * (P1 - P0) + 6 * (1 - param) * param * (P2 - P1) + 3 * (float)Math.Pow(param, 2) * (P3 - P2);
+        //}
 
         /// <summary>
         /// It calculates center of the circle.
@@ -573,13 +551,13 @@ namespace ATC_Game.Control
         /// <param name="act_direction">tangent of the act_position in the circle</param>
         /// <param name="turn_radius">radius of the turn</param>
         /// <returns>center of the circle</returns>
-        private Vector2 CircleCenterPoint(Vector2 act_position, Vector2 act_direction, float turn_radius, bool is_left_turn)
-        {
-            if (is_left_turn)
-                return act_position + turn_radius * new Vector2(-act_direction.Y, act_direction.X);
-            else
-                return act_position - turn_radius * new Vector2(act_direction.Y, -act_direction.X);
-        }
+        //private Vector2 CircleCenterPoint(Vector2 act_position, Vector2 act_direction, float turn_radius, bool is_left_turn)
+        //{
+        //    if (is_left_turn)
+        //        return act_position + turn_radius * new Vector2(-act_direction.Y, act_direction.X);
+        //    else
+        //        return act_position - turn_radius * new Vector2(act_direction.Y, -act_direction.X);
+        //}
 
         /// <summary>
         /// Get intersection points of two circles.
@@ -589,18 +567,18 @@ namespace ATC_Game.Control
         /// <param name="center2">center act_position of the second circle</param>
         /// <param name="radius2">radius of the second circle</param>
         /// <returns>two intersection points</returns>
-        private (Vector2, Vector2) CirclesInstersections(Vector2 center1, float radius1, Vector2 center2, float radius2)
-        {
-            float d = Vector2.Distance(center1, center2); // distance between centers
-            float a = (radius1 * radius1 - radius2 * radius2 + d * d) / (2 * d); // distance between center1 and line between circles intersections
-            float h = (float)Math.Sqrt(radius1 * radius1 - a * a); // height between a and intersection
-            Vector2 direction = (center2 - center1) / d; // normal vector of act_direction from center1 to center2
-            Vector2 base_point = center1 + a * direction; // a act_position between intersection on the axis of circles
+        //private (Vector2, Vector2) CirclesInstersections(Vector2 center1, float radius1, Vector2 center2, float radius2)
+        //{
+        //    float d = Vector2.Distance(center1, center2); // distance between centers
+        //    float a = (radius1 * radius1 - radius2 * radius2 + d * d) / (2 * d); // distance between center1 and line between circles intersections
+        //    float h = (float)Math.Sqrt(radius1 * radius1 - a * a); // height between a and intersection
+        //    Vector2 direction = (center2 - center1) / d; // normal vector of act_direction from center1 to center2
+        //    Vector2 base_point = center1 + a * direction; // a act_position between intersection on the axis of circles
 
-            Vector2 intersection1 = new Vector2(base_point.X + h * direction.Y, base_point.Y - h * direction.X);
-            Vector2 intersection2 = new Vector2(base_point.X - h * direction.Y, base_point.Y + h * direction.X);
-            return (intersection1, intersection2);
-        }
+        //    Vector2 intersection1 = new Vector2(base_point.X + h * direction.Y, base_point.Y - h * direction.X);
+        //    Vector2 intersection2 = new Vector2(base_point.X - h * direction.Y, base_point.Y + h * direction.X);
+        //    return (intersection1, intersection2);
+        //}
 
         /// <summary>
         /// Get one of two intersection of the two circles. Choose nearer intersection in the act_direction of move.
@@ -611,20 +589,20 @@ namespace ATC_Game.Control
         /// <param name="intersect2">second intersection</param>
         /// <param name="center">the center of the circle</param>
         /// <returns>the right intersection</returns>
-        private Vector2 ChooseOneCirclesIntersect(Vector2 D0, Vector2 P0, Vector2 intersect1, Vector2 intersect2, Vector2 center)
-        {
-            bool is_cv_rot = IsClockwiseRotation(D0, P0, center); // clockwise / counterclock. rotation
-            float orig_angle = MathF.Atan2(P0.Y - center.Y, P0.X - center.X); // angle of the original act_position on the circle
-            float angle1 = MathF.Atan2(intersect1.Y - center.Y, intersect1.X - center.X); // angle of the intersection 1
-            float angle2 = MathF.Atan2(intersect2.Y - center.Y, intersect2.X - center.X); // angle of the intersection 2
+        //private Vector2 ChooseOneCirclesIntersect(Vector2 D0, Vector2 P0, Vector2 intersect1, Vector2 intersect2, Vector2 center)
+        //{
+        //    bool is_cv_rot = IsClockwiseRotation(D0, P0, center); // clockwise / counterclock. rotation
+        //    float orig_angle = MathF.Atan2(P0.Y - center.Y, P0.X - center.X); // angle of the original act_position on the circle
+        //    float angle1 = MathF.Atan2(intersect1.Y - center.Y, intersect1.X - center.X); // angle of the intersection 1
+        //    float angle2 = MathF.Atan2(intersect2.Y - center.Y, intersect2.X - center.X); // angle of the intersection 2
 
-            Vector2 choosen_intersect;
-            if (is_cv_rot)
-                choosen_intersect = (angle1 > orig_angle && angle1 < angle2) ? intersect1 : intersect2;
-            else
-                choosen_intersect = (angle1 < orig_angle && angle1 > angle2) ? intersect1 : intersect2;
-            return choosen_intersect;
-        }
+        //    Vector2 choosen_intersect;
+        //    if (is_cv_rot)
+        //        choosen_intersect = (angle1 > orig_angle && angle1 < angle2) ? intersect1 : intersect2;
+        //    else
+        //        choosen_intersect = (angle1 < orig_angle && angle1 > angle2) ? intersect1 : intersect2;
+        //    return choosen_intersect;
+        //}
 
         /// <summary>
         /// Find, if the turn is to left side or not.
@@ -632,13 +610,13 @@ namespace ATC_Game.Control
         /// <param name="act_position">actual positon of an object</param>
         /// <param name="wp_position">positon of the waypoint</param>
         /// <returns>return true, if the turn is left turn, otherwise false</returns>
-        private bool IsLeftTurnFirst(Vector2 act_position, Vector2 wp_position)
-        {
-            Vector2 wp_direc = wp_position - act_position;
-            Vector2 normalized_direct = Vector2.Normalize(wp_direc);
-            float cross = (normalized_direct.X * wp_direc.Y) - (normalized_direct.Y * wp_direc.X);
-            return cross >= 0;
-        }
+        //private bool IsLeftTurnFirst(Vector2 act_position, Vector2 wp_position)
+        //{
+        //    Vector2 wp_direc = wp_position - act_position;
+        //    Vector2 normalized_direct = Vector2.Normalize(wp_direc);
+        //    float cross = (normalized_direct.X * wp_direc.Y) - (normalized_direct.Y * wp_direc.X);
+        //    return cross >= 0;
+        //}
 
         /// <summary>
         /// It finds two intersections of a line (defined with two points) and a circle (defined through a center act_position and the radius). It is'nt check, if there are really two intersections.
@@ -648,23 +626,23 @@ namespace ATC_Game.Control
         /// <param name="center">a center act_position of the circle</param>
         /// <param name="radius">a radius of the circle</param>
         /// <returns>two vector points of the intersections</returns>
-        private (Vector2, Vector2) LineCircleIntersections(Vector2 P1, Vector2 P2, Vector2 center, float radius)
-        {
-            Vector2 d = P2 - P1;
-            Vector2 f = P1 - center;
-            // koeficients
-            float a = Vector2.Dot(d, d);
-            float b = 2 * Vector2.Dot(f, d);
-            float c = Vector2.Dot(f, f) - radius * radius;
-            float discriminant = (float)Math.Sqrt(b * b - 4 * a * c);
-            // equation results
-            float t1 = (-b - discriminant) / (2 * a);
-            float t2 = (-b + discriminant) / (2 * a);
-            // intersections
-            Vector2 intersection1 = P1 + t1 * d;
-            Vector2 intersection2 = P1 + t2 * d;
-            return (intersection1, intersection2);
-        }
+        //private (Vector2, Vector2) LineCircleIntersections(Vector2 P1, Vector2 P2, Vector2 center, float radius)
+        //{
+        //    Vector2 d = P2 - P1;
+        //    Vector2 f = P1 - center;
+        //    // koeficients
+        //    float a = Vector2.Dot(d, d);
+        //    float b = 2 * Vector2.Dot(f, d);
+        //    float c = Vector2.Dot(f, f) - radius * radius;
+        //    float discriminant = (float)Math.Sqrt(b * b - 4 * a * c);
+        //    // equation results
+        //    float t1 = (-b - discriminant) / (2 * a);
+        //    float t2 = (-b + discriminant) / (2 * a);
+        //    // intersections
+        //    Vector2 intersection1 = P1 + t1 * d;
+        //    Vector2 intersection2 = P1 + t2 * d;
+        //    return (intersection1, intersection2);
+        //}
 
         /// <summary>
         /// Find the right intersection between line and circle in the calculation of the inner tangent of two circles.
@@ -673,14 +651,14 @@ namespace ATC_Game.Control
         /// <param name="intersect_lc2">second intersection</param>
         /// <param name="intersect_cc">an intersection between this circle and the auxiliary Thalet circle between this and the second main circle</param>
         /// <returns>the right intersection for next calculation</returns>
-        private Vector2 ChooseOneLCIntersection(Vector2 intersect_lc1, Vector2 intersect_lc2, Vector2 intersect_cc)
-        {
-            float lc1_inters_dist = (intersect_cc - intersect_lc1).Length();
-            float lc2_inters_dist = (intersect_cc + intersect_lc2).Length();
-            if (lc1_inters_dist <= lc2_inters_dist)
-                return intersect_lc1;
-            return intersect_lc2;
-        }
+        //private Vector2 ChooseOneLCIntersection(Vector2 intersect_lc1, Vector2 intersect_lc2, Vector2 intersect_cc)
+        //{
+        //    float lc1_inters_dist = (intersect_cc - intersect_lc1).Length();
+        //    float lc2_inters_dist = (intersect_cc + intersect_lc2).Length();
+        //    if (lc1_inters_dist <= lc2_inters_dist)
+        //        return intersect_lc1;
+        //    return intersect_lc2;
+        //}
 
         /// <summary>
         /// It calculates the position of the intersection of a diameter line and second circle and get this intersection. 
@@ -691,13 +669,13 @@ namespace ATC_Game.Control
         /// <param name="center2">center of the second circle</param>
         /// <param name="radius2">radius of the second circle</param>
         /// <returns>act_position for trasition from direct flight to the final turn</returns>
-        private Vector2 SecondTangentPoint(Vector2 center1, Vector2 first_circ_tangent, Vector2 center2, float radius2)
-        {
-            Vector2 tangent1_vect = Vector2.Normalize(first_circ_tangent - center1); // normal vector of a tanget line of the first circle
-            Vector2 tangent2_vect = new Vector2(-tangent1_vect.Y, tangent1_vect.X); // noemal vector of a tangent line of the second circle
-            Vector2 sec_tangent_point = center2 + tangent2_vect * radius2;
-            return sec_tangent_point;
-        }
+        //private Vector2 SecondTangentPoint(Vector2 center1, Vector2 first_circ_tangent, Vector2 center2, float radius2)
+        //{
+        //    Vector2 tangent1_vect = Vector2.Normalize(first_circ_tangent - center1); // normal vector of a tanget line of the first circle
+        //    Vector2 tangent2_vect = new Vector2(-tangent1_vect.Y, tangent1_vect.X); // noemal vector of a tangent line of the second circle
+        //    Vector2 sec_tangent_point = center2 + tangent2_vect * radius2;
+        //    return sec_tangent_point;
+        //}
 
         /// <summary>
         /// Add each act_position of the arc into the trajectory queue of the airplane
@@ -707,38 +685,38 @@ namespace ATC_Game.Control
         /// <param name="circle_center">circle center of the arc</param>
         /// <param name="circle_rad">circle radius of the arc</param>
         /// <param name="heading_step">absolute value of one change of the actual_head</param>
-        private void AddArcToTrajectory(Vector2 start_point, Vector2 end_point, Vector2 circle_center, float circle_rad, float heading_step)
-        {
-            float start_angle = MathHelper.ToDegrees((float)Math.Atan2(start_point.Y - circle_center.Y, start_point.X - circle_center.X));
-            float end_angle = MathHelper.ToDegrees((float)Math.Atan2(end_point.Y - circle_center.Y, end_point.X - circle_center.X));
-            float head_change = OneHeadingChange(heading_step, start_angle, end_angle);
-            float actual_angle = General.HeadingBordersCheck(start_angle);
-            Vector2 actual_pos = start_point;
-            while (!General.ObjectReachedPoint(actual_pos, end_point, 2))
-            {
-                actual_angle = General.HeadingBordersCheck(actual_angle + head_change);
-                actual_pos.X = (float)(circle_center.X + circle_rad * Math.Cos(MathHelper.ToRadians(actual_angle)));
-                actual_pos.Y = (float)(circle_center.Y + circle_rad * Math.Sin(MathHelper.ToRadians(actual_angle)));
-                _airplane.trajectory.Enqueue(actual_pos);
-                _airplane.heading_queue.Enqueue((int)General.HeadingBordersCheck(actual_angle - 90));
-            }
-        }
+        //private void AddArcToTrajectory(Vector2 start_point, Vector2 end_point, Vector2 circle_center, float circle_rad, float heading_step)
+        //{
+        //    float start_angle = MathHelper.ToDegrees((float)Math.Atan2(start_point.Y - circle_center.Y, start_point.X - circle_center.X));
+        //    float end_angle = MathHelper.ToDegrees((float)Math.Atan2(end_point.Y - circle_center.Y, end_point.X - circle_center.X));
+        //    float head_change = OneHeadingChange(heading_step, start_angle, end_angle);
+        //    float actual_angle = General.HeadingBordersCheck(start_angle);
+        //    Vector2 actual_pos = start_point;
+        //    while (!General.ObjectReachedPoint(actual_pos, end_point, 2))
+        //    {
+        //        actual_angle = General.HeadingBordersCheck(actual_angle + head_change);
+        //        actual_pos.X = (float)(circle_center.X + circle_rad * Math.Cos(MathHelper.ToRadians(actual_angle)));
+        //        actual_pos.Y = (float)(circle_center.Y + circle_rad * Math.Sin(MathHelper.ToRadians(actual_angle)));
+        //        _airplane.trajectory.Enqueue(actual_pos);
+        //        _airplane.heading_queue.Enqueue((int)General.HeadingBordersCheck(actual_angle - 90));
+        //    }
+        //}
 
-        private void CreateBezierTrajectory(Vector2 wp_pos, Vector2 P0, Vector2 P1, Vector2 P2, Vector2 P3)
-        {
-            float parameter = 0; // position on the curve
-            while (parameter <= 1)
-            {
-                Vector2 actual_pos = BezierCurvePoint(parameter, P0, P1, P2, P3);
-                this._actual_x_pos = actual_pos.X;
-                this._actual_y_pos = actual_pos.Y;
-                this._actual_heading = General.GetHeading(BezierCurveTangent(parameter, P0, P1, P2, P3));
-                this._airplane.trajectory.Enqueue(new Vector2(this._actual_x_pos, this._actual_y_pos));
-                this._airplane.heading_queue.Enqueue((int)_actual_heading);
-                parameter += 0.000166667f;
-            }
+        //private void CreateBezierTrajectory(Vector2 wp_pos, Vector2 P0, Vector2 P1, Vector2 P2, Vector2 P3)
+        //{
+        //    float parameter = 0; // position on the curve
+        //    while (parameter <= 1)
+        //    {
+        //        Vector2 actual_pos = BezierCurvePoint(parameter, P0, P1, P2, P3);
+        //        this._actual_x_pos = actual_pos.X;
+        //        this._actual_y_pos = actual_pos.Y;
+        //        this._actual_heading = General.GetHeading(BezierCurveTangent(parameter, P0, P1, P2, P3));
+        //        this._airplane.trajectory.Enqueue(new Vector2(this._actual_x_pos, this._actual_y_pos));
+        //        this._airplane.heading_queue.Enqueue((int)_actual_heading);
+        //        parameter += 0.000166667f;
+        //    }
 
-        }
+        //}
 
         /// <summary>
         /// Find, if the rotation on the circle is clockwise.
@@ -747,17 +725,34 @@ namespace ATC_Game.Control
         /// <param name="P0">a act_position on the circle</param>
         /// <param name="center">a center of the circle</param>
         /// <returns>true, if the rotation is clockwise, otherwise false</returns>
-        private bool IsClockwiseRotation(Vector2 D0, Vector2 P0, Vector2 center)
-        {
-            Vector2 P1 = P0 + D0;
-            Vector2 V1 = Vector2.Normalize(P0 - center);
-            Vector2 V2 = Vector2.Normalize(P1 - center);
-            if (VectorDeterminant(V1, V2) < 0)
-                return true; // clockwise
-            return false; // counterclockwise
+        //private bool IsClockwiseRotation(Vector2 D0, Vector2 P0, Vector2 center)
+        //{
+        //    Vector2 P1 = P0 + D0;
+        //    Vector2 V1 = Vector2.Normalize(P0 - center);
+        //    Vector2 V2 = Vector2.Normalize(P1 - center);
+        //    if (VectorDeterminant(V1, V2) < 0)
+        //        return true; // clockwise
+        //    return false; // counterclockwise
 
-        }
+        //}
 
+        //private Texture2D CreateTexture(GraphicsDevice graphicsDevice)
+        //{
+        //    Texture2D stripe = new Texture2D(graphicsDevice, 5, 5);
+        //    Color[] color_data = new Color[5*5];
+        //    for (int i = 0; i < color_data.Length; i++)
+        //        color_data[i] = Color.Red;
+        //    stripe.SetData(color_data);
+        //    return stripe;
+        //}
 
+        //public void Draw(SpriteBatch sb)
+        //{
+        //    if (this.texture.Count == 0 || this.posit.Count == 0) return;
+        //    for (int i = 0; i < this.texture.Count; i++)
+        //    {
+        //        sb.Draw(this.texture[i], this.posit[i], Color.White);
+        //    }
+        //}
     }
 }

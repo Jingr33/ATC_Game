@@ -28,6 +28,8 @@ namespace ATC_Game.GameObjects
         private SpriteFont _font;
 
         private Rectangle _event_space;
+        ButtonState _mouse_state;
+        ButtonState _last_state;
 
         public Button(Game1 game, Vector2 position, string title, int width)
         {
@@ -40,6 +42,8 @@ namespace ATC_Game.GameObjects
             this._border_color = Color.CadetBlue;
             this._font = game.Content.Load<SpriteFont>("font");
             this._texture = CreateButtonTex(this._game.GraphicsDevice);
+            this._mouse_state = ButtonState.Released;
+            this._last_state = ButtonState.Released;
             LoadEvent();
         }
 
@@ -83,9 +87,15 @@ namespace ATC_Game.GameObjects
         /// <summary>
         /// Activate button function.
         /// </summary>
-        public void ActivateButton()
+        /// <returns>bool value if the event was clicked</returns>
+        public bool WasClicked()
         {
-
+            bool is_clicked = false;
+            this._mouse_state = this._game.mouse.LeftButton;
+            if (this._event_space.Contains(this._game.mouse.Position) && this._mouse_state == ButtonState.Released && this._last_state == ButtonState.Pressed)
+                is_clicked = true;
+            this._last_state = this._mouse_state;
+            return is_clicked;
         }
 
         /// <summary>

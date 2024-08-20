@@ -1,4 +1,5 @@
 ﻿using ATC_Game.GameObjects;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace ATC_Game
         // buttons
         private Button _left_turn_btn;
         private Button _right_turn_btn;
+        private Button _land_btn;
 
         public ControlPanel(Game1 game)
         {
@@ -42,16 +44,17 @@ namespace ATC_Game
         private void LoadControlButtons ()
         {
             this._speed_sbtn = new SequentialButton(this._game, new Vector2(10, 5), "speed", 140, Config.min_control_speed, Config.max_control_speed);
-            this._altitude_sbtn = new SequentialButton(this._game, new Vector2(300, 5), "altitude", 160, Config.min_control_alt, Config.max_control_alt, false, 300, false);
-            this._heading_sbtn = new SequentialButton(this._game, new Vector2(600, 5), "heading", 152, 0, 360, true);
-            this._left_turn_btn = new Button(this._game, new Vector2(800, 5), "left turn", 116);
-            this._right_turn_btn = new Button(this._game, new Vector2(1000, 5), "right turn", 122);
+            this._altitude_sbtn = new SequentialButton(this._game, new Vector2(200, 5), "altitude", 160, Config.min_control_alt, Config.max_control_alt, false, 300, false);
+            this._heading_sbtn = new SequentialButton(this._game, new Vector2(400, 5), "heading", 152, 0, 360, true);
+            this._left_turn_btn = new Button(this._game, new Vector2(600, 5), "left turn", 116);
+            this._right_turn_btn = new Button(this._game, new Vector2(800, 5), "right turn", 122);
+            this._land_btn = new Button(this._game, new Vector2(1000, 5), " land ", 75);
         }
 
         /// <summary>
         /// Update all element in the control panel in every moment.
         /// </summary>
-        public void Update ()
+        public void Update (GameTime game_time)
         {
             if (this.airplane != null)
             {
@@ -65,6 +68,8 @@ namespace ATC_Game
                 this.airplane.delayer.desired_alt = this._altitude_sbtn.Update();
                 if (this._head_enabled)
                     this.airplane.delayer.desired_heading = this._heading_sbtn.Update();
+                if (this._land_btn.WasClicked())
+                    this.airplane.autopilot.PossibleToLand(game_time);
             }
             else
             {
@@ -88,6 +93,7 @@ namespace ATC_Game
             this._heading_sbtn.Draw(spriteBatch, this._head_enabled);
             this._left_turn_btn.Draw(spriteBatch);
             this._right_turn_btn.Draw(spriteBatch);
+            this._land_btn.Draw(spriteBatch);
         }
     }
 }

@@ -23,15 +23,18 @@ namespace ATC_Game.GameObjects
         private string _number; // (06, 24L, 9C, ...)
         public Vector2 position; // positon in airport area
         public Vector2 map_position;
+        public int altitude; // altitude of the runway in feet
         public int heading; // direction of runway in degree
         public Vector2 direction; // direction of runway in vector
         public float rotation; // direction of rwy in float
         private int _rwy_lenght; // runway lenght in meters
         private int _rwy_width; // runway width in meters
         private Texture2D _texture;
+        private Texture2D _active_texture;
         private Vector2 _draw_position;
         private WeightCat _max_category; // maximum weight category
         private float _time;
+        public bool is_active;
         // lights
         private Texture2D _land_ligh_tex;
         private Vector2[] _light_pos; // center posiiton of lights
@@ -47,14 +50,17 @@ namespace ATC_Game.GameObjects
             this._number = rwy_number;
             this.position = start_pos;
             this.map_position = GetInMapPosition();
+            this.altitude = 0; // TODO:
             this.heading = heading;
             this.direction = General.GetDirection(this.heading); // direction of runway in vector2
             this._rwy_lenght = lenght;
             this._rwy_width = width;
-            this._texture = CreateRwyTexture(this._game.GraphicsDevice);
+            this._texture = CreateRwyTexture(this._game.GraphicsDevice, Color.Black);
+            this._active_texture = CreateRwyTexture(this._game.GraphicsDevice, Color.DarkRed);
             this._draw_position = GetDrawPosition();
             this._light_pos = new Vector2[Config.land_lights_number];
             this._time = 0;
+            this.is_active = false;
             LoadLightsTexture();
             InitLightsPositions();
             InitLandingWP(); // landing WP initialization
@@ -66,14 +72,14 @@ namespace ATC_Game.GameObjects
         /// </summary>
         /// <param name="graphicsDevice">grpahics device</param>
         /// <returns>runway texture (rectangle)</returns>
-        private Texture2D CreateRwyTexture(GraphicsDevice graphicsDevice)
+        private Texture2D CreateRwyTexture(GraphicsDevice graphicsDevice, Color color)
         {
             int tex_width = this._rwy_width / 9;
             int tex_lenght = this._rwy_lenght / 23;
             Texture2D rwy_tex = new Texture2D(graphicsDevice, tex_lenght, tex_width);
             Color[] color_data = new Color[tex_lenght * tex_width];
             for (int i = 0; i < color_data.Length; i++)
-                color_data[i] = Color.Black;
+                color_data[i] = color;
             rwy_tex.SetData(color_data);
             return rwy_tex;
         }
@@ -96,6 +102,15 @@ namespace ATC_Game.GameObjects
         private Vector2 GetInMapPosition ()
         {
             return new Vector2(this.position.X + this._airport.GetTexturePosition().X, this.position.Y + this._airport.GetTexturePosition().Y);
+        }
+
+        /// <summary>
+        /// Get a rectangle as a button for click event on the runway.
+        /// </summary>
+        /// <returns>a click event rectangle</returns>
+        private Rectangle GetEventSquare ()
+        {
+            return new Rectangle((int)this.position.X + 400, (int)this.position.Y + 50, this._rwy_width, this._rwy_lenght / 2);
         }
 
         /// <summary>
@@ -153,12 +168,15 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// TexDraw runway texture.
+        /// Draw right variant of the runway texture.
         /// </summary>
         /// <param name="sprite_batch">sprite batch</param>
         public void Draw (SpriteBatch sprite_batch)
         {
-            sprite_batch.Draw(this._texture, this._draw_position, Color.White);
+            if (!this.is_active)
+                sprite_batch.Draw(this._texture, this._draw_position, Color.White);
+            else
+                sprite_batch.Draw(this._active_texture, this._draw_position, Color.White);
         }
 
         /// <summary>

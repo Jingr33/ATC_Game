@@ -1,11 +1,6 @@
 ﻿using ATC_Game.GameObjects;
 using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ATC_Game.Control
 {
@@ -48,12 +43,15 @@ namespace ATC_Game.Control
         /// Call right autopilot function depending on the operation.
         /// </summary>
         /// <param name="game_time">game _time</param>
-        private void StartAutopilot (GameTime game_time)
+        private void StartAutopilot(GameTime game_time)
         {
             switch (this.operation)
             {
                 case AutopilotOperation.TakeOff:
                     TakeOff(game_time);
+                    break;
+                case AutopilotOperation.Landing:
+                    Landing(game_time);
                     break;
                 default:
                     break;
@@ -63,7 +61,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// Autopilot control of takeOff maneuver.
         /// </summary>
-        /// <param name="game_time"></param>
+        /// <param name="game_time">game time</param>
         private void TakeOff(GameTime game_time)
         {
             this._time += (float)game_time.ElapsedGameTime.TotalSeconds;
@@ -71,7 +69,7 @@ namespace ATC_Game.Control
                 this._speed_equal.EqualizeSpeed(game_time, Config.after_takeoff_speed);
 
             if (this._airplane.speed >= Config.min_takeoff_speed) // climb
-                this._altitude_equal.EqualizeAltitude(game_time, Config.after_takeoff_alt); 
+                this._altitude_equal.EqualizeAltitude(game_time, Config.after_takeoff_alt);
 
             if (this._airplane.speed >= Config.after_takeoff_speed && this._airplane.altitude >= Config.after_takeoff_alt) // switch off the autopilot
                 SwitchAPOff();
@@ -80,7 +78,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// Start autopilot control for toWaypoint operation. Create trajectory of flight to elected waypoint. 
         /// </summary>
-        public void ToWaypoint ()
+        public void ToWaypoint()
         {
             this.operation = AutopilotOperation.ToWaypoint;
             FlyAwayFromWPArea(this._airplane.waypoints[0].position);
@@ -95,7 +93,6 @@ namespace ATC_Game.Control
         public void ToLandpoint()
         {
             this.operation = AutopilotOperation.ToWaypoint;
-            //FlyAwayFromWPArea(this._airplane.landpoint.position, 110);
             if (!General.ObjectReachedPoint(this._airplane.center_position, this._airplane.landpoint.position, 110))
                 this._airplane.delayer.heading_equal.GetToLWPTrajectory(this._airplane.landpoint);
             else
@@ -111,21 +108,120 @@ namespace ATC_Game.Control
         /// If the airplane position is in the neighborhood of waypoint. It fly away from this zone.
         /// </summary>
         /// <param name="destination_wp">waypoint object of flight destination</param>
-        private void FlyAwayFromWPArea (Vector2 wp_dest, int neighborhood = 80)
+        private void FlyAwayFromWPArea(Vector2 wp_dest, int neighborhood = 80)
         {
             if (General.ObjectReachedPoint(this._airplane.center_position, wp_dest, neighborhood))
             {
                 // create auxiliary point for exit the waypoint neighborhood
-                Vector2 pos = new Vector2(this._airplane.center_position.X + this._airplane.direction.X*neighborhood, 
-                                          this._airplane.center_position.Y + this._airplane.direction.Y*neighborhood);
+                Vector2 pos = new Vector2(this._airplane.center_position.X + this._airplane.direction.X * neighborhood,
+                                          this._airplane.center_position.Y + this._airplane.direction.Y * neighborhood);
                 Waypoint aux_wp = new Waypoint(this._game, pos, "");
                 this._airplane.waypoints.Insert(0, aux_wp);
             }
         }
 
-        private void Landing ()
+        /// <summary>
+        /// Check all airplane states and conditions for successful landing. 
+        /// If the conditions are met, flight section of the airplane is setted to landing.
+        /// </summary>
+        public void PossibleToLand(GameTime game_time)
         {
+            bool altitude = this._airplane.altitude <= 3000;
+            bool speed = this._airplane.speed <= 13;
+            Vector2 vec_to_airport = this._airplane.runway.map_position - this._airplane.center_position;
+            bool distance = vec_to_airport.Length() <= 200 && vec_to_airport.Length() > 50;
+            bool heading = General.GetHeading(vec_to_airport) <= this._airplane.runway.heading + 5
+                           && General.GetHeading(vec_to_airport) >= this._airplane.runway.heading - 5;
+            bool operation = this.operation != AutopilotOperation.Landing;
+            Console.WriteLine(General.GetHeading(vec_to_airport).ToString());
+            Console.WriteLine((this._airplane.heading + 5).ToString());
+            Console.WriteLine((this._airplane.heading - 5).ToString());
+            Console.WriteLine(vec_to_airport.Length().ToString());
 
+            if (altitude && speed && distance && heading && operation)
+            {
+                this._airplane.trajectory.Clear();
+                this._airplane.autopilot_on = true;
+                this._airplane.flight_section = FlightSection.Final;
+                this.operation = AutopilotOperation.Landing;
+                this._time = 0;
+            }
+        }
+
+        /// <summary>
+        /// Autopilot control of landing maneuver.
+        /// </summary>
+        /// <param name="game_time">game time</param>
+        private void Landing(GameTime game_time)
+        {
+            this._time += (float)game_time.ElapsedGameTime.TotalSeconds;
+            Vector2 vector = this._airplane.runway.map_position - this._airplane.center_position;
+            float distance = vector.Length();
+            bool before_rwy_treshold = Math.Abs(General.GetHeading(vector) - this._airplane.runway.heading) <= 90 ? true : false;
+
+            ControlLandingSpeed(this._time, distance, before_rwy_treshold);
+            if (before_rwy_treshold)
+            {
+                ControlLandingHeading(this._airplane.center_position, this._airplane.runway.map_position, game_time);
+                ControlLandingAltitude(distance);
+            }
+            else
+                this._airplane.heading = this._airplane.runway.heading;
+            FlightSectionChanges(distance, before_rwy_treshold);
+        }
+
+        /// <summary>
+        /// Maintain or update a heding of the airplane in time to direct plane to the runway.
+        /// </summary>
+        /// <param name="airplane_pos">position of the airplane</param>
+        /// <param name="rwy_pos">position of the airport runway</param>
+        private void ControlLandingHeading(Vector2 airplane_pos, Vector2 rwy_pos, GameTime game_time)
+        {
+            this._airplane.delayer.heading_equal.LeadToRunway(airplane_pos, rwy_pos, game_time);
+        }
+
+        /// <summary>
+        /// MAintain and decrease speed of airplane before touch down and brake the airplane on ground.
+        /// </summary>
+        /// <param name="time">game time from last speed change</param>
+        /// <param name="distance">distance from the runway treshold</param>
+        /// <param name="in_air">if the airplane id in the air (true) or already on ground (false)</param>
+        private void ControlLandingSpeed(float time, float distance, bool in_air)
+        {
+            if (in_air && distance > 50 && this._airplane.speed > 10 && time >= 0.4) // airplane is far from the runway and fast
+            {
+                this._airplane.speed -= 1;
+                this._time = 0;
+            }
+            else if (in_air && distance <= 50 && this._airplane.speed <= 10) // systematic braking before touch down
+                this._airplane.speed = (int)(distance / 10) + 6;
+            else if (!in_air) // after touch down braking
+                this._airplane.speed = 6 - (int)(distance / 10);
+        }
+
+        /// <summary>
+        /// Control an airplane altitude and decrease it in time.
+        /// </summary>
+        /// <param name="distance">distance from a treshold of the runway</param>
+        private void ControlLandingAltitude(float distance)
+        {
+            int ground_alt = this._airplane.altitude - this._airplane.runway.altitude;
+            int max_desired_alt = 50 * (int)distance + this._airplane.runway.altitude;
+            if (this._airplane.altitude > max_desired_alt)
+                this._airplane.altitude = (int)(Math.Round(max_desired_alt / 100d, 0) * 100); ;
+        }
+
+        /// <summary>
+        /// Change flight section of the airplane enter the new part of flight
+        /// </summary>
+        /// <param name="distance">distance of airplane from treshold of the runway</param>
+        /// <param name="in_air">if the airplane is in the air (true) or on ground</param>
+        private void FlightSectionChanges (float distance, bool in_air)
+        {
+            if (distance <= 35 && this._airplane.flight_section != FlightSection.Landing)
+                this._airplane.flight_section = FlightSection.Landing;
+            else if (!in_air && this._airplane.flight_section != FlightSection.Landed && this._airplane.speed <= 2)
+                this._airplane.flight_section = FlightSection.Landed;
         }
 
         /// <summary>

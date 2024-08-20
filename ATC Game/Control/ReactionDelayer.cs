@@ -59,7 +59,7 @@ namespace ATC_Game.Control
             {
                 UpdateSpeed(game_time);
                 UpdateAltitude(game_time);
-                UpdateHeading(game_time);
+                UpdateHeading();
             }
         }
 
@@ -86,13 +86,13 @@ namespace ATC_Game.Control
         /// Check if the heading value is change. if yes, block the heading controler and start heading equalizer.
         /// </summary>
         /// <param name="game_time">game time</param>
-        private void UpdateHeading(GameTime game_time)
+        private void UpdateHeading()
         {
             mouse = Mouse.GetState();
             if (this.desired_heading != this._setted_heading && mouse.LeftButton == ButtonState.Released)
             {
                 this._airplane.heading_enabled = false;
-                this.heading_equal.Equalize(desired_heading, game_time);
+                this.heading_equal.Equalize(desired_heading);
                 this._setted_heading = desired_heading;
             }
             // enabled controler of heading if the heading is already equalized

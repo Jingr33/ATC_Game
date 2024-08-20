@@ -27,7 +27,7 @@ namespace ATC_Game.GameObjects
     public class Airplane : GameObject
     {
         public int id;
-        public Game1 _game; // TODO: dej na private
+        private Game1 _game;
         private int _type_num;
         private Texture2D _texture;
         private Texture2D _marginal_texture;
@@ -59,6 +59,7 @@ namespace ATC_Game.GameObjects
         public int heading { get; set; } // direction of flight in degree + 90°
         public int speed { get; set; } // means ground speed
         public Airport airport { get; set; }
+        public Runway runway {  get; set; }
         
         // ADITIONAL FEATURES
         private ArrivalAlert _arrival_alert;
@@ -69,7 +70,7 @@ namespace ATC_Game.GameObjects
         public bool heading_enabled;
         // autopilot
         public bool autopilot_on;
-        private Autopilot _autopilot;
+        public Autopilot autopilot;
         public List<Waypoint> waypoints;
         public LandingWaypoint landpoint;
         // drawing
@@ -97,6 +98,7 @@ namespace ATC_Game.GameObjects
             this.flight_section = flight_section;
             this.flight_status = flight_status;
             this.airport = airport;
+            this.runway = this.oper_type == OperationType.Arrival ? airport.in_use_arr : airport.in_use_dep;
             this.oper_type = oper_type;
             this.destination = destination;
             this.altitude = altitude;
@@ -119,7 +121,7 @@ namespace ATC_Game.GameObjects
             this.heading_enabled = true;
             this.delayer = new ReactionDelayer(this._game,this);
             // autopilot
-            this._autopilot = new Autopilot(this._game, this);
+            this.autopilot = new Autopilot(this._game, this);
             this.autopilot_on = SetAutopilotAtSpawn();
             this.waypoints = new List<Waypoint>();
             this.landpoint = null;
@@ -130,7 +132,7 @@ namespace ATC_Game.GameObjects
         /// <summary>
         /// Update position of plane in the map.
         /// </summary>
-        /// <param name="game_time"></param>
+        /// <param name="game_time">game time</param>
         public void Update (GameTime game_time)
         {
             UpdateAutopilot(game_time); // autopilot
@@ -153,6 +155,7 @@ namespace ATC_Game.GameObjects
             this.time_in_game += (float)game_time.ElapsedGameTime.TotalSeconds;
             this.IsMissedAirplane();
             this.in_margin = IsInMargin();
+            UpdateAirport();
             UpdateWaypoints();
             UpdateLandpoint();
             this._last_state = this.is_active;
@@ -276,37 +279,39 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
+        /// It updates all states of airport for departure / arrival of the airplane.
+        /// </summary>
+        private void UpdateAirport()
+        {
+            if (this.is_active)
+                this.runway.is_active = true;
+            else if (this.runway.is_active && !this.is_active && this._last_state)
+                this.runway.is_active = false;
+        }
+
+        /// <summary>
         /// Update autopilot state this.autopilot_on in every moment.
         /// </summary>
         private void UpdateAutopilot(GameTime game_time)
         {
             if (this.autopilot_on) // autopilot for completly autopiloted functions
-                this._autopilot.Update(game_time);
+                this.autopilot.Update(game_time);
 
             if (this.waypoints.Count > 0 && !autopilot_on) // autopilot for heading piloted functions
             {
                 this.autopilot_on = true;
-                vypiswp();
-                this._autopilot.ToWaypoint();
+                this.autopilot.ToWaypoint();
             }
             else if (this.landpoint != null && !autopilot_on)
             {
                 this.autopilot_on = true;
-                this._autopilot.ToLandpoint();
+                this.autopilot.ToLandpoint();
             }
-            else if (this.trajectory.IsEmpty && this.autopilot_on && this._autopilot.operation == AutopilotOperation.Unknown && this.landpoint == null)
+            else if (this.trajectory.IsEmpty && this.autopilot_on && this.autopilot.operation == AutopilotOperation.Unknown && this.landpoint == null)
                 this.autopilot_on = false;
         }
 
-        private void vypiswp ()
-        {
-            int pocet = 0;
-            foreach(Waypoint waypoint in this.waypoints)
-            {
-                pocet++;
-                Console.WriteLine(pocet + ": " + waypoint.position.ToString());
-            }
-        }
+
 
         /// <summary>
         /// Set next position of an airplane  in trajectory list of points.
@@ -582,7 +587,7 @@ namespace ATC_Game.GameObjects
         {
             if (this.flight_section == FlightSection.TakeOff)
             {
-                this._autopilot.operation = AutopilotOperation.TakeOff;
+                this.autopilot.operation = AutopilotOperation.TakeOff;
                 return true;
             }
             return false;

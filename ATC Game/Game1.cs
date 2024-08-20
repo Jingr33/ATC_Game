@@ -20,6 +20,8 @@ using System.Runtime.CompilerServices;
 // predelej event kliknuti na letadlo do airplanu z game
 // pri ceste na lwp se na konci nezmeni heading v control panelu
 // zase nefunguje prepinani mezi letadlama ... mizi wp
+// pokud se letisti zmeni rwy_in_use, vem vsechny letadla co tam pristavaji a jednou funkci jim tu runway zmen z tridy toho letiste
+// dodelej event na runway pro kliknuti mysi... normalne ke zobrazeni info, mas pripravený clickSquare
 
 
 namespace ATC_Game
@@ -91,7 +93,7 @@ namespace ATC_Game
             this.airplane_logic.UpdateAirplanes(game_time);
             UpdateScrollablePanel();
             UpdateGameArea(game_time);
-            UpdateControlPanel();
+            UpdateControlPanel(game_time);
             base.Update(game_time);
         }
 
@@ -161,9 +163,9 @@ namespace ATC_Game
         /// <summary>
         /// Update event states in the control panel
         /// </summary>
-        private void UpdateControlPanel()
+        private void UpdateControlPanel(GameTime game_time)
         {
-            this.control_panel.Update();
+            this.control_panel.Update(game_time);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -185,13 +187,13 @@ namespace ATC_Game
             GraphicsDevice.SetRenderTarget(null);
             DrawMainLayout();
 
-            this._spriteBatch.Begin();
+            //this._spriteBatch.Begin();
 
-            foreach (Airplane airplane in this.airplanes)
-            {
-                airplane.delayer.heading_equal.Draw(this._spriteBatch);
-            }
-            this._spriteBatch.End();
+            //foreach (Airplane airplane in this.airplanes)
+            //{
+            //    airplane.delayer.heading_equal.Draw(this._spriteBatch);
+            //}
+            //this._spriteBatch.End();
 
             base.Draw(gameTime);
         }
