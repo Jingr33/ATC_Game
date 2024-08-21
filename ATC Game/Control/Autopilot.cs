@@ -133,10 +133,6 @@ namespace ATC_Game.Control
             bool heading = General.GetHeading(vec_to_airport) <= this._airplane.runway.heading + 5
                            && General.GetHeading(vec_to_airport) >= this._airplane.runway.heading - 5;
             bool operation = this.operation != AutopilotOperation.Landing;
-            Console.WriteLine(General.GetHeading(vec_to_airport).ToString());
-            Console.WriteLine((this._airplane.heading + 5).ToString());
-            Console.WriteLine((this._airplane.heading - 5).ToString());
-            Console.WriteLine(vec_to_airport.Length().ToString());
 
             if (altitude && speed && distance && heading && operation)
             {

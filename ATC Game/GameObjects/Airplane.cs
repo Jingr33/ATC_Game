@@ -91,7 +91,7 @@ namespace ATC_Game.GameObjects
             this._site_lenght = 40;
             // flight status
             this.heading = heading;
-            this.direction = GetDirection(this.heading);
+            this.direction = General.GetDirection(this.heading);
             this.weight_cat = GetWeightCategory();
             this.callsign = Config.airplane_callsigns[this._type_num];
             this.registration = Config.airplane_registration[this._type_num];
@@ -104,7 +104,7 @@ namespace ATC_Game.GameObjects
             this.altitude = altitude;
             this.speed = speed;
             this._rotation_center = new Vector2(this._texture.Width / 2, this._texture.Height / 2);
-            this._rotation = GetRotation(this.direction);
+            this._rotation = General.GetRotation(this.direction);
             this.trajectory = new ConcurrentQueue<Vector2> { };
             this.heading_queue = new ConcurrentQueue<int> { };
 
@@ -141,14 +141,11 @@ namespace ATC_Game.GameObjects
                 SetNextPosition();
                 this.heading_autopilot_on = true;
             }
-            else if (!this.heading_autopilot_on) 
-            {
+            else if (!this.heading_autopilot_on)
                 this.center_position = NewCoordStraightOn(game_time);
-                this.heading_autopilot_on = false;
-            }
 
-            this._rotation = GetRotation(this.direction);
-            this.direction = GetDirection(this.heading);
+            this._rotation = General.GetRotation(this.direction);
+            this.direction = General.GetDirection(this.heading);
             this._draw_position = this.center_position;
             this.delayer.UpdateReaction(game_time);
             SaveLastPositions();
@@ -283,7 +280,7 @@ namespace ATC_Game.GameObjects
                 this.heading_autopilot_on = true;
                 this.autopilot.ToLandpoint();
             }
-            else if (this.trajectory.IsEmpty && (this.autopilot_on || this.heading_autopilot_on) && this.autopilot.operation == AutopilotOperation.Unknown && this.landpoint == null)
+            else if (this.trajectory.IsEmpty && (this.autopilot_on || this.heading_autopilot_on) && this.autopilot.operation == AutopilotOperation.Unknown)
             {
                 this.heading_autopilot_on = false;
                 this.autopilot_on = false;
@@ -532,43 +529,6 @@ namespace ATC_Game.GameObjects
             ArrivalAlert alert = new ArrivalAlert(this._game, this, this.center_position);
             this._game.airplane_logic.arrival_alerts.Add(alert);
             return alert;
-        }
-
-        /// <summary>
-        /// Get a direciton of flight (heading) in degree.
-        /// </summary>
-        /// <returns>heading in degree</returns>
-        private int GetHeading()
-        {
-            int heading = (int)(Math.Atan2(this.direction.Y, this.direction.X) / Math.PI * 180 + 90);
-            if (heading >= 0)
-                return heading;
-            return heading + 360;
-        }
-
-        /// <summary>
-        /// Get a direction of a flight in vector
-        /// </summary>
-        /// <param name="heading">heading of the airplane (0-360)</param>
-        /// <returns>normal vector direction</returns>
-        private Vector2 GetDirection (int heading)
-        {
-            heading -= 90;
-            if (heading < 0)
-                heading += 360;
-            double x = Math.Cos(heading * Math.PI / 180);
-            double y = Math.Sin(heading * Math.PI / 180);
-            return new Vector2((float)x, (float)y);
-        }
-
-        /// <summary>
-        /// Get a rotation (direction of the airplane) in radians.
-        /// </summary>
-        /// <param name="direction">normal vector of the airplane</param>
-        /// <returns>direction in radinans</returns>
-        private float GetRotation (Vector2 direction)
-        {
-            return (float)Math.Atan2(this.direction.Y, this.direction.X);
         }
 
         /// <summary>

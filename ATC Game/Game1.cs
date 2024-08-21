@@ -11,17 +11,13 @@ using System.Runtime.CompilerServices;
 
 // TODO:
 // přide body vstupů, ke kterým to letí
-// generování dsestinací udělej tak aby přiletaly ze stran ze kterých to dává smysl (pokud bude letiště reálné)
-// stripy nemaji klikací eventy
+// generování dsestinací udělej tak aby přilétaly ze stran ze kterých to dává smysl (pokud bude letiště reálné)
 // predelej na ground speed at to neukazuje nereálné čísla
-// udělej stripes jako scrollable panel
-// tlačítka na posouvání stripeama
-// vymaz get direction a get heading z airplane, je to v general
-// predelej event kliknuti na letadlo do airplanu z game
+// tlačítka na posouvání stripeama - možná
 // pri ceste na lwp se na konci nezmeni heading v control panelu
-// zase nefunguje prepinani mezi letadlama ... mizi wp
 // pokud se letisti zmeni rwy_in_use, vem vsechny letadla co tam pristavaji a jednou funkci jim tu runway zmen z tridy toho letiste
 // dodelej event na runway pro kliknuti mysi... normalne ke zobrazeni info, mas pripravený clickSquare
+// letadlo vyletí z heading autopilota a controlery se nastaví někdy na aktuální údaje, ale přitom letadlo třeba zrychlovalo na vyšší rychlost
 
 
 namespace ATC_Game

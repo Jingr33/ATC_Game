@@ -57,6 +57,15 @@ namespace ATC_Game
             return heading + 360;
         }
 
+        /// <summary>
+        /// Get a rotation (direction of the airplane) in radians.
+        /// </summary>
+        /// <param name="direction">normal vector of the airplane</param>
+        /// <returns>direction in radinans</returns>
+        public static float GetRotation(Vector2 direction)
+        {
+            return (float)Math.Atan2(direction.Y, direction.X);
+        }
 
         /// <summary>
         /// Set next point in specified direction in specified distance from original point.
