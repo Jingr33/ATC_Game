@@ -59,7 +59,8 @@ namespace ATC_Game.Control
             {
                 UpdateSpeed(game_time);
                 UpdateAltitude(game_time);
-                UpdateHeading();
+                if (!this._airplane.heading_autopilot_on)
+                    UpdateHeading();
             }
         }
 
@@ -91,13 +92,13 @@ namespace ATC_Game.Control
             mouse = Mouse.GetState();
             if (this.desired_heading != this._setted_heading && mouse.LeftButton == ButtonState.Released)
             {
-                this._airplane.heading_enabled = false;
+                this._airplane.heading_autopilot_on = true;
                 this.heading_equal.Equalize(desired_heading);
                 this._setted_heading = desired_heading;
             }
             // enabled controler of heading if the heading is already equalized
             if (this.desired_heading == _airplane.heading)
-                this._airplane.heading_enabled = true;
+                this._airplane.heading_autopilot_on = false;
         }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -111,6 +112,17 @@ namespace ATC_Game.Logic
                 plane.is_active = false;
             foreach (InfoStripe stripe in this._game.infostripes)
                 stripe.is_active = false;
+        }
+
+        /// <summary>
+        /// Check, if all airplanes are in a deactive state.
+        /// </summary>
+        /// <returns>true if all planes are deactivated</returns>
+        public bool IsAllPlanesDeactive ()
+        {
+            foreach (Airplane airplane in this._game.airplanes)
+                if (airplane.is_active) return false;
+            return true;
         }
 
         /// <summary>

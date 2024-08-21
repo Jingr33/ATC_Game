@@ -119,23 +119,40 @@ namespace ATC_Game
         /// </summary>
         private void UpdateGameArea (GameTime game_time)
         {
-            this.mouse = Mouse.GetState();
-            foreach(Airplane plane in this.airplanes)
-            {
-                if (plane.GetAirplaneSquare().Contains(this.mouse.Position) && this.mouse.LeftButton == ButtonState.Pressed && this._previous_state == ButtonState.Released)
-                {
-                    if (!plane.is_active)
-                    {
-                        this.airplane_logic.DeactivateAllPlanes();
-                        plane.Activate();
-                    }
-                    else
-                        plane.Deactivate();
-                }
-            }
-            this._previous_state = this.mouse.LeftButton;
+            UpdateAirplaneActiveState();
             UpdateAirports(game_time);
             UpdateWaypoints();
+        }
+
+        /// <summary>
+        /// Update airplane active/deactive state.
+        /// </summary>
+        private void UpdateAirplaneActiveState ()
+        {
+            this.mouse = Mouse.GetState();
+            for (int i = 0; i < this.airplanes.Count; i++)
+            //foreach (Airplane plane in this.airplanes)
+            {
+                if ((this.airplanes[i].GetAirplaneSquare().Contains(this.mouse.Position) 
+                    || this.infostripes[i].GetStripeSquare(i).Contains(this.mouse.Position))
+                    && this.mouse.LeftButton == ButtonState.Pressed && this._previous_state == ButtonState.Released)
+                {
+                    if (!this.airplanes[i].is_active)
+                    {
+                        this.airplane_logic.DeactivateAllPlanes();
+                        this.airplanes[i].Activate();
+                    }
+                    else
+                        this.airplanes[i].Deactivate();
+                }
+            }
+
+            if (this.airplane_logic.IsAllPlanesDeactive())
+            {
+                this.map_generator.DeactiveAllWaypoints();
+                this.map_generator.DeactiveAllLandpoints();
+            }
+            this._previous_state = this.mouse.LeftButton;
         }
 
         /// <summary>
@@ -187,14 +204,6 @@ namespace ATC_Game
             GraphicsDevice.SetRenderTarget(null);
             DrawMainLayout();
 
-            //this._spriteBatch.Begin();
-
-            //foreach (Airplane airplane in this.airplanes)
-            //{
-            //    airplane.delayer.heading_equal.Draw(this._spriteBatch);
-            //}
-            //this._spriteBatch.End();
-
             base.Draw(gameTime);
         }
 
@@ -232,9 +241,7 @@ namespace ATC_Game
         {
             this._spriteBatch.Begin();
             for(int i = 0; i < this.infostripes.Count; i++)
-            {
                 this.infostripes[i].Draw(this._spriteBatch, i);
-            }
             this._spriteBatch.End();
         }
 
@@ -244,9 +251,7 @@ namespace ATC_Game
         private void DrawcontrolArea()
         {
             this._spriteBatch.Begin();
-
             this.control_panel.Draw(this._spriteBatch);
-
             this._spriteBatch.End();
         }
 

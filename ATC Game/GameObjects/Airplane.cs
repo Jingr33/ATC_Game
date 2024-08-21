@@ -67,7 +67,7 @@ namespace ATC_Game.GameObjects
         public bool in_margin;
         // reaction delay
         public ReactionDelayer delayer;
-        public bool heading_enabled;
+        public bool heading_autopilot_on;
         // autopilot
         public bool autopilot_on;
         public Autopilot autopilot;
@@ -118,7 +118,7 @@ namespace ATC_Game.GameObjects
             this.in_margin = false;
 
             //reaction delay
-            this.heading_enabled = true;
+            this.heading_autopilot_on = false;
             this.delayer = new ReactionDelayer(this._game,this);
             // autopilot
             this.autopilot = new Autopilot(this._game, this);
@@ -139,11 +139,12 @@ namespace ATC_Game.GameObjects
 
             if (!this.trajectory.IsEmpty) { // trajectory generation
                 SetNextPosition();
-                this.heading_enabled = false;
+                this.heading_autopilot_on = true;
             }
-            else {
+            else if (!this.heading_autopilot_on) 
+            {
                 this.center_position = NewCoordStraightOn(game_time);
-                this.heading_enabled = true;
+                this.heading_autopilot_on = false;
             }
 
             this._rotation = GetRotation(this.direction);
@@ -153,7 +154,7 @@ namespace ATC_Game.GameObjects
             SaveLastPositions();
 
             this.time_in_game += (float)game_time.ElapsedGameTime.TotalSeconds;
-            this.IsMissedAirplane();
+            IsInGameUpdate();
             this.in_margin = IsInMargin();
             UpdateAirport();
             UpdateWaypoints();
@@ -167,10 +168,8 @@ namespace ATC_Game.GameObjects
         private void UpdateWaypoints ()
         {
             WaypointReached();
-            DeactiveAirplaneWPs(); // if the airplane has just been deactivated
             if (this.is_active)
             {
-                SetAirplaneWPs(); // if the aircraft has just been activated
                 // add new waypoint
                 foreach (Waypoint wp in this._game.map_generator.GetActiveWaypoints())
                     if (!this.waypoints.Contains(wp)) 
@@ -187,18 +186,14 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void WaypointReached ()
         {
-            //for (int i = 0; i < this.waypoints.Count; i++)
-            //{
             if (this.waypoints.Count > 0)
             {
                 if (General.ObjectReachedPoint(this.center_position, this.waypoints[0].position, 5))
                 {
                     this.waypoints[0].is_active = false;
                     this.waypoints.Remove(this.waypoints[0]);
-                    //break;
                 }
             }
-            //}
         }
 
         /// <summary>
@@ -207,10 +202,8 @@ namespace ATC_Game.GameObjects
         private void UpdateLandpoint ()
         {
             LandpointReached();
-            DeactiveAirplaneLWPs();
             if (this.is_active)
             {
-                SetAirplaneLWPs();
                 // add landing waypoint
                 foreach (LandingWaypoint lwp in this._game.map_generator.all_landpoints)
                     if (lwp != this.landpoint && lwp.is_active)
@@ -242,6 +235,7 @@ namespace ATC_Game.GameObjects
             if (this.is_active && !this._last_state)
             {
                 this._game.map_generator.DeactiveAllWaypoints();
+                Console.WriteLine(this.waypoints.Count.ToString() + "set airplane wps");
                 foreach (Waypoint wp in this.waypoints)
                     wp.is_active = true;
             }
@@ -258,24 +252,6 @@ namespace ATC_Game.GameObjects
                 if (this.landpoint != null)
                     this.landpoint.is_active = true;
             }
-        }
-
-        /// <summary>
-        /// Deactivate all airplane waypoints if the plane has been just deactivated.
-        /// </summary>
-        private void DeactiveAirplaneWPs ()
-        {
-            if (!this.is_active && this._last_state)
-                this._game.map_generator.DeactiveAllWaypoints();
-        }
-
-        /// <summary>
-        /// Deactive all landing waypoints if the plane has been just deactivated.
-        /// </summary>
-        private void DeactiveAirplaneLWPs ()
-        {
-            if (!this.is_active && this._last_state && this.landpoint != null)
-                this.landpoint.is_active = false;
         }
 
         /// <summary>
@@ -297,21 +273,44 @@ namespace ATC_Game.GameObjects
             if (this.autopilot_on) // autopilot for completly autopiloted functions
                 this.autopilot.Update(game_time);
 
-            if (this.waypoints.Count > 0 && !autopilot_on) // autopilot for heading piloted functions
+            if (this.waypoints.Count > 0 && !autopilot_on && !this.heading_autopilot_on) // autopilot for heading piloted functions
             {
-                this.autopilot_on = true;
+                this.heading_autopilot_on = true;
                 this.autopilot.ToWaypoint();
             }
-            else if (this.landpoint != null && !autopilot_on)
+            else if (this.landpoint != null && !autopilot_on && !this.heading_autopilot_on)
             {
-                this.autopilot_on = true;
+                this.heading_autopilot_on = true;
                 this.autopilot.ToLandpoint();
             }
-            else if (this.trajectory.IsEmpty && this.autopilot_on && this.autopilot.operation == AutopilotOperation.Unknown && this.landpoint == null)
+            else if (this.trajectory.IsEmpty && (this.autopilot_on || this.heading_autopilot_on) && this.autopilot.operation == AutopilotOperation.Unknown && this.landpoint == null)
+            {
+                this.heading_autopilot_on = false;
                 this.autopilot_on = false;
+            }
         }
 
+        /// <summary>
+        /// Check and manage the airplane, if it is out of the game. (ready to remove)
+        /// </summary>
+        private void IsInGameUpdate ()
+        {
+            IsMissedAirplane(); // if it is missed approach
+            IsLanded(); // if it is landed
 
+        }
+
+        /// <summary>
+        /// Set options and remove this airplane, if it is already landed in airport.
+        /// </summary>
+        private void IsLanded ()
+        {
+            if (this.speed == 0 && this.flight_section == FlightSection.Landed)
+            {
+                // TODO: neco s airport statistikama
+                this.destroy_me = true;
+            }
+        }
 
         /// <summary>
         /// Set next position of an airplane  in trajectory list of points.
@@ -457,6 +456,8 @@ namespace ATC_Game.GameObjects
             this.is_active = true;
             this.info_strip.is_active = true;
             this._game.control_panel.airplane = this;
+            SetAirplaneWPs();
+            SetAirplaneLWPs();
         }
 
         /// <summary>

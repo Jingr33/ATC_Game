@@ -60,7 +60,7 @@ namespace ATC_Game
             {
                 this._speed_enabled = !this.airplane.autopilot_on; // disabled speed seq button if autopilot is on
                 this._alt_enabled = !this.airplane.autopilot_on; // disabled altitude seq button if autopilot is on
-                this._head_enabled = this.airplane.heading_enabled && !this.airplane.autopilot_on; // disabled heading seq button if the airplane is just in turn or autopilot is on
+                this._head_enabled = !(this.airplane.heading_autopilot_on || this.airplane.autopilot_on); // disabled heading seq button if the airplane is just in turn or autopilot is on
                 this._speed_sbtn.value = this.airplane.delayer.desired_speed;
                 this._altitude_sbtn.value = this.airplane.delayer.desired_alt;
                 this._heading_sbtn.value = this.airplane.delayer.desired_heading;

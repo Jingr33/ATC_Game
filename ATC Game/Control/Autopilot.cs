@@ -234,7 +234,10 @@ namespace ATC_Game.Control
             this.operation = AutopilotOperation.Unknown;
             this._airplane.delayer.SetActualFlightState();
             if (switch_off)
+            {
                 this._airplane.autopilot_on = false;
+                this._airplane.heading_autopilot_on = false;
+            }
         }
     }
 }
