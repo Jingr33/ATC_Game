@@ -31,19 +31,10 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Update methid for autopilot.
+        /// Update methods for autopilot. Start operation of it is setted.
         /// </summary>
         /// <param name="game_time">game time</param>
         public void Update(GameTime game_time)
-        {
-            StartAutopilot(game_time);
-        }
-
-        /// <summary>
-        /// Call right autopilot function depending on the operation.
-        /// </summary>
-        /// <param name="game_time">game _time</param>
-        private void StartAutopilot(GameTime game_time)
         {
             switch (this.operation)
             {
@@ -53,9 +44,14 @@ namespace ATC_Game.Control
                 case AutopilotOperation.Landing:
                     Landing(game_time);
                     break;
+                case AutopilotOperation.LeftTurn:
+                case AutopilotOperation.RightTurn:
+                    OneTurn(this.operation);
+                    break;
                 default:
                     break;
             }
+
         }
 
         /// <summary>
@@ -118,6 +114,19 @@ namespace ATC_Game.Control
                 Waypoint aux_wp = new Waypoint(this._game, pos, "");
                 this._airplane.waypoints.Insert(0, aux_wp);
             }
+        }
+
+        /// <summary>
+        /// Create one circle turn trajectory according to the turn direction.
+        /// </summary>
+        /// <param name="turn_direc">direction of the turn (left / right)</param>
+        private void OneTurn (AutopilotOperation turn_direc)
+        {
+            this._airplane.heading_autopilot_on = true;
+            float heading_step = 0.01f;
+            heading_step = this.operation == AutopilotOperation.RightTurn ? heading_step : -heading_step;
+            this.operation = AutopilotOperation.Unknown;
+            this._heading_equal.OneTurnTrajectory(heading_step);
         }
 
         /// <summary>

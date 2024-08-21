@@ -267,7 +267,7 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void UpdateAutopilot(GameTime game_time)
         {
-            if (this.autopilot_on) // autopilot for completly autopiloted functions
+            if (this.autopilot_on || this.heading_autopilot_on) // autopilot for completly autopiloted functions
                 this.autopilot.Update(game_time);
 
             if (this.waypoints.Count > 0 && !autopilot_on && !this.heading_autopilot_on) // autopilot for heading piloted functions
@@ -325,7 +325,6 @@ namespace ATC_Game.GameObjects
                 {
                     this.heading = next_heading;
                     this.center_position = next_pos;
-                    //this.traj_frame_time = 0;
                 }
             }
         }

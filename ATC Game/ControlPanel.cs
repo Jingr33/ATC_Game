@@ -68,8 +68,7 @@ namespace ATC_Game
                 this.airplane.delayer.desired_alt = this._altitude_sbtn.Update();
                 if (this._head_enabled)
                     this.airplane.delayer.desired_heading = this._heading_sbtn.Update();
-                if (this._land_btn.WasClicked())
-                    this.airplane.autopilot.PossibleToLand(game_time);
+                UpdateOneClickButtons(game_time);
             }
             else
             {
@@ -80,6 +79,25 @@ namespace ATC_Game
                 this._altitude_sbtn.value = 0;
                 this._heading_sbtn.value = 0;
             }
+        }
+
+        /// <summary>
+        /// Update states of the standard buttons.
+        /// </summary>
+        private void UpdateOneClickButtons (GameTime game_time)
+        {
+            if (this._left_turn_btn.WasClicked())
+            {
+                this.airplane.autopilot.operation = AutopilotOperation.LeftTurn;
+                this.airplane.heading_autopilot_on = true;
+            }
+            if (this._right_turn_btn.WasClicked())
+            {
+                this.airplane.autopilot.operation = AutopilotOperation.RightTurn;
+                this.airplane.heading_autopilot_on = true;
+            }
+            if (this._land_btn.WasClicked())
+                this.airplane.autopilot.PossibleToLand(game_time);
         }
 
         /// <summary>

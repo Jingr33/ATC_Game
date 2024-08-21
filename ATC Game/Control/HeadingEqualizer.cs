@@ -97,12 +97,35 @@ namespace ATC_Game.Control
             }
         }
 
+        /// <summary>
+        /// Create circle trajectory of one holding turn of the airplane.
+        /// </summary>
+        /// <param name="heading_step">one heading step</param>
+        public void OneTurnTrajectory (float heading_step)
+        {
+            SetActualAirplaneState();
+            this.desired_heading = (int)this._actual_heading;
+            this._actual_heading += heading_step;
+            this._airplane.trajectory = new ConcurrentQueue<Vector2> { };
+            this._airplane.heading_queue = new ConcurrentQueue<int> { };
+            for (float i = 0; i < 180; i += Math.Abs(heading_step))
+            {
+                SetNextTurnPoint(heading_step);
+                this._actual_heading += heading_step;
+            }
+
+        }
+
+        /// <summary>
+        /// Set actual states of the airplane.
+        /// </summary>
         private void SetActualAirplaneState()
         {
             this._actual_heading = this._airplane.heading;
             this._actual_x_pos = this._airplane.center_position.X;
             this._actual_y_pos = this._airplane.center_position.Y;
             this._airplane.trajectory = new ConcurrentQueue<Vector2> { };
+            this._airplane.heading_queue = new ConcurrentQueue<int> { };
         }
 
         /// <summary>

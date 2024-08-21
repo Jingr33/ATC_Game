@@ -31,11 +31,10 @@ namespace ATC_Game
         public AirplaneLogic airplane_logic;
         public MapGenerator map_generator;
         public ControlPanel control_panel;
+        public ObjectInfoPanel info_panel;
 
-        private RenderTarget2D _game_render_target;
-        private RenderTarget2D _strips_render_target;
-        private RenderTarget2D _control_render_target;
-        private Rectangle _game_area, _plane_stripes_area, _control_area;
+        private RenderTarget2D _game_render_target, _strips_render_target, _control_render_target, _object_info_target;
+        private Rectangle _game_area, _plane_stripes_area, _control_area, _info_area;
         private Vector2 _plane_stripes_offset; // displayd part of scrollable panel
         private int stripes_block_height; // total height of content in plane strips panel
 
@@ -72,6 +71,10 @@ namespace ATC_Game
             this._control_render_target = new RenderTarget2D(GraphicsDevice, 1400, 50);
             this.control_panel = new ControlPanel(this);
             this._control_area = new Rectangle(0, 0, 1400, 50);
+            // object info area
+            this._object_info_target = new RenderTarget2D(GraphicsDevice, 500, 400);
+            this.info_panel = new ObjectInfoPanel(this);
+            this._info_area = new Rectangle(0, 450, 500, 400);
 
             this.airplanes = new List<Airplane>();
             this.infostripes = new List<InfoStripe>();
@@ -90,6 +93,7 @@ namespace ATC_Game
             UpdateScrollablePanel();
             UpdateGameArea(game_time);
             UpdateControlPanel(game_time);
+            UpdateInfoPanel(game_time);
             base.Update(game_time);
         }
 
@@ -181,6 +185,15 @@ namespace ATC_Game
             this.control_panel.Update(game_time);
         }
 
+        /// <summary>
+        /// Update events in the object info panel.
+        /// </summary>
+        /// <param name="game_time"></param>
+        private void UpdateInfoPanel (GameTime game_time)
+        {
+            this.info_panel.Update(game_time);
+        }
+
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(this._bg_color);
@@ -195,7 +208,11 @@ namespace ATC_Game
 
             GraphicsDevice.SetRenderTarget(this._control_render_target);
             GraphicsDevice.Clear(this._bg_color);
-            DrawcontrolArea();
+            DrawControlArea();
+
+            GraphicsDevice.SetRenderTarget(this._object_info_target);
+            GraphicsDevice.Clear(this._bg_color);
+            DrawInfoPanel();
 
             GraphicsDevice.SetRenderTarget(null);
             DrawMainLayout();
@@ -244,10 +261,20 @@ namespace ATC_Game
         /// <summary>
         /// TexDraw control panel area content.
         /// </summary>
-        private void DrawcontrolArea()
+        private void DrawControlArea()
         {
             this._spriteBatch.Begin();
             this.control_panel.Draw(this._spriteBatch);
+            this._spriteBatch.End();
+        }
+
+        /// <summary>
+        /// Draw textures of the object info panel.
+        /// </summary>
+        private void DrawInfoPanel()
+        {
+            this._spriteBatch.Begin();
+            this.info_panel.Draw(this._spriteBatch);
             this._spriteBatch.End();
         }
 
