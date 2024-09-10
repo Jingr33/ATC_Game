@@ -1,4 +1,5 @@
-﻿using ATC_Game.GameObjects;
+﻿using ATC_Game.Drawing;
+using ATC_Game.GameObjects;
 using ATC_Game.GameObjects.AirplaneFeatures;
 using ATC_Game.Logic;
 using Microsoft.Xna.Framework;
@@ -15,9 +16,18 @@ using System.Runtime.CompilerServices;
 // predelej na ground speed at to neukazuje nereálné čísla
 // tlačítka na posouvání stripeama - možná
 // pri ceste na lwp se na konci nezmeni heading v control panelu
-// pokud se letisti zmeni rwy_in_use, vem vsechny letadla co tam pristavaji a jednou funkci jim tu runway zmen z tridy toho letiste
-// dodelej event na runway pro kliknuti mysi... normalne ke zobrazeni info, mas pripravený clickSquare
+// pokud se letisti zmeni rwy_in_use, vem vsechny letadla co tam pristavaji a jednou funkci jim tu land_runway zmen z tridy toho letiste
+// dodelej event na land_runway pro kliknuti mysi... normalne ke zobrazeni info, mas pripravený clickSquare
 // letadlo vyletí z heading autopilota a controlery se nastaví někdy na aktuální údaje, ale přitom letadlo třeba zrychlovalo na vyšší rychlost
+// doddelej track drawer
+// airplane info panel - arrow icon mezi destinacemi
+// třípísmené kódy letitšť dodělej
+// at se do airplane ghosts, arrival departure airplanes v letistich neco hodí hned od začátku hry
+// pokud letadlo odletí z letiště oddělej ho z airplaneghost a změn stats letiště
+// vykresli do mapy k runwayim jejich názvy
+// change v airport info panelu at funguje
+// on ground letadla - dodělej, ať to funguje
+// zkontroluj přepínání rwy in use v airport info panelu az budes mit letiste co má víc rwys
 
 
 namespace ATC_Game
@@ -72,9 +82,9 @@ namespace ATC_Game
             this.control_panel = new ControlPanel(this);
             this._control_area = new Rectangle(0, 0, 1400, 50);
             // object info area
-            this._object_info_target = new RenderTarget2D(GraphicsDevice, 500, 400);
-            this.info_panel = new ObjectInfoPanel(this);
-            this._info_area = new Rectangle(0, 450, 500, 400);
+            this._object_info_target = new RenderTarget2D(GraphicsDevice, 400, 500);
+            this.info_panel = new ObjectInfoPanel(this, 400, 500);
+            this._info_area = new Rectangle(0, 450, 400, 500);
 
             this.airplanes = new List<Airplane>();
             this.infostripes = new List<InfoStripe>();
@@ -147,7 +157,7 @@ namespace ATC_Game
                 }
             }
 
-            if (this.airplane_logic.IsAllPlanesDeactive())
+            if (this.airplane_logic.AreAllPlanesDeactive())
             {
                 this.map_generator.DeactiveAllWaypoints();
                 this.map_generator.DeactiveAllLandpoints();
@@ -230,6 +240,7 @@ namespace ATC_Game
             Rectangle scroll_offset = new Rectangle(0, (int)this._plane_stripes_offset.Y, this._plane_stripes_area.Width, this._plane_stripes_area.Height);
             this._spriteBatch.Draw(this._strips_render_target, this._plane_stripes_area, scroll_offset, this._bg_color);
             this._spriteBatch.Draw(this._control_render_target, this._control_area, this._bg_color);
+            this._spriteBatch.Draw(this._object_info_target, this._info_area, this._bg_color);
             this._spriteBatch.End();
         }
 

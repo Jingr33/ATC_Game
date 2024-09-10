@@ -75,6 +75,7 @@ namespace ATC_Game.GameObjects
         public LandingWaypoint landpoint;
         // drawing
         private TrajectoryDrawer _traj_drawer;
+        public TrackDrawer _track_drawer;
 
         public Airplane (Game1 game, int id, Vector2 center_position, int heading, OperationType oper_type, int speed, int type_number, 
                         string destination, int altitude, FlightSection flight_section, FlightStatus flight_status, Airport airport)
@@ -98,7 +99,7 @@ namespace ATC_Game.GameObjects
             this.flight_section = flight_section;
             this.flight_status = flight_status;
             this.airport = airport;
-            this.runway = this.oper_type == OperationType.Arrival ? airport.in_use_arr : airport.in_use_dep;
+            this.runway = this.oper_type == OperationType.Arrival ? airport.in_use_arr[0] : airport.in_use_dep[0]; //TODO: tohle musí být náhodný výběr
             this.oper_type = oper_type;
             this.destination = destination;
             this.altitude = altitude;
@@ -127,6 +128,17 @@ namespace ATC_Game.GameObjects
             this.landpoint = null;
             // drawing
             this._traj_drawer = new TrajectoryDrawer(this._game, this);
+            this._track_drawer = new TrackDrawer(this._game, this);
+
+            AssignToAirportTraffic();
+        }
+
+        private void AssignToAirportTraffic ()
+        {
+            if (this.oper_type == OperationType.Departure)
+                this.airport.AddAirplaneTo(this, this.airport.departure_airplanes);
+            else
+                this.airport.AddAirplaneTo(this, this.airport.arrival_airplanes);
         }
 
         /// <summary>
@@ -304,7 +316,7 @@ namespace ATC_Game.GameObjects
         {
             if (this.speed == 0 && this.flight_section == FlightSection.Landed)
             {
-                // TODO: neco s airport statistikama
+                this.airport.AirplaneLanded(this);
                 this.destroy_me = true;
             }
         }
@@ -499,6 +511,8 @@ namespace ATC_Game.GameObjects
         {
             if ((this.time_in_game > 12) && !IsInGameMap(Config.alert_bound_dist))
             {
+                this.airport.AirplaneDeparted(this);
+                //TODO: zkontroluj odlet na správnou stranu
                 this.destroy_me = true;
                 return;
             }

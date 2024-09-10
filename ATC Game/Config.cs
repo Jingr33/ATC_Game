@@ -47,6 +47,13 @@ namespace ATC_Game
         //COLORS
         public static Color bg_color = Color.Snow; // background color
         public static Color traj_color = Color.LightBlue; // color of a trajectory
+        public static Color text_black = Color.Black;
+        public static Color text_gray = Color.DimGray;
+        public static Color border_gray = Color.Gainsboro;
+        public static Color arr_rwy_color = Color.BlueViolet;
+        public static Color dep_rwy_color = Color.LimeGreen;
+        public static Color arr_btn_color = Color.CadetBlue;
+        public static Color dep_btn_color = Color.LightGreen;
 
         // CONTROLS
         public static int min_control_speed = 8; // minimum adjustable speed of an airplane in knots

@@ -68,7 +68,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Generate a trajectory of a flight to a landing act_position already with runway actual_head.
+        /// Generate a trajectory of a flight to a landing act_position already with land_runway actual_head.
         /// </summary>
         /// <param name="LWP">landing waypoint object</param>
         /// <param name="heading_step">one step of actual_head change</param>
@@ -80,10 +80,10 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Change heading of the airplane in time to lead it to the its runway.
+        /// Change heading of the airplane in time to lead it to the its land_runway.
         /// </summary>
         /// <param name="airplane_pos">actual position of the airplane</param>
-        /// <param name="rwy_pos">position of the treshold of the runway</param>
+        /// <param name="rwy_pos">position of the treshold of the land_runway</param>
         /// <param name="game_time">game time</param>
         public void LeadToRunway (Vector2 airplane_pos, Vector2 rwy_pos, GameTime game_time)
         {
@@ -175,7 +175,7 @@ namespace ATC_Game.Control
             // points of the trajectory
             this.desired_heading = HeadingToWP(new Vector2(LWP.position.X - 50, LWP.position.Y - 50)); // desired actual_head is setted to the final turn start act_position
             GenToWPTrajectoryAsync(turn_point, heading_step); // generate first part of trajectory
-            this.desired_heading = LWP.runway.heading; // the final turn start act_position is setted to the runway actual_head
+            this.desired_heading = LWP.runway.heading; // the final turn start act_position is setted to the land_runway actual_head
             heading_step = is_left_turn ? -heading_step : heading_step;
             Console.WriteLine(heading_step.ToString());
             while (this.desired_heading != (int)this._actual_heading) // generate final turn of trajectory 
@@ -433,7 +433,7 @@ namespace ATC_Game.Control
         /// </summary>
         /// <param name="lwp_pos">landing waypoint position</param>
         /// <param name="plane_pos">plane position</param>
-        /// <param name="rwy_heading">vector of the runway</param>
+        /// <param name="rwy_heading">vector of the land_runway</param>
         /// <returns>a value of the angle</returns>
         private float AngleBetweenVectors (Vector2 lwp_pos, Vector2 plane_pos, float rwy_heading)
         {

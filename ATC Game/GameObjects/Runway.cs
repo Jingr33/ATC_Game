@@ -20,15 +20,15 @@ namespace ATC_Game.GameObjects
     {
         private Game1 _game;
         private Airport _airport;
-        private string _number; // (06, 24L, 9C, ...)
+        public string number; // (06, 24L, 9C, ...)
         public Vector2 position; // positon in airport area
         public Vector2 map_position;
-        public int altitude; // altitude of the runway in feet
-        public int heading; // direction of runway in degree
-        public Vector2 direction; // direction of runway in vector
+        public int altitude; // altitude of the land_runway in feet
+        public int heading; // direction of land_runway in degree
+        public Vector2 direction; // direction of land_runway in vector
         public float rotation; // direction of rwy in float
-        private int _rwy_lenght; // runway lenght in meters
-        private int _rwy_width; // runway width in meters
+        private int _rwy_lenght; // land_runway lenght in meters
+        private int _rwy_width; // land_runway width in meters
         private Texture2D _texture;
         private Texture2D _active_texture;
         private Vector2 _draw_position;
@@ -47,12 +47,12 @@ namespace ATC_Game.GameObjects
         {
             this._game = game;
             this._airport = airport;
-            this._number = rwy_number;
+            this.number = rwy_number;
             this.position = start_pos;
             this.map_position = GetInMapPosition();
             this.altitude = 0; // TODO:
             this.heading = heading;
-            this.direction = General.GetDirection(this.heading); // direction of runway in vector2
+            this.direction = General.GetDirection(this.heading); // direction of land_runway in vector2
             this._rwy_lenght = lenght;
             this._rwy_width = width;
             this._texture = CreateRwyTexture(this._game.GraphicsDevice, Color.Black);
@@ -68,10 +68,10 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Create texture of runway in right size.
+        /// Create texture of land_runway in right size.
         /// </summary>
         /// <param name="graphicsDevice">grpahics device</param>
-        /// <returns>runway texture (rectangle)</returns>
+        /// <returns>land_runway texture (rectangle)</returns>
         private Texture2D CreateRwyTexture(GraphicsDevice graphicsDevice, Color color)
         {
             int tex_width = this._rwy_width / 9;
@@ -85,7 +85,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Return draw position of a runway.
+        /// Return draw position of a land_runway.
         /// </summary>
         /// <returns>draw position</returns>
         private Vector2 GetDrawPosition ()
@@ -105,7 +105,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Get a rectangle as a button for click event on the runway.
+        /// Get a rectangle as a button for click event on the land_runway.
         /// </summary>
         /// <returns>a click event rectangle</returns>
         private Rectangle GetEventSquare ()
@@ -122,7 +122,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Create positions of landing lights for runway.
+        /// Create positions of landing lights for land_runway.
         /// </summary>
         private void InitLightsPositions ()
         {
@@ -137,7 +137,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Initialization of landing waypoint for this runway.
+        /// Initialization of landing waypoint for this land_runway.
         /// </summary>
         private void InitLandingWP()
         {
@@ -146,7 +146,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update landing lights of this runway. Shift active light to another in period.
+        /// Update landing lights of this land_runway. Shift active light to another in period.
         /// </summary>
         public void UpdateLandingLights (GameTime game_time)
         {
@@ -159,7 +159,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Return parent airport of this runway.
+        /// Return parent airport of this land_runway.
         /// </summary>
         /// <returns>parent airport</returns>
         public Airport GetMyAirport()
@@ -168,7 +168,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Draw right variant of the runway texture.
+        /// Draw right variant of the land_runway texture.
         /// </summary>
         /// <param name="sprite_batch">sprite batch</param>
         public void Draw (SpriteBatch sprite_batch)

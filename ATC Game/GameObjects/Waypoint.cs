@@ -19,7 +19,7 @@ namespace ATC_Game.GameObjects
         private Texture2D _texture;
         private Texture2D _active_texture;
         public Vector2 position;
-        private string _name;
+        public string name;
         private bool _is_active;
         // state (active/deactive)
         public bool is_active;
@@ -33,7 +33,7 @@ namespace ATC_Game.GameObjects
         {
             this._game = game;
             this.position = position;
-            this._name = name;
+            this.name = name;
             this._texture = GetTexture();
             this._active_texture = GetActiveTexture();
             this.is_active = false;

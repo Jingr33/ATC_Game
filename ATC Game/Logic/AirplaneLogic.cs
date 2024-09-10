@@ -118,7 +118,7 @@ namespace ATC_Game.Logic
         /// Check, if all airplanes are in a deactive state.
         /// </summary>
         /// <returns>true if all planes are deactivated</returns>
-        public bool IsAllPlanesDeactive ()
+        public bool AreAllPlanesDeactive ()
         {
             foreach (Airplane airplane in this._game.airplanes)
                 if (airplane.is_active) return false;

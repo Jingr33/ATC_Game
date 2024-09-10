@@ -83,7 +83,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Start autopilot heading control for ToLandpoint operation. Create trajectory of a flight to a landpoint for elected runway
+        /// Start autopilot heading control for ToLandpoint operation. Create trajectory of a flight to a landpoint for elected land_runway
         /// and prepare heading a position of a plane for landing.
         /// </summary>
         public void ToLandpoint()
@@ -176,10 +176,10 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Maintain or update a heding of the airplane in time to direct plane to the runway.
+        /// Maintain or update a heding of the airplane in time to direct plane to the land_runway.
         /// </summary>
         /// <param name="airplane_pos">position of the airplane</param>
-        /// <param name="rwy_pos">position of the airport runway</param>
+        /// <param name="rwy_pos">position of the airport land_runway</param>
         private void ControlLandingHeading(Vector2 airplane_pos, Vector2 rwy_pos, GameTime game_time)
         {
             this._airplane.delayer.heading_equal.LeadToRunway(airplane_pos, rwy_pos, game_time);
@@ -189,11 +189,11 @@ namespace ATC_Game.Control
         /// MAintain and decrease speed of airplane before touch down and brake the airplane on ground.
         /// </summary>
         /// <param name="time">game time from last speed change</param>
-        /// <param name="distance">distance from the runway treshold</param>
+        /// <param name="distance">distance from the land_runway treshold</param>
         /// <param name="in_air">if the airplane id in the air (true) or already on ground (false)</param>
         private void ControlLandingSpeed(float time, float distance, bool in_air)
         {
-            if (in_air && distance > 50 && this._airplane.speed > 10 && time >= 0.4) // airplane is far from the runway and fast
+            if (in_air && distance > 50 && this._airplane.speed > 10 && time >= 0.4) // airplane is far from the land_runway and fast
             {
                 this._airplane.speed -= 1;
                 this._time = 0;
@@ -207,7 +207,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// Control an airplane altitude and decrease it in time.
         /// </summary>
-        /// <param name="distance">distance from a treshold of the runway</param>
+        /// <param name="distance">distance from a treshold of the land_runway</param>
         private void ControlLandingAltitude(float distance)
         {
             int ground_alt = this._airplane.altitude - this._airplane.runway.altitude;
@@ -219,7 +219,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// Change flight section of the airplane enter the new part of flight
         /// </summary>
-        /// <param name="distance">distance of airplane from treshold of the runway</param>
+        /// <param name="distance">distance of airplane from treshold of the land_runway</param>
         /// <param name="in_air">if the airplane is in the air (true) or on ground</param>
         private void FlightSectionChanges (float distance, bool in_air)
         {

@@ -18,7 +18,7 @@ namespace ATC_Game.GameObjects
 {
     /// <summary>
     /// Class for landing waypoint.
-    /// It is waypoint for every runway. Behind this point the plane goes to land with automatic land system.
+    /// It is waypoint for every land_runway. Behind this point the plane goes to land with automatic land system.
     /// </summary>
     public class LandingWaypoint : Waypoint
     {

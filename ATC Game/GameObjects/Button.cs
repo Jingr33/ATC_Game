@@ -56,10 +56,6 @@ namespace ATC_Game.GameObjects
         {
             Texture2D rect = new Texture2D(graphicsDevice, this._width, this._height);
             Color[] color_data = new Color[this._width * this._height];
-            // background
-            //for (int i = 0; i < color_data.Length; i++)
-            //    color_data[i] = this._bg_color;
-            // border
             for (int j = 0; j < this._height; j++)
             {
                 for (int k = 0; k < this._width; k++)

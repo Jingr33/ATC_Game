@@ -95,7 +95,7 @@ namespace ATC_Game
         {
             OperationType oper_type = OperationType.Departure;
             Airport airport = ChooseArrDepAirport(); // elected airport
-            Runway runway = airport.in_use_dep; // rwy in use for departures
+            Runway runway = airport.in_use_dep[0]; //TODO: rwy in use for departures - tohle musí být náhodný výběr
             Vector2 start_pos = SetRunwayDeparturePos(runway);
             int heading = runway.heading;
             int speed = 0;
@@ -137,7 +137,7 @@ namespace ATC_Game
         /// <summary>
         /// Set departure position of a starting airplane from a runaway
         /// </summary>
-        /// <param name="rwy">departure runway</param>
+        /// <param name="rwy">departure land_runway</param>
         /// <returns>position of airplane spawn</returns>
         private Vector2 SetRunwayDeparturePos (Runway rwy)
         {

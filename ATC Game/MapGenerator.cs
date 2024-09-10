@@ -104,6 +104,39 @@ namespace ATC_Game
         }
 
         /// <summary>
+        /// Set deactive state to all airports.
+        /// </summary>
+        public void DeactiveAllAirports ()
+        {
+            foreach(Airport airport in this.airports)
+                airport.is_active = false;
+        }
+
+        /// <summary>
+        /// Get an active airport if it possible. If not, return null.
+        /// </summary>
+        /// <returns>an active airport object</returns>
+        public Airport GetActiveAirport()
+        {
+            foreach (Airport airport in this.airports)
+                if (airport.is_active)
+                    return airport;
+            return null;
+        }
+
+        /// <summary>
+        /// If there is some active airport, return true. If not -> false.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsSomeActiveAirport ()
+        {
+            foreach (Airport airport in this.airports)
+                if (airport.is_active)
+                    return true;
+            return false;
+        }
+
+        /// <summary>
         /// Deactivate all waypoints in the game map.
         /// </summary>
         public void DeactiveAllWaypoints ()
@@ -133,6 +166,8 @@ namespace ATC_Game
                     list.Add(wp);
             return list;
         }
+
+        
 
         /// <summary>
         /// TexDraw map objects.

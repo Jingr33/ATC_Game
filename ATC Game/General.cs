@@ -196,5 +196,18 @@ namespace ATC_Game
         {
             return Math.Abs(line_a*point.X + line_b*point.Y + line_c) / Math.Sqrt(Math.Pow(line_a, 2) + Math.Pow(line_b, 2));
         }
+
+        /// <summary>
+        /// Switch a bool value to the second variant.
+        /// </summary>
+        /// <param name="actual_value">actual value of the bool</param>
+        /// <returns></returns>
+        public static bool Switcher(bool actual_value)
+        {
+            if (actual_value)
+                return false;
+            else
+                return true;
+        }
     }
 }
