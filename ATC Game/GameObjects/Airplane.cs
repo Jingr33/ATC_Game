@@ -75,7 +75,7 @@ namespace ATC_Game.GameObjects
         public LandingWaypoint landpoint;
         // drawing
         private TrajectoryDrawer _traj_drawer;
-        public TrackDrawer _track_drawer;
+        public TrackDrawer track_drawer;
 
         public Airplane (Game1 game, int id, Vector2 center_position, int heading, OperationType oper_type, int speed, int type_number, 
                         string destination, int altitude, FlightSection flight_section, FlightStatus flight_status, Airport airport)
@@ -128,7 +128,7 @@ namespace ATC_Game.GameObjects
             this.landpoint = null;
             // drawing
             this._traj_drawer = new TrajectoryDrawer(this._game, this);
-            this._track_drawer = new TrackDrawer(this._game, this);
+            this.track_drawer = new TrackDrawer(this._game);
 
             AssignToAirportTraffic();
         }
@@ -410,6 +410,7 @@ namespace ATC_Game.GameObjects
             else
                 this.TexDraw(_spriteBatch);
             DrawTrajectory(_spriteBatch);
+            this.track_drawer.Draw(_spriteBatch);
         }
 
         /// <summary>

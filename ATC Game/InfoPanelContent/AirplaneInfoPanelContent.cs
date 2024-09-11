@@ -174,6 +174,7 @@ namespace ATC_Game.InfoPanelContent
         {
             this._airplane = airplane;
             TrackDrawerSwitcher();
+            this._airplane.track_drawer.Update(this._airplane);
         }
 
         /// <summary>
@@ -184,13 +185,23 @@ namespace ATC_Game.InfoPanelContent
             if (this._track_schema_rect.Contains(this._game.mouse.Position)
                 && this._game.mouse.LeftButton == ButtonState.Released && this._last_state == ButtonState.Pressed)
             {
-                this._airplane._track_drawer.SwitchActivity();
+                this._airplane.track_drawer.SwitchActivity();
                 if (this._track_drawer_is_active)
                     this._track_drawer_is_active = false;
                 else
                     this._track_drawer_is_active = true;
             }
             this._last_state = this._game.mouse.LeftButton;
+        }
+
+        /// <summary>
+        /// Set track drawer activity to false.
+        /// </summary>
+        public void DeactiveTrackDrawer()
+        {
+            this._track_drawer_is_active = false;
+            if (this._airplane != null)
+                this._airplane.track_drawer.is_active = false;
         }
 
         /// <summary>

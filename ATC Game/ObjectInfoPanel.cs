@@ -146,6 +146,7 @@ namespace ATC_Game
             {
                 this._is_airport_active = false;
                 this._is_airplane_active = false;
+                this._airplane_content.DeactiveTrackDrawer();
             }
             // airplane tab is exist
             else if (this._airplane != null && this._airport == null)
@@ -158,6 +159,7 @@ namespace ATC_Game
             {
                 this._is_airport_active = true;
                 this._is_airplane_active = false;
+                this._airplane_content.DeactiveTrackDrawer();
             }
             // both exits -> click event
             else
@@ -182,6 +184,7 @@ namespace ATC_Game
             {
                 this._is_airport_active = true;
                 this._is_airplane_active = false;
+                this._airplane_content.DeactiveTrackDrawer();
             }
             //last button state change
             this._last_state = this._game.mouse.LeftButton;

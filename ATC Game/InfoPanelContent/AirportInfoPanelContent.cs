@@ -126,7 +126,6 @@ namespace ATC_Game.InfoPanelContent
                         color_data[i + j * width] = color2;
             button.SetData(color_data);
             return button;
-
         }
 
         /// <summary>
@@ -139,6 +138,7 @@ namespace ATC_Game.InfoPanelContent
             this._rwy_info_rects = GetRwyButtonSquares(this._btn_width, this._btn_height);
             FlightToAPDrawerSwitcher();
             RwysInUseSwitcher();
+            
         }
 
         /// <summary>

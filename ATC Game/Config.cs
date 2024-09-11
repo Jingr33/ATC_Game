@@ -54,6 +54,7 @@ namespace ATC_Game
         public static Color dep_rwy_color = Color.LimeGreen;
         public static Color arr_btn_color = Color.CadetBlue;
         public static Color dep_btn_color = Color.LightGreen;
+        public static Color track_color = Color.GreenYellow;
 
         // CONTROLS
         public static int min_control_speed = 8; // minimum adjustable speed of an airplane in knots

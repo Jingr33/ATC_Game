@@ -16,10 +16,9 @@ namespace ATC_Game.Drawing
         private Airport _airport;
         private bool _is_active;
 
-        public FlightsToApDrawer(Game1 game, Airport airport)
+        public FlightsToApDrawer(Game1 game)
         {
             this._game = game;
-            this._airport = airport;
             this._is_active = false;
         }
 
