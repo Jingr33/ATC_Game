@@ -31,7 +31,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         }
 
         /// <summary>
-        /// Return rectangle of the stripe position for click event.
+        /// Return rectangle of the stripe touch_down_position for click event.
         /// </summary>
         /// <param name="stripe_row">row of the stripe in the blosk</param>
         /// <returns>rectangle of click event button</returns>
@@ -44,7 +44,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         /// TexDraw a info stripe for a given airplane (it depends on the is_active state).
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
-        /// <param name="y_pos">row (position) of a stripe in plane sptripe area</param>
+        /// <param name="y_pos">row (touch_down_position) of a stripe in plane sptripe area</param>
         public void Draw (SpriteBatch spriteBatch, int stripe_row)
         {
             int x_pos = GetXPosition();
@@ -56,7 +56,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         }
 
         /// <summary>
-        /// Return X position of the stripe in the stripe area.
+        /// Return X touch_down_position of the stripe in the stripe area.
         /// </summary>
         /// <returns>integer x positon coord</returns>
         private int GetXPosition ()
@@ -65,7 +65,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         }
 
         /// <summary>
-        /// Return Y position of the stripe in the stripe area
+        /// Return Y touch_down_position of the stripe in the stripe area
         /// </summary>
         /// <param name="stripe_row">row of the stripe in the block</param>
         /// <returns>Y coord</returns>

@@ -21,8 +21,9 @@ namespace ATC_Game.GameObjects
         private Game1 _game;
         private Airport _airport;
         public string number; // (06, 24L, 9C, ...)
-        public Vector2 position; // positon in airport area
-        public Vector2 map_position;
+        public Vector2 touch_down_position; // positon in airport area
+        private Vector2 _center_position; // touch_down_position of the runway center in the airport area
+        public Vector2 map_position; // touch_down_position in whole game
         public int altitude; // altitude of the land_runway in feet
         public int heading; // direction of land_runway in degree
         public Vector2 direction; // direction of land_runway in vector
@@ -31,7 +32,6 @@ namespace ATC_Game.GameObjects
         private int _rwy_width; // land_runway width in meters
         private Texture2D _texture;
         private Texture2D _active_texture;
-        private Vector2 _draw_position;
         private WeightCat _max_category; // maximum weight category
         private float _time;
         public bool is_active;
@@ -43,28 +43,27 @@ namespace ATC_Game.GameObjects
         // landing waypoint
         public LandingWaypoint land_waypoint;
 
-        public Runway(Game1 game, Airport airport, string rwy_number, Vector2 start_pos, int heading, int lenght, int width)
+        public Runway(Game1 game, Airport airport, string rwy_number, Vector2 center_pos, int heading, int lenght, int width)
         {
             this._game = game;
             this._airport = airport;
             this.number = rwy_number;
-            this.position = start_pos;
-            this.map_position = GetInMapPosition();
-            this.altitude = 0; // TODO:
+            this._rwy_lenght = lenght / 37;
+            this._rwy_width = width / 9;
             this.heading = heading;
+            this._center_position = center_pos;
+            this.map_position = GetInMapPosition();
+            this.touch_down_position = GetTouchDownPosition();
+            this.altitude = 0; // TODO:
             this.direction = General.GetDirection(this.heading); // direction of land_runway in vector2
-            this._rwy_lenght = lenght;
-            this._rwy_width = width;
-            this._texture = CreateRwyTexture(this._game.GraphicsDevice, Color.Black);
-            this._active_texture = CreateRwyTexture(this._game.GraphicsDevice, Color.DarkRed);
-            this._draw_position = GetDrawPosition();
+            this._texture = CreateRwyTexture(this._game.GraphicsDevice, Color.Black, this._rwy_lenght, this._rwy_width);
+            this._active_texture = CreateRwyTexture(this._game.GraphicsDevice, Config.rwry_active_color, this._rwy_lenght, this._rwy_width);
             this._light_pos = new Vector2[Config.land_lights_number];
             this._time = 0;
             this.is_active = false;
             LoadLightsTexture();
             InitLightsPositions();
             InitLandingWP(); // landing WP initialization
-
         }
 
         /// <summary>
@@ -72,12 +71,10 @@ namespace ATC_Game.GameObjects
         /// </summary>
         /// <param name="graphicsDevice">grpahics device</param>
         /// <returns>land_runway texture (rectangle)</returns>
-        private Texture2D CreateRwyTexture(GraphicsDevice graphicsDevice, Color color)
+        private Texture2D CreateRwyTexture(GraphicsDevice graphicsDevice, Color color, int lenght, int width)
         {
-            int tex_width = this._rwy_width / 9;
-            int tex_lenght = this._rwy_lenght / 23;
-            Texture2D rwy_tex = new Texture2D(graphicsDevice, tex_lenght, tex_width);
-            Color[] color_data = new Color[tex_lenght * tex_width];
+            Texture2D rwy_tex = new Texture2D(graphicsDevice, lenght, width);
+            Color[] color_data = new Color[lenght * width];
             for (int i = 0; i < color_data.Length; i++)
                 color_data[i] = color;
             rwy_tex.SetData(color_data);
@@ -85,23 +82,21 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Return draw position of a land_runway.
+        /// Return global touch_down_position in whole game area space.
         /// </summary>
-        /// <returns>draw position</returns>
-        private Vector2 GetDrawPosition ()
+        /// <returns>map touch_down_position</returns>
+        private Vector2 GetInMapPosition ()
         {
-            float x = this.map_position.X - 12; 
-            float y = this.map_position.Y - this._texture.Height / 2;
-            return new Vector2(x, y);
+            return new Vector2(this._center_position.X + this._airport.GetTexturePosition().X, this._center_position.Y + this._airport.GetTexturePosition().Y);
         }
 
         /// <summary>
-        /// Return global position in whole game area space.
+        /// Get a top left touch_down_position of the runway in the airport area.
         /// </summary>
-        /// <returns>map position</returns>
-        private Vector2 GetInMapPosition ()
+        /// <returns>vector2 touch_down_position of th etop left corner.</returns>
+        private Vector2 GetTouchDownPosition ()
         {
-            return new Vector2(this.position.X + this._airport.GetTexturePosition().X, this.position.Y + this._airport.GetTexturePosition().Y);
+            return General.MovePosition(this._center_position, General.GetOpositeHeading(this.heading), this._rwy_lenght / 2 - 10);
         }
 
         /// <summary>
@@ -110,7 +105,7 @@ namespace ATC_Game.GameObjects
         /// <returns>a click event rectangle</returns>
         private Rectangle GetEventSquare ()
         {
-            return new Rectangle((int)this.position.X + 400, (int)this.position.Y + 50, this._rwy_width, this._rwy_lenght / 2);
+            return new Rectangle((int)this.touch_down_position.X + 400, (int)this.touch_down_position.Y + 50, this._rwy_width, this._rwy_lenght / 2);
         }
 
         /// <summary>
@@ -127,12 +122,12 @@ namespace ATC_Game.GameObjects
         private void InitLightsPositions ()
         {
             int lights_length = 90;
-            this._land_lights_start_pos = General.PosInDirection(this.map_position, General.GetOpositeHeading(this.heading), lights_length + 17);
-            this._land_lights_end_pos = General.PosInDirection(this.map_position, General.GetOpositeHeading(this.heading), 17);
+            this._land_lights_start_pos = General.MovePosition(this.map_position, General.GetOpositeHeading(this.heading), lights_length + this._rwy_lenght / 2 + 7);
+            this._land_lights_end_pos = General.MovePosition(this.map_position, General.GetOpositeHeading(this.heading), this._rwy_lenght / 2 + 7);
             for (int i = 0; i < this._light_pos.Length; i++)
             {
                 int distance = lights_length / this._light_pos.Length * (i + 1);
-                this._light_pos[i] = General.PosInDirection(this.map_position, General.GetOpositeHeading(this.heading), distance);
+                this._light_pos[i] = General.MovePosition(this._land_lights_start_pos, this.heading, distance);
             }
         }
 
@@ -141,8 +136,8 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void InitLandingWP()
         {
-            Vector2 pos = General.PosInDirection(this.map_position, General.GetOpositeHeading(this.heading), 100);
-            this.land_waypoint = new LandingWaypoint(this._game, pos, "LWP", this);
+            Vector2 pos = General.MovePosition(this.map_position, General.GetOpositeHeading(this.heading), 100 + this._rwy_lenght / 2);
+            this.land_waypoint = new LandingWaypoint(this._game, pos, this.number + " - LWP", this);
         }
 
         /// <summary>
@@ -173,10 +168,16 @@ namespace ATC_Game.GameObjects
         /// <param name="sprite_batch">sprite batch</param>
         public void Draw (SpriteBatch sprite_batch)
         {
+            Vector2 origin = new Vector2(this._rwy_lenght / 2, this._rwy_width/ 2);
             if (!this.is_active)
-                sprite_batch.Draw(this._texture, this._draw_position, Color.White);
+            {
+                sprite_batch.Draw(this._texture, this.map_position, null, Config.bg_color, General.GetRotation(this.heading), origin, 1, SpriteEffects.None, 0.0f);
+            }
             else
-                sprite_batch.Draw(this._active_texture, this._draw_position, Color.White);
+            {
+                //Vector2 origin = new Vector2(this._active_texture.Width / 2, this._active_texture.Height / 2);
+                sprite_batch.Draw(this._active_texture, this.map_position, null, Config.bg_color, General.GetRotation(this.heading), origin, 1, SpriteEffects.None, 1.0f);
+            }
         }
 
         /// <summary>

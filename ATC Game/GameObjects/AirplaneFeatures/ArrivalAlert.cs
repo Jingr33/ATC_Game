@@ -83,9 +83,9 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         }
 
         /// <summary>
-        /// Calcute position in the game map of ariival alert.
+        /// Calcute touch_down_position in the game map of ariival alert.
         /// </summary>
-        /// <param name="plane_pos">start position of a plane</param>
+        /// <param name="plane_pos">start touch_down_position of a plane</param>
         /// <returns>point of alert</returns>
         private Vector2 CalculatePosition(Vector2 plane_pos)
         {

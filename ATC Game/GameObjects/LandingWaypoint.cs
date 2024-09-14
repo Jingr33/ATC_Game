@@ -24,7 +24,6 @@ namespace ATC_Game.GameObjects
     {
         private Game1 _game;
         public Vector2 position;
-        private Vector2 _draw_position;
         private Texture2D _texture;
         private Texture2D _active_texture;
         private string _name;
@@ -42,7 +41,6 @@ namespace ATC_Game.GameObjects
             this._name = name;
             this._texture = GetTexture();
             this._active_texture = GetActiveTexture();
-            this._draw_position = General.GetDrawPosition(this.position, this._texture);
             this.runway = runway;
             this._heading = runway.heading;
             this.turn_center_pos = new Vector2[2];
@@ -86,21 +84,20 @@ namespace ATC_Game.GameObjects
         /// </summary>
         protected override void SwitchState()
         {
-            if (this.is_active)
-                this.is_active = false;
-            else
-                this.is_active = true;
+            this.is_active = General.Switcher(this.is_active);
         }
+
         /// <summary>
         /// TexDraw a landing waypoint.
         /// </summary>
         /// <param name="spriteBatch">sprite batch</param>
         public override void Draw(SpriteBatch spriteBatch)
         {
+            Vector2 origin = new Vector2(this._texture.Width / 2, this._texture.Height / 2);
             if (this.is_active)
-                spriteBatch.Draw(this._active_texture, this._draw_position, Config.bg_color);
+                spriteBatch.Draw(this._active_texture, this.position, null,  Config.bg_color, General.GetRotation(this.runway.heading), origin, 1, SpriteEffects.None, 0);
             else
-                spriteBatch.Draw(this._texture, this._draw_position, Config.bg_color);
+                spriteBatch.Draw(this._texture, this.position, null, Config.bg_color, General.GetRotation(this.runway.heading), origin, 1, SpriteEffects.None, 0);
         }
     }
 }

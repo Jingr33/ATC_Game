@@ -19,6 +19,7 @@ namespace ATC_Game.GameObjects
     {
         private Game1 _game;
         private Texture2D _texture;
+        private Vector2 _parent_position; // top left corner of the panel (due to click event positions)
         private int _width;
         private int _height;
         private Color _bg_color;
@@ -37,11 +38,12 @@ namespace ATC_Game.GameObjects
         private Rectangle _decrease_btn;
         private MouseState _last_state;
 
-        public SequentialButton(Game1 game, Vector2 position, string title, int width, int min_val, int max_val, bool repeatable = false, 
+        public SequentialButton(Game1 game, Vector2 parent_pos, Vector2 position, string title, int width, int min_val, int max_val, bool repeatable = false, 
                                 int difference = 1, bool smooth = true)
         {
             this._game = game;
             this._position = position;
+            this._parent_position = parent_pos;
             this._title = title;
             this._difference = difference;
             this.smooth = smooth;
@@ -93,8 +95,8 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void LoadChangeButtons ()
         {
-            this._increase_btn = new Rectangle((int)this._position.X + this._width - 34, (int)this._position.Y + 0, 34, this._height);
-            this._decrease_btn = new Rectangle((int)this._position.X + 0, (int)this._position.Y + 0, 34, this._height);
+            this._increase_btn = new Rectangle((int)this._position.X + this._width - 34 + (int)this._parent_position.X, (int)this._position.Y + 0 + (int)this._parent_position.Y, 34, this._height);
+            this._decrease_btn = new Rectangle((int)this._position.X + 0 + (int)this._parent_position.X, (int)this._position.Y + 0 + (int)this._parent_position.Y, 34, this._height);
         }
 
         /// <summary>

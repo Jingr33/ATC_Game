@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System.Runtime.CompilerServices;
+using ATC_Game.Drawing;
 
 namespace ATC_Game.GameObjects
 {
@@ -32,6 +33,8 @@ namespace ATC_Game.GameObjects
         public List<AirplaneGhost> airplane_ghosts; // on ground airplanes
         public List<Airplane> arrival_airplanes;
         public List<Airplane> departure_airplanes;
+
+        public FlightsToApDrawer flights_track_drawer;
 
         public bool is_active;
         private ButtonState _last_state;
@@ -58,6 +61,8 @@ namespace ATC_Game.GameObjects
             this.airplane_ghosts = new List<AirplaneGhost>() { };
             this.arrival_airplanes = new List<Airplane>() { };
             this.departure_airplanes = new List<Airplane>() { };
+
+            this.flights_track_drawer = new FlightsToApDrawer(this._game, this);
 
             this.is_active = false;
             this._last_state = ButtonState.Released;
@@ -158,9 +163,9 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Get vector position of top left coner of airport texture
+        /// Get vector touch_down_position of top left coner of airport texture
         /// </summary>
-        /// <returns>texture draw position</returns>
+        /// <returns>texture draw touch_down_position</returns>
         public Vector2 GetTexturePosition()
         {
             int x_pos = (int)(this._center_pos.X - this._texture.Width / 2);
@@ -169,9 +174,9 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Get a vector position of the top left coner of the airport highlighter texture.
+        /// Get a vector touch_down_position of the top left coner of the airport highlighter texture.
         /// </summary>
-        /// <returns>highlighter draw position</returns>
+        /// <returns>highlighter draw touch_down_position</returns>
         public Vector2 GetHighlighterPosition()
         {
             int x_pos = (int)(this._center_position.X - this._width / 2);
@@ -250,16 +255,17 @@ namespace ATC_Game.GameObjects
         /// <param name="spriteBatch">spritebatch</param>
         public void Draw (SpriteBatch spriteBatch)
         {
-            // airport texture
-            spriteBatch.Draw(this._texture, GetTexturePosition(), Config.bg_color);
-            if (this.is_active)
-                spriteBatch.Draw(this._highlight_texture, GetHighlighterPosition(), Config.bg_color);
             // land_runway texture
             foreach (var runway in this.runways)
                 runway.Draw(spriteBatch);
             // rwy in use for arrival lights
             foreach (Runway in_use_rwy in this.in_use_arr)
                 in_use_rwy.DrawLights(spriteBatch);
+            this.flights_track_drawer.Draw(spriteBatch);
+            // airport texture
+            //spriteBatch.Draw(this._texture, GetTexturePosition(), Config.bg_color);
+            if (this.is_active)
+                spriteBatch.Draw(this._highlight_texture, GetHighlighterPosition(), Config.bg_color);
         }
 
         /// <summary>

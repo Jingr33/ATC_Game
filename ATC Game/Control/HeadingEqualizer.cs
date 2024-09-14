@@ -82,8 +82,8 @@ namespace ATC_Game.Control
         /// <summary>
         /// Change heading of the airplane in time to lead it to the its land_runway.
         /// </summary>
-        /// <param name="airplane_pos">actual position of the airplane</param>
-        /// <param name="rwy_pos">position of the treshold of the land_runway</param>
+        /// <param name="airplane_pos">actual touch_down_position of the airplane</param>
+        /// <param name="rwy_pos">touch_down_position of the treshold of the land_runway</param>
         /// <param name="game_time">game time</param>
         public void LeadToRunway (Vector2 airplane_pos, Vector2 rwy_pos, GameTime game_time)
         {
@@ -221,7 +221,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Change all flight parameters for next act_position of trajectory. Return new posint, for check the position.
+        /// Change all flight parameters for next act_position of trajectory. Return new posint, for check the touch_down_position.
         /// </summary>
         /// <param name="one_step">actual_head step change</param>
         private void SetNextTurnPoint (float one_step)
@@ -272,12 +272,12 @@ namespace ATC_Game.Control
         /// <summary>
         /// Return actual_head of the plane to elected waypoint.
         /// </summary>
-        /// <param name="WP_pos">vector position of waypoint</param>
+        /// <param name="WP_pos">vector touch_down_position of waypoint</param>
         /// <returns>actual_head value</returns>
         private int HeadingToWP (Vector2 WP_pos)
         {
             Vector2 coord_dist = new Vector2(WP_pos.X - this._actual_x_pos, WP_pos.Y - this._actual_y_pos);
-            return General.GetHeading(coord_dist);
+            return (int)General.GetHeading(coord_dist);
         }
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace ATC_Game.Control
             //// calculation of guidelines of normal of sections between individual points
             //float gl1 = (x2.Y - x1.Y) / (x2.X - x1.X);
             //float gl2 = (x3.Y - x2.Y) / (x3.X - x2.X);
-            //// calculation of a center position of a turn circle
+            //// calculation of a center touch_down_position of a turn circle
             //float centerX = (gl1 * gl2 * (x1.Y - x3.Y) + gl2 * (x1.X + x2.X) - gl1 * (x2.X + x3.X)) / (2 * (gl2 - gl1));
             //float centerY = -1 / gl1 * (centerX - (x1.X + x2.X) / 2) + (x1.Y + x2.Y) / 2;
             //Vector2 center = new Vector2(centerX, centerY);
@@ -306,7 +306,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// It try to find Point of start the final turn to the landing waypoint. Return this turn act_position or position of the plane.
+        /// It try to find Point of start the final turn to the landing waypoint. Return this turn act_position or touch_down_position of the plane.
         /// </summary>
         /// <param name="LWP">landing waypoint object</param>
         /// <param name="turn_radius">radius of final turn</param>
@@ -344,7 +344,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// It calculates position of a start of a final turn to landing waypoint.
+        /// It calculates touch_down_position of a start of a final turn to landing waypoint.
         /// </summary>
         /// <param name="LWP">landing waypoint object</param>
         /// <param name="plane_heading">actual heading of the airplane</param>
@@ -379,7 +379,7 @@ namespace ATC_Game.Control
         /// </summary>
         /// <param name="turn_radius">radius of the turn</param>
         /// <param name="LWP">landing waypoint object</param>
-        /// <returns>center position of circle and bool value, if the final turn os to left or to right site (left = true)</returns>
+        /// <returns>center touch_down_position of circle and bool value, if the final turn os to left or to right site (left = true)</returns>
         private (Vector2, bool) FindCenterPosOfTurn (float turn_radius, LandingWaypoint LWP)
         {
             Vector2 flight_direc = Vector2.Normalize(new Vector2(this._actual_x_pos, this._actual_y_pos) - LWP.position);
@@ -396,9 +396,9 @@ namespace ATC_Game.Control
         /// It calculates a act_position at a circle witch some radius. Position of act_position is given by circle radius and a rotation angle.
         /// </summary>
         /// <param name="turn_radius">radius of a turn</param>
-        /// <param name="turn_center">center position of a circle</param>
+        /// <param name="turn_center">center touch_down_position of a circle</param>
         /// <param name="turn_heading">actual_head (angle) of rotation</param>
-        /// <returns>position of a act_position at the circle</returns>
+        /// <returns>touch_down_position of a act_position at the circle</returns>
         private Vector2 PositionAtCircle(float turn_radius, Vector2 turn_center, int rwy_heading, float turn_heading, bool is_left_center)
         {
             float total_heading = General.HeadingBordersCheck(rwy_heading + turn_heading);
@@ -431,8 +431,8 @@ namespace ATC_Game.Control
         /// <summary>
         /// Calculates an angle between two vectors.
         /// </summary>
-        /// <param name="lwp_pos">landing waypoint position</param>
-        /// <param name="plane_pos">plane position</param>
+        /// <param name="lwp_pos">landing waypoint touch_down_position</param>
+        /// <param name="plane_pos">plane touch_down_position</param>
         /// <param name="rwy_heading">vector of the land_runway</param>
         /// <returns>a value of the angle</returns>
         private float AngleBetweenVectors (Vector2 lwp_pos, Vector2 plane_pos, float rwy_heading)
@@ -727,7 +727,7 @@ namespace ATC_Game.Control
 
         //private void CreateBezierTrajectory(Vector2 wp_pos, Vector2 P0, Vector2 P1, Vector2 P2, Vector2 P3)
         //{
-        //    float parameter = 0; // position on the curve
+        //    float parameter = 0; // touch_down_position on the curve
         //    while (parameter <= 1)
         //    {
         //        Vector2 actual_pos = BezierCurvePoint(parameter, P0, P1, P2, P3);

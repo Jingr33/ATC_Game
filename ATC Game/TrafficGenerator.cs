@@ -112,9 +112,9 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Random generate entry position of airplane when entering a game map.
+        /// Random generate entry touch_down_position of airplane when entering a game map.
         /// </summary>
-        /// <returns> position coordinates of entry point</returns>
+        /// <returns> touch_down_position coordinates of entry point</returns>
         private Vector2 GenArrivalEntryPos()
         {
             int rnd_site = _random.Next(0, 4);
@@ -135,10 +135,10 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Set departure position of a starting airplane from a runaway
+        /// Set departure touch_down_position of a starting airplane from a runaway
         /// </summary>
         /// <param name="rwy">departure land_runway</param>
-        /// <returns>position of airplane spawn</returns>
+        /// <returns>touch_down_position of airplane spawn</returns>
         private Vector2 SetRunwayDeparturePos (Runway rwy)
         {
             return rwy.map_position;
@@ -152,13 +152,8 @@ namespace ATC_Game
         private int GenArrivalHeading(Vector2 start_pos)
         {
             Vector2 center = new Vector2(_screen_size.X / 2, _screen_size.Y / 2);
-            Vector2 long_direction = new Vector2(center.X - start_pos.X, center.Y - start_pos.Y);
-            //float lenght = (float)Math.Sqrt(Math.Pow(long_direction.X, 2) + Math.Pow(long_direction.Y, 2));
-            //Vector2 direc = new Vector2(long_direction.X / lenght, long_direction.Y / lenght);
-            int heading = (int)(Math.Atan2(long_direction.Y, long_direction.X) / Math.PI * 180 + 90);
-            if (heading >= 0)
-                return heading;
-            return heading + 360;
+            Vector2 direction = new Vector2(center.X - start_pos.X, center.Y - start_pos.Y);
+            return (int)General.GetHeading(direction);
         }
 
         /// <summary>

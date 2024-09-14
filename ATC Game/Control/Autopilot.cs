@@ -84,7 +84,7 @@ namespace ATC_Game.Control
 
         /// <summary>
         /// Start autopilot heading control for ToLandpoint operation. Create trajectory of a flight to a landpoint for elected land_runway
-        /// and prepare heading a position of a plane for landing.
+        /// and prepare heading a touch_down_position of a plane for landing.
         /// </summary>
         public void ToLandpoint()
         {
@@ -101,7 +101,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// If the airplane position is in the neighborhood of waypoint. It fly away from this zone.
+        /// If the airplane touch_down_position is in the neighborhood of waypoint. It fly away from this zone.
         /// </summary>
         /// <param name="destination_wp">waypoint object of flight destination</param>
         private void FlyAwayFromWPArea(Vector2 wp_dest, int neighborhood = 80)
@@ -178,8 +178,8 @@ namespace ATC_Game.Control
         /// <summary>
         /// Maintain or update a heding of the airplane in time to direct plane to the land_runway.
         /// </summary>
-        /// <param name="airplane_pos">position of the airplane</param>
-        /// <param name="rwy_pos">position of the airport land_runway</param>
+        /// <param name="airplane_pos">touch_down_position of the airplane</param>
+        /// <param name="rwy_pos">touch_down_position of the airport land_runway</param>
         private void ControlLandingHeading(Vector2 airplane_pos, Vector2 rwy_pos, GameTime game_time)
         {
             this._airplane.delayer.heading_equal.LeadToRunway(airplane_pos, rwy_pos, game_time);

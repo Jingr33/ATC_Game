@@ -33,11 +33,17 @@ namespace ATC_Game.InfoPanelContent
         private int _top_pad_row1;
         private int _top_pad_row2;
         private int _top_pad_row3;
+        private int _top_pad_row4;
         private float _text_big;
         private float _text_normal;
-        private int _btn_width;
-        private int _btn_height;
+        private int _sm_btn_width;
+        private int _sm_btn_height;
+        private int _lg_btn_width;
+        private int _lg_btn_height;
+        private int stripe_width = 60;
+        private int stripe_height = 30;
         private List<Rectangle> _rwy_info_rects;
+        private Rectangle _air_traf_rect;
         private Texture2D _airplane_icon;
         private Texture2D _rwy_btn_tex;
         private Texture2D _arr_btn_tex;
@@ -45,6 +51,10 @@ namespace ATC_Game.InfoPanelContent
         private Texture2D _arr_dep_btn_tex;
         private Texture2D _arr_rwy_btn_tex;
         private Texture2D _dep_rwy_btn_tex;
+        private Texture2D _traf_btn_tex;
+        private Texture2D _active_traf_btn_tex;
+        private Texture2D _onground_stripe;
+        private bool _is_air_traf_active;
 
         private ButtonState _left_last_state; // left mouse button last state
         private ButtonState _right_last_state; // right mouse button last state
@@ -62,17 +72,23 @@ namespace ATC_Game.InfoPanelContent
             this._top_pad_row1 = 5;
             this._top_pad_row2 = this._top_pad_row1 + 30;
             this._top_pad_row3 = this._top_pad_row2 + 30;
+            this._top_pad_row4 = this._top_pad_row3 + 30;
             this._text_big = 1.1f;
             this._text_normal = 1.0f;
-            this._btn_width = 35;
-            this._btn_height = 25;
+            this._sm_btn_width = 35;
+            this._sm_btn_height = 25;
+            this._lg_btn_width = 120;
+            this._lg_btn_height = 30;
             this._airplane_icon = LoadAirplaneIconTex();
-            this._rwy_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._btn_width, this._btn_height, Config.border_gray);
-            this._arr_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._btn_width, this._btn_height, Config.arr_btn_color);
-            this._dep_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._btn_width, this._btn_height, Config.dep_btn_color);
-            this._arr_dep_btn_tex = CreateDoubleButtonTexture(this._game.GraphicsDevice, this._btn_width, this._btn_height, Config.arr_btn_color, Config.dep_btn_color);
-            this._arr_rwy_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._btn_width, this._btn_height, Config.arr_btn_color);
-            this._dep_rwy_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._btn_width, this._btn_height, Config.dep_btn_color);
+            this._rwy_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._sm_btn_width, this._sm_btn_height, Config.border_gray);
+            this._arr_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._sm_btn_width, this._sm_btn_height, Config.arr_btn_color);
+            this._dep_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._sm_btn_width, this._sm_btn_height, Config.dep_btn_color);
+            this._arr_dep_btn_tex = CreateDoubleButtonTexture(this._game.GraphicsDevice, this._sm_btn_width, this._sm_btn_height, Config.arr_btn_color, Config.dep_btn_color);
+            this._arr_rwy_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._sm_btn_width, this._sm_btn_height, Config.arr_btn_color);
+            this._dep_rwy_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._sm_btn_width, this._sm_btn_height, Config.dep_btn_color);
+            this._traf_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._lg_btn_width, this._lg_btn_height, Config.border_gray);
+            this._active_traf_btn_tex = CreateButtonTexture(this._game.GraphicsDevice, this._lg_btn_width, this._lg_btn_height, Config.btn_active);
+            this._is_air_traf_active = false;
 
             this._left_last_state = ButtonState.Released;
             this._right_last_state = ButtonState.Released;
@@ -135,10 +151,14 @@ namespace ATC_Game.InfoPanelContent
         public void UpdateContent (Airport airport)
         {
             this._airport = airport;
-            this._rwy_info_rects = GetRwyButtonSquares(this._btn_width, this._btn_height);
-            FlightToAPDrawerSwitcher();
+            this._rwy_info_rects = GetRwyButtonSquares(this._sm_btn_width, this._sm_btn_height);
+            this._air_traf_rect = GetFlightsToAPSquare(this._lg_btn_width, this._lg_btn_height);
+            FlightsToAPDrawerSwitcher();
             RwysInUseSwitcher();
-            
+            this._airport.flights_track_drawer.Update();
+
+            this._left_last_state = this._game.mouse.LeftButton;
+            this._right_last_state = this._game.mouse.RightButton;
         }
 
         /// <summary>
@@ -152,15 +172,41 @@ namespace ATC_Game.InfoPanelContent
             List<Rectangle> buttons = new List<Rectangle>();
             for (int i = 0; i < this._airport.runways.Count; i++)
             {
-                Rectangle rwy_btn = new Rectangle((int)this._topleft.X + this._left_pad + i * (width + 5), (int)this._topleft.Y + 80 + this._top_pad + 450 + 30, width, height);
+                Rectangle rwy_btn = new Rectangle((int)this._topleft.X + this._left_pad + i * (width + 5), (int)this._topleft.Y + 80 + this._top_pad + 450 + this._top_pad, width, height);
                 buttons.Add(rwy_btn);
             }
             return buttons;
         }
 
-        private void FlightToAPDrawerSwitcher ()
+        /// <summary>
+        /// Return a rectangle object of the button for display a traffic in the air from/to this airport.
+        /// </summary>
+        private Rectangle GetFlightsToAPSquare (int width, int height)
         {
+            return new Rectangle((int)this._topleft.X + this._left_pad, (int)this._topleft.Y + this._top_pad + this._top_pad_row4 + 100 + 450, width, height);
+        }
 
+        private List<Rectangle> GetOnGroundAPSquare (int width, int height)
+        {
+            List<Rectangle> on_grounds = new List<Rectangle>();
+            for (int i = 0; i < this._airport.airplane_ghosts.Count; i++)
+            {
+                Rectangle ghost_plane = new Rectangle((int)this._topleft.X + this._left_pad + i * (width + 3), (int)this._topleft.Y + this._top_pad + 240 + 450, width, height);
+                on_grounds.Add(ghost_plane);
+            }
+            return on_grounds;
+        }
+        /// <summary>
+        /// Switch the activity of the FllightToAPDrawer to the oposite value if the button is clicked.
+        /// </summary>
+        private void FlightsToAPDrawerSwitcher ()
+        {
+            if (this._air_traf_rect.Contains(this._game.mouse.Position)
+                && this._game.mouse.LeftButton == ButtonState.Released && this._left_last_state == ButtonState.Pressed)
+            {
+                this._airport.flights_track_drawer.SwitchActivity();
+                this._is_air_traf_active = General.Switcher(this._is_air_traf_active);
+            }
         }
 
         /// <summary>
@@ -184,8 +230,16 @@ namespace ATC_Game.InfoPanelContent
                     this._airport.UpdateInUseRwysLists(this._airport.runways[i], true);
 
             }
-            this._left_last_state = this._game.mouse.LeftButton;
-            this._right_last_state = this._game.mouse.RightButton;
+        }
+
+        /// <summary>
+        /// Deactivate Flights to airport drawer.
+        /// </summary>
+        public void DeactivateFlightsToAPDrawer ()
+        {
+            this._is_air_traf_active = false;
+            if (this._airport != null)
+                this._airport.flights_track_drawer.is_active = false;
         }
 
         /// <summary>
@@ -198,7 +252,9 @@ namespace ATC_Game.InfoPanelContent
             DrawAirportTraffic(sprite_batch, topleft);
             topleft.Y += 80;
             DrawAirportRwys(sprite_batch, topleft);
-            topleft.Y += 0;
+            topleft.Y += 115;
+            DrawTrafficInAir(sprite_batch, topleft);
+            topleft.Y += 45;
             DrawOnGroud(sprite_batch, topleft);
         }
 
@@ -224,16 +280,16 @@ namespace ATC_Game.InfoPanelContent
         public void DrawAirportRwys (SpriteBatch sprite_batch, Vector2 topleft)
         {
             sprite_batch.DrawString(this._font, "Runways:", new Vector2(topleft.X, topleft.Y), Config.text_black, 0, Vector2.Zero, this._text_big, SpriteEffects.None, 0);
-            Texture2D texture = this._rwy_btn_tex;
             for (int i = 0; i < this._airport.runways.Count; i++)
             {
-                if (this._airport.in_use_arr.Contains(this._airport.runways[i])
-                    && this._airport.in_use_dep.Contains(this._airport.runways[i]))
+                Texture2D texture = this._rwy_btn_tex;
+                if (this._airport.in_use_arr.Contains(this._airport.runways[i]) && this._airport.in_use_dep.Contains(this._airport.runways[i]))
                     texture = this._arr_dep_btn_tex;
                 else if (this._airport.in_use_arr.Contains(this._airport.runways[i]))
                     texture = this._arr_btn_tex;
                 else if (this._airport.in_use_dep.Contains(this._airport.runways[i]))
                     texture = this._dep_btn_tex;
+
                 Vector2 position = new Vector2(this._rwy_info_rects[i].X, this._rwy_info_rects[i].Y - 450 - 30);
                 DrawRunwayInfo(sprite_batch, i, position, texture);
             }
@@ -241,9 +297,9 @@ namespace ATC_Game.InfoPanelContent
             sprite_batch.DrawString(this._font, "Departures", new Vector2(topleft.X, topleft.Y + this._top_pad_row3), Config.text_black, 0, Vector2.Zero, this._text_normal, SpriteEffects.None, 0);
             for (int j = 0; j < this._airport.in_use_dep.Count; j++)
                 sprite_batch.DrawString(this._font, this._airport.in_use_dep[j].number.ToString().ToUpper(), new Vector2(topleft.X + 95 + j * 30, topleft.Y + this._top_pad_row3), Config.dep_rwy_color, 0, Vector2.Zero, this._text_big, SpriteEffects.None, 0);
-            sprite_batch.DrawString(this._font, "Arrivals", new Vector2(topleft.X + this._left_pad_col2 + 40, topleft.Y + this._top_pad_row3), Config.text_black, 0, Vector2.Zero, this._text_normal, SpriteEffects.None, 0);
+            sprite_batch.DrawString(this._font, "Arrivals", new Vector2(topleft.X, topleft.Y + this._top_pad_row4), Config.text_black, 0, Vector2.Zero, this._text_normal, SpriteEffects.None, 0);
             for (int k = 0; k < this._airport.in_use_arr.Count; k++)
-                sprite_batch.DrawString(this._font, this._airport.in_use_arr[k].number.ToString().ToUpper(), new Vector2(topleft.X + this._left_pad_col2 + 125 + k * 30, topleft.Y + this._top_pad_row3), Config.dep_rwy_color, 0, Vector2.Zero, this._text_big, SpriteEffects.None, 0);
+                sprite_batch.DrawString(this._font, this._airport.in_use_arr[k].number.ToString().ToUpper(), new Vector2(topleft.X + 95 + k * 30, topleft.Y + this._top_pad_row4), Config.arr_rwy_color, 0, Vector2.Zero, this._text_big, SpriteEffects.None, 0);
         }
 
         /// <summary>
@@ -255,9 +311,24 @@ namespace ATC_Game.InfoPanelContent
         /// <param name="position">top left order of the box</param>
         public void DrawRunwayInfo (SpriteBatch sprite_batch, int order, Vector2 position, Texture2D texture)
         {
-            Vector2 coord = new Vector2(position.X + order * (this._rwy_btn_tex.Width + 5), position.Y + this._top_pad_row2 - 5);
+            Vector2 coord = new Vector2(position.X, position.Y + this._top_pad_row2 - 5);
             sprite_batch.Draw(texture, coord, Config.bg_color);
             sprite_batch.DrawString(this._font, this._airport.runways[order].number.ToString().ToUpper(), new Vector2(coord.X + 5, coord.Y + 5), Config.text_black);
+        }
+
+        /// <summary>
+        /// Draw a traffic in the air button click switcher.
+        /// </summary>
+        /// <param name="sprite_batch">sprite batch</param>
+        /// <param name="position">top left touch_down_position of the block</param>
+        public void DrawTrafficInAir (SpriteBatch sprite_batch, Vector2 position)
+        {
+            position.Y += 5;
+            if (!this._is_air_traf_active)
+                sprite_batch.Draw(this._traf_btn_tex, position, Config.bg_color);
+            else
+                sprite_batch.Draw(this._active_traf_btn_tex, position, Config.bg_color);
+            sprite_batch.DrawString(this._font, "Traffic in the air", new Vector2(position.X + 5, position.Y + 7), Config.text_black);
         }
 
         /// <summary>
@@ -266,6 +337,8 @@ namespace ATC_Game.InfoPanelContent
         /// <param name="sprite_batch"></param>
         public void DrawOnGroud (SpriteBatch sprite_batch, Vector2 topleft)
         {
+            sprite_batch.DrawString(this._font, "On Ground:", new Vector2(topleft.X, topleft.Y), Config.text_black);
+
 
         }
     }

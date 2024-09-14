@@ -25,9 +25,7 @@ using System.Runtime.CompilerServices;
 // at se do airplane ghosts, arrival departure airplanes v letistich neco hodí hned od začátku hry
 // pokud letadlo odletí z letiště oddělej ho z airplaneghost a změn stats letiště
 // vykresli do mapy k runwayim jejich názvy
-// change v airport info panelu at funguje
 // on ground letadla - dodělej, ať to funguje
-// zkontroluj přepínání rwy in use v airport info panelu az budes mit letiste co má víc rwys
 
 
 namespace ATC_Game
@@ -78,9 +76,9 @@ namespace ATC_Game
             this._plane_stripes_offset = Vector2.Zero;
             this.stripes_block_height = (Config.max_plane_count + 1) * (Config.stripe_height + Config.stripe_gap) + 10;
             // plane control area 
-            this._control_render_target = new RenderTarget2D(GraphicsDevice, 1400, 50);
+            this._control_render_target = new RenderTarget2D(GraphicsDevice, 950, 50);
             this.control_panel = new ControlPanel(this);
-            this._control_area = new Rectangle(0, 0, 1400, 50);
+            this._control_area = new Rectangle(400, 0, 950, 50);
             // object info area
             this._object_info_target = new RenderTarget2D(GraphicsDevice, 400, 500);
             this.info_panel = new ObjectInfoPanel(this, 400, 500);
@@ -108,7 +106,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update displayed position of plane stripe panel
+        /// Update displayed touch_down_position of plane stripe panel
         /// </summary>
         private void UpdateScrollablePanel ()
         {
@@ -249,7 +247,7 @@ namespace ATC_Game
         /// </summary>
         private void DrawGameArea()
         {
-            this._spriteBatch.Begin();
+            this._spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend);
             this.map_generator.Draw(this._spriteBatch); // draw a game map
             foreach (Airplane airplane in this.airplanes)
                 airplane.Draw(this._spriteBatch);

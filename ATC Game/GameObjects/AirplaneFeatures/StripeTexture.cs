@@ -41,7 +41,7 @@ namespace ATC_Game.GameObjects.AirplaneFeatures
         /// Add string states of flight info a stripe
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
-        /// <param name="pos">position of top left coner of a stripe</param>
+        /// <param name="pos">touch_down_position of top left coner of a stripe</param>
         /// <param name="type">airplane type</param>
         /// <param name="w_cat">weight category</param>
         /// <param name="callsign">callsign</param>

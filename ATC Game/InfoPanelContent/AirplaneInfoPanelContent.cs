@@ -148,7 +148,6 @@ namespace ATC_Game.InfoPanelContent
             return rect;
         }
 
-
         /// <summary>
         /// Return a texture of the gray line (border).
         /// </summary>
@@ -186,10 +185,7 @@ namespace ATC_Game.InfoPanelContent
                 && this._game.mouse.LeftButton == ButtonState.Released && this._last_state == ButtonState.Pressed)
             {
                 this._airplane.track_drawer.SwitchActivity();
-                if (this._track_drawer_is_active)
-                    this._track_drawer_is_active = false;
-                else
-                    this._track_drawer_is_active = true;
+                this._track_drawer_is_active = General.Switcher(this._track_drawer_is_active);
             }
             this._last_state = this._game.mouse.LeftButton;
         }
@@ -197,7 +193,7 @@ namespace ATC_Game.InfoPanelContent
         /// <summary>
         /// Set track drawer activity to false.
         /// </summary>
-        public void DeactiveTrackDrawer()
+        public void DeactivateTrackDrawer()
         {
             this._track_drawer_is_active = false;
             if (this._airplane != null)
@@ -391,7 +387,7 @@ namespace ATC_Game.InfoPanelContent
         /// Draw a bottom border of the airplane info panel block.
         /// </summary>
         /// <param name="sprite_batch">sprite abtch</param>
-        /// <param name="topleft">Top left position of the texture</param>
+        /// <param name="topleft">Top left touch_down_position of the texture</param>
         private void DrawBorderLine (SpriteBatch sprite_batch, Vector2 topleft)
         {
             sprite_batch.Draw(this._border_line_texture, new Vector2(topleft.X + 25, topleft.Y - 5), Config.bg_color);

@@ -38,14 +38,15 @@ namespace ATC_Game.Drawing
         }
 
         /// <summary>
-        /// Load a one position texture of the track.
+        /// Load a one touch_down_position texture of the track.
         /// </summary>
         /// <param name="graphics_device"></param>
         private Texture2D LoadPointTexture (GraphicsDevice graphics_device)
         {
-            Texture2D point = new Texture2D(graphics_device, 1, 1);
-            Color[] color_data = new Color[1];
-            for (int i = 0; i < 1; i++)
+            int size = 1;
+            Texture2D point = new Texture2D(graphics_device, size, size);
+            Color[] color_data = new Color[size * size];
+            for (int i = 0; i < size * size; i++)
                 color_data[i] = Config.track_color;
             point.SetData(color_data);
             return point;
@@ -57,7 +58,7 @@ namespace ATC_Game.Drawing
         /// <param name="airplane">airplane for draw its track</param>
         public void Update(Airplane airplane)
         {
-            if (is_active)
+            if (this.is_active)
             {
                 this._airplane = airplane;
                 GetLineCoords();
@@ -84,7 +85,7 @@ namespace ATC_Game.Drawing
         }
 
         /// <summary>
-        /// If the airplane track is changed or the airplane reached some track position, return true, else false.
+        /// If the airplane track is changed or the airplane reached some track touch_down_position, return true, else false.
         /// </summary>
         private bool RegenerateTrack ()
         {
@@ -113,8 +114,8 @@ namespace ATC_Game.Drawing
         /// <summary>
         /// Add one line between two track points into the track list.
         /// </summary>
-        /// <param name="start_point">start position of the line</param>
-        /// <param name="end_point">end position of the line</param>
+        /// <param name="start_point">start touch_down_position of the line</param>
+        /// <param name="end_point">end touch_down_position of the line</param>
         /// <returns>list of texture positions</returns>
         private List<Vector2> GetOneTrackLine (Vector2 start_point, Vector2 end_point)
         {

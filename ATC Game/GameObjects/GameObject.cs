@@ -23,7 +23,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Get center position of object in Vector2.
+        /// Get center touch_down_position of object in Vector2.
         /// </summary>
         /// <returns>Position of object center.</returns>
         public Vector2 GetCenterPosition()
@@ -32,11 +32,11 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Get vector position of draw point of an game object texture.
+        /// Get vector touch_down_position of draw point of an game object texture.
         /// </summary>
-        /// <param name="center_position">center position of a game object</param>
+        /// <param name="center_position">center touch_down_position of a game object</param>
         /// <param name="texture">texture of a game object</param>
-        /// <returns>top left position of texture</returns>
+        /// <returns>top left touch_down_position of texture</returns>
         public virtual Vector2 GetTexturePosition(Vector2 center_position, Texture2D texture)
         {
             float x_pos = center_position.X - texture.Width / 2;

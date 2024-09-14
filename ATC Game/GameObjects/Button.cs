@@ -25,16 +25,18 @@ namespace ATC_Game.GameObjects
         private Color _border_color;
         private string _title;
         private Vector2 _position;
+        private Vector2 _parent_position; // top left position of the parent panel (due to click event button positions)
         private SpriteFont _font;
 
         private Rectangle _event_space;
         ButtonState _mouse_state;
         ButtonState _last_state;
 
-        public Button(Game1 game, Vector2 position, string title, int width)
+        public Button(Game1 game, Vector2 parent_pos, Vector2 position, string title, int width)
         {
             this._game = game;
             this._position = position;
+            this._parent_position = parent_pos;
             this._title = title;
             this._width = width;
             this._height = 40;
@@ -77,7 +79,7 @@ namespace ATC_Game.GameObjects
         /// </summary>
         private void LoadEvent ()
         {
-            this._event_space = new Rectangle((int)this._position.X, (int)this._position.Y, this._width, this._height);
+            this._event_space = new Rectangle((int)this._position.X + (int)this._parent_position.X, (int)this._position.Y + (int)this._parent_position.Y, this._width, this._height);
         }
 
         /// <summary>

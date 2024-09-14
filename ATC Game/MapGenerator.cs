@@ -41,10 +41,16 @@ namespace ATC_Game
         private void Init()
         {
             this._map_name = this._map.ToString();
+            this._map_texture = LoadGameMap();
             this._path = string.Format("maps/{0}", this._map.ToString().ToLower());
             LoadAirports();
             LoadWaypoints();
             LoadLandpoints();
+        }
+
+        private Texture2D LoadGameMap ()
+        {
+            return _game.Content.Load<Texture2D>(this._map_name);
         }
 
         /// <summary>
@@ -175,6 +181,7 @@ namespace ATC_Game
         /// <param name="spriteBatch"></param>
         public void Draw (SpriteBatch spriteBatch)
         {
+            spriteBatch.Draw(this._map_texture, Vector2.Zero, Config.bg_color);
             foreach (Airport airport in this.airports)
                 airport.Draw(spriteBatch);
             foreach (Waypoint wp in this.all_waypoints)

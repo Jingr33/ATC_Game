@@ -19,6 +19,7 @@ namespace ATC_Game
         private bool _speed_enabled;
         private bool _alt_enabled;
         private bool _head_enabled; // set heading control to enabled or disabled state
+        private int _left_pad;
         //seq buttons
         private SequentialButton _speed_sbtn;
         private SequentialButton _altitude_sbtn;
@@ -35,6 +36,7 @@ namespace ATC_Game
             this._speed_enabled = true;
             this._alt_enabled = true;
             this._head_enabled = true;
+            this._left_pad = 30;
             LoadControlButtons();
         }
 
@@ -43,12 +45,12 @@ namespace ATC_Game
         /// </summary>
         private void LoadControlButtons ()
         {
-            this._speed_sbtn = new SequentialButton(this._game, new Vector2(10, 5), "speed", 140, Config.min_control_speed, Config.max_control_speed);
-            this._altitude_sbtn = new SequentialButton(this._game, new Vector2(200, 5), "altitude", 160, Config.min_control_alt, Config.max_control_alt, false, 300, false);
-            this._heading_sbtn = new SequentialButton(this._game, new Vector2(400, 5), "heading", 152, 0, 360, true);
-            this._left_turn_btn = new Button(this._game, new Vector2(600, 5), "left turn", 116);
-            this._right_turn_btn = new Button(this._game, new Vector2(800, 5), "right turn", 122);
-            this._land_btn = new Button(this._game, new Vector2(1000, 5), " land ", 75);
+            this._speed_sbtn = new SequentialButton(this._game, GetPosition(), new Vector2(this._left_pad, 5), "speed", 140, Config.min_control_speed, Config.max_control_speed);
+            this._altitude_sbtn = new SequentialButton(this._game, GetPosition(), new Vector2(this._left_pad + 150, 5), "altitude", 160, Config.min_control_alt, Config.max_control_alt, false, 300, false);
+            this._heading_sbtn = new SequentialButton(this._game, GetPosition(), new Vector2(this._left_pad + 320, 5), "heading", 152, 0, 360, true);
+            this._left_turn_btn = new Button(this._game, GetPosition(), new Vector2(this._left_pad + 500, 5), "left turn", 116);
+            this._right_turn_btn = new Button(this._game, GetPosition(), new Vector2(this._left_pad + 625, 5), "right turn", 122);
+            this._land_btn = new Button(this._game, GetPosition(), new Vector2(this._left_pad + 755, 5), " land ", 75);
         }
 
         /// <summary>
@@ -112,6 +114,15 @@ namespace ATC_Game
             this._left_turn_btn.Draw(spriteBatch);
             this._right_turn_btn.Draw(spriteBatch);
             this._land_btn.Draw(spriteBatch);
+        }
+
+        /// <summary>
+        /// Return a position of the top left corner of the panel in the app window.
+        /// </summary>
+        /// <returns>vector position</returns>
+        public Vector2 GetPosition ()
+        {
+            return new Vector2(400, 0);
         }
     }
 }

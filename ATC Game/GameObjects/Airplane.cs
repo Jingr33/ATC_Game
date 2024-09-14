@@ -142,7 +142,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update position of plane in the map.
+        /// Update touch_down_position of plane in the map.
         /// </summary>
         /// <param name="game_time">game time</param>
         public void Update (GameTime game_time)
@@ -191,7 +191,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Remove waypoint from flight plan (waypoint list) if the waypoint position was reached.
+        /// Remove waypoint from flight plan (waypoint list) if the waypoint touch_down_position was reached.
         /// </summary>
         private void WaypointReached ()
         {
@@ -206,7 +206,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Remove landing waypoint from flight plan if the landing waypoint position was rached.
+        /// Remove landing waypoint from flight plan if the landing waypoint touch_down_position was rached.
         /// </summary>
         private void UpdateLandpoint ()
         {
@@ -322,7 +322,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Set next position of an airplane  in trajectory list of points.
+        /// Set next touch_down_position of an airplane  in trajectory list of points.
         /// </summary>
         private void SetNextPosition ()
         {
@@ -342,7 +342,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Get new Vector2 center position of an aircraft in straight direction of flight.
+        /// Get new Vector2 center touch_down_position of an aircraft in straight direction of flight.
         /// </summary>
         /// <returns>new coord</returns>
         private Vector2 NewCoordStraightOn(GameTime game_time)
@@ -432,7 +432,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Mthod from draw a plane object if its position is on the edge of game map.
+        /// Mthod from draw a plane object if its touch_down_position is on the edge of game map.
         /// </summary>
         /// <param name="spriteBatch">spritebatch</param>
         private void MarginalDraw(SpriteBatch spriteBatch)

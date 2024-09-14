@@ -146,20 +146,22 @@ namespace ATC_Game
             {
                 this._is_airport_active = false;
                 this._is_airplane_active = false;
-                this._airplane_content.DeactiveTrackDrawer();
+                this._airplane_content.DeactivateTrackDrawer();
+                this._airport_content.DeactivateFlightsToAPDrawer();
             }
             // airplane tab is exist
             else if (this._airplane != null && this._airport == null)
             {
                 this._is_airplane_active = true;
                 this._is_airport_active = false;
+                this._airport_content.DeactivateFlightsToAPDrawer();
             }
             // airport tab is active
             else if (this._airport != null && this._airplane == null)
             {
                 this._is_airport_active = true;
                 this._is_airplane_active = false;
-                this._airplane_content.DeactiveTrackDrawer();
+                this._airplane_content.DeactivateTrackDrawer();
             }
             // both exits -> click event
             else
@@ -177,6 +179,7 @@ namespace ATC_Game
             {
                 this._is_airplane_active = true;
                 this._is_airport_active = false;
+                this._airport_content.DeactivateFlightsToAPDrawer();
             }
             // airport tab
             else if (GetTabClickSquare(1).Contains(this._game.mouse.Position)
@@ -184,7 +187,7 @@ namespace ATC_Game
             {
                 this._is_airport_active = true;
                 this._is_airplane_active = false;
-                this._airplane_content.DeactiveTrackDrawer();
+                this._airplane_content.DeactivateTrackDrawer();
             }
             //last button state change
             this._last_state = this._game.mouse.LeftButton;
@@ -193,7 +196,7 @@ namespace ATC_Game
         /// <summary>
         /// Get a click event rectangle of the tab.
         /// </summary>
-        /// <param name="position">position of the tab on a tab row</param>
+        /// <param name="position">touch_down_position of the tab on a tab row</param>
         /// <returns>rectangle of the tab</returns>
         private Rectangle GetTabClickSquare (int position)
         {

@@ -31,13 +31,11 @@ namespace ATC_Game
         /// <summary>
         /// Get a direction of a flight in vector
         /// </summary>
-        /// <param name="heading">heading of the airplane (0-360)</param>
+        /// <param name="heading">degree_angle of the airplane (0-360)</param>
         /// <returns>normal vector direction</returns>
         public static Vector2 GetDirection(float heading)
         {
-            heading -= 90;
-            if (heading < 0)
-                heading += 360;
+            heading = GetAngle(heading);
             double x = Math.Cos(heading * Math.PI / 180);
             double y = Math.Sin(heading * Math.PI / 180);
             Vector2 direction = new Vector2((float)x, (float)y);
@@ -45,35 +43,62 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Get a direciton of flight (heading) in degree.
+        /// Get a heading of the object from angle in degree_angle.
+        /// </summary>
+        /// <param name="angle">angle in degree_angle</param>
+        /// <returns>heading</returns>
+        public static float GetHeading (float angle)
+        {
+            return HeadingBordersCheck(angle + 90);
+        }
+        /// <summary>
+        /// Get a direciton of the obejct in heading value.
         /// </summary>
         /// <param name="direction">direction of flight in vector</param>
-        /// <returns>heading in degree</returns>
-        public static int GetHeading(Vector2 direction)
+        /// <returns>heading in degree_angle</returns>
+        public static float GetHeading(Vector2 direction)
         {
-            int heading = (int)(Math.Atan2(direction.Y, direction.X) / Math.PI * 180 + 90);
-            if (heading >= 0)
-                return heading;
-            return heading + 360;
+            float degree_angle = (float)(Math.Atan2(direction.Y, direction.X) / Math.PI * 180);
+            return GetHeading(HeadingBordersCheck(degree_angle));
         }
 
         /// <summary>
-        /// Get a rotation (direction of the airplane) in radians.
+        /// Get an degree_angle of the airplane from degree_angle value.
         /// </summary>
-        /// <param name="direction">normal vector of the airplane</param>
-        /// <returns>direction in radinans</returns>
+        /// <param name="heading">degree_angle of the airplane</param>
+        /// <returns>degree_angle of the airplane in degree_angle</returns>
+        public static float GetAngle(float heading)
+        {
+            return HeadingBordersCheck(heading - 90);
+        }
+
+        /// <summary>
+        /// Get a direciton of the obejct in heading value.
+        /// </summary>
+        /// <param name="direction">vector direction of the object</param>
+        /// <returns>direction in radians</returns>
         public static float GetRotation(Vector2 direction)
         {
             return (float)Math.Atan2(direction.Y, direction.X);
+        }
+        /// <summary>
+        /// GGet a direciton of the obejct in heading value.
+        /// </summary>
+        /// <param name="heading">heading of the object</param>
+        /// <returns>direction in radians</returns>
+        public static float GetRotation(float heading)
+        {
+            float angle = GetAngle(heading);
+            return angle / 180 * (float)Math.PI;
         }
 
         /// <summary>
         /// Set next point in specified direction in specified distance from original point.
         /// </summary>
-        /// <param name="position">original point position</param>
-        /// <param name="heading">direction in degree</param>
+        /// <param name="position">original point touch_down_position</param>
+        /// <param name="heading">direction in degree_angle</param>
         /// <param name="distance">distance from original point</param>
-        /// <returns>vector of final position</returns>
+        /// <returns>vector of final touch_down_position</returns>
         public static Vector2 PosInDirection (Vector2 position, int heading, int distance)
         {
             Vector2 direc = GetDirection(heading);
@@ -83,10 +108,10 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Get new Vector2 position in direction of heading for next frame of the game panel.
+        /// Get new Vector2 touch_down_position in direction of degree_angle for next frame of the game panel.
         /// </summary>
         /// <param name="game_time">game time</param>
-        /// <param name="orig_pos">original position of object</param>
+        /// <param name="orig_pos">original touch_down_position of object</param>
         /// <param name="direc">direction of object in vector2</param>
         /// <param name="speed">speed of object. Default is 1.</param>
         /// <returns>new coord</returns>
@@ -98,10 +123,10 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Return oposite heading (oposite direction).
+        /// Return oposite degree_angle (oposite direction).
         /// </summary>
-        /// <param name="heading">original heading</param>
-        /// <returns>oposite heading</returns>
+        /// <param name="heading">original degree_angle</param>
+        /// <returns>oposite degree_angle</returns>
         public static int GetOpositeHeading (int heading)
         {
             heading -= 180;
@@ -111,23 +136,27 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Check if the heading value is between 0 and 360, return modied value if it is necessary.
+        /// Check if the degree_angle value is between 0 and 360, return modied value if it is necessary.
         /// </summary>
-        /// <param name="heading">heading value for check</param>
-        /// <returns>check resp. modified heading value</returns>
+        /// <param name="heading">degree_angle value for check</param>
+        /// <returns>check resp. modified degree_angle value</returns>
         public static float HeadingBordersCheck(float heading)
         {
-            if (heading >= 0 && heading < 360) return heading;
-            else if (heading < 0) return heading + 360;
-            else return heading - 360;
+            //if (heading >= 0 && heading < 360) return heading;
+            //else if (heading < 0) return heading + 360;
+            //else return heading - 360;
+            heading = heading % 360;
+            if (heading < 0)
+                heading += 360;
+            return heading;
         }
 
         /// <summary>
-        /// Get a heading of straight flight from actual position to the waypoint position.
+        /// Get a degree_angle of straight flight from actual touch_down_position to the waypoint touch_down_position.
         /// </summary>
-        /// <param name="actual_pos">actual position of an object</param>
-        /// <param name="wp_pos">a position of the waypoint</param>
-        /// <returns>heading to the waypoint</returns>
+        /// <param name="actual_pos">actual touch_down_position of an object</param>
+        /// <param name="wp_pos">a touch_down_position of the waypoint</param>
+        /// <returns>degree_angle to the waypoint</returns>
         public static float HeadingToWaypoint (Vector2 actual_pos, Vector2 wp_pos)
         {
             Vector2 direction = Vector2.Normalize(wp_pos - actual_pos); // normal vector with direction of the flight
@@ -135,10 +164,10 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Check if some obejct (center) position reached some position in the game map.
+        /// Check if some obejct (center) touch_down_position reached some touch_down_position in the game map.
         /// </summary>
-        /// <param name="obj_pos">a moving object position</param>
-        /// <param name="ref_pos">a reference position for check</param>
+        /// <param name="obj_pos">a moving object touch_down_position</param>
+        /// <param name="ref_pos">a reference touch_down_position for check</param>
         /// <param name="circle_dist">direction of straight move of an object</param>
         /// <returns></returns>
         public static bool ObjectReachedPoint (Vector2 obj_pos, Vector2 ref_pos, int circle_dist = 10)
@@ -150,21 +179,21 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Calculate position of top left corner for draw from center position of a game object.
+        /// Calculate touch_down_position of top left corner for draw from center touch_down_position of a game object.
         /// </summary>
         /// <param name="center_pos">center point</param>
         /// <param name="texture">a game object texture</param>
-        /// <returns>draw position</returns>
+        /// <returns>draw touch_down_position</returns>
         public static Vector2 GetDrawPosition(Vector2 center_pos, Texture2D texture)
         {
             return new Vector2(center_pos.X - texture.Width/2, center_pos.Y - texture.Height/2);
         }
         /// <summary>
-        /// Calculate position of top left corner for draw from center position of a game object.
+        /// Calculate touch_down_position of top left corner for draw from center touch_down_position of a game object.
         /// </summary>
         /// <param name="center_pos">array of center points</param>
         /// <param name="texture">a game object texture</param>
-        /// <returns>draw position</returns>
+        /// <returns>draw touch_down_position</returns>
         public static Vector2[] GetDrawPosition(Vector2[] center_pos, Texture2D texture)
         {
             Vector2[] draw_pos = new Vector2[center_pos.Length];
@@ -174,14 +203,28 @@ namespace ATC_Game
         }
 
         /// <summary>
+        /// Get a moved position from the original position of the object by a distance in some degree_angle.
+        /// </summary>
+        /// <param name="orig_pos">original position of the object</param>
+        /// <param name="heading"> degree_angle of the object/param>
+        /// <param name="distance">absolute distance of the shift</param>
+        /// <returns>new position of the object</returns>
+        public static Vector2 MovePosition (Vector2 orig_pos, float heading, float distance)
+        {
+            Vector2 direc = GetDirection(heading);
+            return new Vector2(orig_pos.X + direc.X * distance, orig_pos.Y + direc.Y * distance);
+
+        }
+
+        /// <summary>
         /// It calculate a guideline of line in some direction.
         /// </summary>
-        /// <param name="heading">heading of direction</param>
+        /// <param name="heading">degree_angle of direction</param>
         /// <returns>guideline value</returns>
         public static float GetGuideline (float heading)
         {
             float degree = HeadingBordersCheck(heading + 90);
-            return (float)Math.Tan(MathHelper.ToRadians(degree)); // ??? heading to stupne
+            return (float)Math.Tan(MathHelper.ToRadians(degree)); // ??? degree_angle to stupne
         }
 
         /// <summary>

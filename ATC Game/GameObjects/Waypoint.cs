@@ -90,7 +90,7 @@ namespace ATC_Game.GameObjects
 
 
         /// <summary>
-        /// Return position of top left corner of the texture.
+        /// Return touch_down_position of top left corner of the texture.
         /// </summary>
         /// <returns></returns>
         private Vector2 GetTexturePos ()
