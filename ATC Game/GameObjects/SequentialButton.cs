@@ -100,7 +100,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update value in the seq button in every moment (check if the value in button was change and return actual value.
+        /// UpdateGame value in the seq button in every moment (check if the value in button was change and return actual value.
         /// </summary>
         /// <returns>value in the button</returns>
         public int Update()

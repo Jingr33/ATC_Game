@@ -110,7 +110,7 @@ namespace ATC_Game
         /// <summary>
         /// Get new Vector2 touch_down_position in direction of degree_angle for next frame of the game panel.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         /// <param name="orig_pos">original touch_down_position of object</param>
         /// <param name="direc">direction of object in vector2</param>
         /// <param name="speed">speed of object. Default is 1.</param>
@@ -191,7 +191,7 @@ namespace ATC_Game
         /// <summary>
         /// Calculate touch_down_position of top left corner for draw from center touch_down_position of a game object.
         /// </summary>
-        /// <param name="center_pos">array of center points</param>
+        /// <param name="center_pos">array of center _points</param>
         /// <param name="texture">a game object texture</param>
         /// <returns>draw touch_down_position</returns>
         public static Vector2[] GetDrawPosition(Vector2[] center_pos, Texture2D texture)
@@ -251,6 +251,17 @@ namespace ATC_Game
                 return false;
             else
                 return true;
+        }
+        /// <summary>
+        /// Switch the object value to the opposite value
+        /// </summary>
+        /// <param name="actual_value">actual value</param>
+        /// <param name="first_value">first possible value</param>
+        /// <param name="second_value">second possible value</param>
+        /// <returns></returns>
+        public static T Switcher<T>(T actual_value, T first_value, T second_value)
+        {
+            return actual_value.Equals(first_value) ? second_value : first_value;
         }
     }
 }

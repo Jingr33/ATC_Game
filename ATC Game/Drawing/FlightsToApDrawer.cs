@@ -35,7 +35,7 @@ namespace ATC_Game.Drawing
         }
 
         /// <summary>
-        /// Update a FlightsToApDrawer.
+        /// UpdateGame a FlightsToApDrawer.
         /// </summary>
         public void Update ()
         {

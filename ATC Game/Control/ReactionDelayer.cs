@@ -76,7 +76,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// Check if altitude value was changed. Start the altitude equalizer.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         private void UpdateAltitude(GameTime game_time)
         {
             if (this.desired_alt != this._airplane.altitude)
@@ -86,7 +86,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// Check if the heading value is change. if yes, block the heading controler and start heading equalizer.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         private void UpdateHeading()
         {
             mouse = Mouse.GetState();

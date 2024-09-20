@@ -67,7 +67,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// It sets the final turn center points of the landing waypoint on both sides of the lwp.
+        /// It sets the final turn center _points of the landing waypoint on both sides of the lwp.
         /// </summary>
         /// <param name="turn_radius">radius of the final turn</param>
         public void SetTurnCenterPositions(float turn_radius)

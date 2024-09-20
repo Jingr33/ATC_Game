@@ -142,9 +142,9 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update touch_down_position of plane in the map.
+        /// UpdateGame touch_down_position of plane in the map.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         public void Update (GameTime game_time)
         {
             UpdateAutopilot(game_time); // autopilot
@@ -275,7 +275,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update autopilot state this.autopilot_on in every moment.
+        /// UpdateGame autopilot state this.autopilot_on in every moment.
         /// </summary>
         private void UpdateAutopilot(GameTime game_time)
         {
@@ -322,7 +322,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Set next touch_down_position of an airplane  in trajectory list of points.
+        /// Set next touch_down_position of an airplane  in trajectory list of _points.
         /// </summary>
         private void SetNextPosition ()
         {

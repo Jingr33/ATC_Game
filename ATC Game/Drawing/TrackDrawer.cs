@@ -53,7 +53,7 @@ namespace ATC_Game.Drawing
         }
 
         /// <summary>
-        /// Update airplane track drawer.
+        /// UpdateGame airplane track drawer.
         /// </summary>
         /// <param name="airplane">airplane for draw its track</param>
         public void Update(Airplane airplane)
@@ -97,7 +97,7 @@ namespace ATC_Game.Drawing
         }
 
         /// <summary>
-        /// create whole track list witch all track points (if it is necesarry).
+        /// create whole track list witch all track _points (if it is necesarry).
         /// </summary>
         private void GetTrackPoints()
         {
@@ -112,7 +112,7 @@ namespace ATC_Game.Drawing
         }
 
         /// <summary>
-        /// Add one line between two track points into the track list.
+        /// Add one line between two track _points into the track list.
         /// </summary>
         /// <param name="start_point">start touch_down_position of the line</param>
         /// <param name="end_point">end touch_down_position of the line</param>

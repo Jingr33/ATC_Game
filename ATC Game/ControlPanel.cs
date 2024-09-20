@@ -36,7 +36,7 @@ namespace ATC_Game
             this._speed_enabled = true;
             this._alt_enabled = true;
             this._head_enabled = true;
-            this._left_pad = 30;
+            this._left_pad = 60;
             LoadControlButtons();
         }
 
@@ -54,7 +54,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update all element in the control panel in every moment.
+        /// UpdateGame all element in the control panel in every moment.
         /// </summary>
         public void Update (GameTime game_time)
         {
@@ -84,7 +84,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update states of the standard buttons.
+        /// UpdateGame states of the standard buttons.
         /// </summary>
         private void UpdateOneClickButtons (GameTime game_time)
         {

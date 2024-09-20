@@ -166,7 +166,7 @@ namespace ATC_Game.InfoPanelContent
         }
 
         /// <summary>
-        /// Update airplane actual data.
+        /// UpdateGame airplane actual data.
         /// </summary>
         /// <param name="airplane">acive ariplane</param>
         public void UpdateContent(Airplane airplane)

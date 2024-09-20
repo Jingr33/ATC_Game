@@ -120,7 +120,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update airplanes stats in time.
+        /// UpdateGame airplanes stats in _time.
         /// </summary>
         public void Update (GameTime game_time)
         {
@@ -130,7 +130,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update activity click event of the airport.
+        /// UpdateGame activity click event of the airport.
         /// </summary>
         private void UpdateActiveState ()
         {
@@ -278,7 +278,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update arrival and departure runways in use (lists), if player click into the runway button in the airpot info panel
+        /// UpdateGame arrival and departure runways in use (lists), if player click into the runway button in the airpot info panel
         /// and change the runways there.
         /// </summary>
         /// <param name="switched_rwy">clicked runway</param>

@@ -1,4 +1,14 @@
 ﻿/// <summary>
+/// States of the game.
+/// </summary>
+public enum GameState
+{
+    Game,
+    Pause,
+    Menu,
+}
+
+/// <summary>
 /// Describe if a flight is arrival or departure.
 /// </summary>
 public enum OperationType

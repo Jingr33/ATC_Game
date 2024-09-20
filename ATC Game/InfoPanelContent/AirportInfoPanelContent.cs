@@ -145,7 +145,7 @@ namespace ATC_Game.InfoPanelContent
         }
 
         /// <summary>
-        /// Update content of the airport info panel.
+        /// UpdateGame content of the airport info panel.
         /// </summary>
         /// <param name="airport"></param>
         public void UpdateContent (Airport airport)

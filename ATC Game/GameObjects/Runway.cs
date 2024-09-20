@@ -141,7 +141,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update landing lights of this land_runway. Shift active light to another in period.
+        /// UpdateGame landing lights of this land_runway. Shift active light to another in period.
         /// </summary>
         public void UpdateLandingLights (GameTime game_time)
         {

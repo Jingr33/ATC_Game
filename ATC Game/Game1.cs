@@ -17,7 +17,6 @@ using System.Runtime.CompilerServices;
 // tlačítka na posouvání stripeama - možná
 // pri ceste na lwp se na konci nezmeni heading v control panelu
 // pokud se letisti zmeni rwy_in_use, vem vsechny letadla co tam pristavaji a jednou funkci jim tu land_runway zmen z tridy toho letiste
-// dodelej event na land_runway pro kliknuti mysi... normalne ke zobrazeni info, mas pripravený clickSquare
 // letadlo vyletí z heading autopilota a controlery se nastaví někdy na aktuální údaje, ale přitom letadlo třeba zrychlovalo na vyšší rychlost
 // doddelej track drawer
 // airplane info panel - arrow icon mezi destinacemi
@@ -34,16 +33,20 @@ namespace ATC_Game
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        public GameState game_state;
         public List<Airplane> airplanes;
         public List<InfoStripe> infostripes;
         public AirplaneLogic airplane_logic;
         public MapGenerator map_generator;
         public ControlPanel control_panel;
         public ObjectInfoPanel info_panel;
+        public HUDPanel HUD_panel;
+        public MenuPanel menu_panel;
+        public GameStats game_stats;
 
-        private RenderTarget2D _game_render_target, _strips_render_target, _control_render_target, _object_info_target;
-        private Rectangle _game_area, _plane_stripes_area, _control_area, _info_area;
-        private Vector2 _plane_stripes_offset; // displayd part of scrollable panel
+        private RenderTarget2D _game_render_target, _strips_render_target, _control_render_target, _object_info_target, _HUD_render_target, _menu_panel_target;
+        private Rectangle _game_area, _plane_stripes_area, _control_area, _info_area, _HUD_area, _menu_area;
+        private Vector2 _plane_stripes_offset; // displayed part of scrollable panel
         private int stripes_block_height; // total height of content in plane strips panel
 
         // COLORS
@@ -62,28 +65,39 @@ namespace ATC_Game
             this._graphics.ApplyChanges();
             this._previous_state = ButtonState.Released;
             IsMouseVisible = true;
+            this.game_state = GameState.Game;
         }
 
         protected override void Initialize()
         {
             // game area
-            this._game_render_target = new RenderTarget2D(GraphicsDevice, 900, 900);
-            this._game_area = new Rectangle(400, 50, 900, 900);
+            this._game_render_target = new RenderTarget2D(GraphicsDevice, 950, 900);
+            this._game_area = new Rectangle(400, 50, 950, 900);
             this.map_generator = new MapGenerator(this, Maps.Prague);
             // plane stripes area
             this._strips_render_target = new RenderTarget2D(GraphicsDevice, 400, 450);
             this._plane_stripes_area = new Rectangle(0, 50, 400, 450);
             this._plane_stripes_offset = Vector2.Zero;
             this.stripes_block_height = (Config.max_plane_count + 1) * (Config.stripe_height + Config.stripe_gap) + 10;
-            // plane control area 
+            // planel control area 
             this._control_render_target = new RenderTarget2D(GraphicsDevice, 950, 50);
             this.control_panel = new ControlPanel(this);
             this._control_area = new Rectangle(400, 0, 950, 50);
+            // HUD panel area
+            this._HUD_render_target = new RenderTarget2D(GraphicsDevice, 400, 50);
+            this.HUD_panel = new HUDPanel(this);
+            this._HUD_area = new Rectangle(0, 0, 400, 50);
             // object info area
             this._object_info_target = new RenderTarget2D(GraphicsDevice, 400, 500);
             this.info_panel = new ObjectInfoPanel(this, 400, 500);
             this._info_area = new Rectangle(0, 450, 400, 500);
 
+            // menu panel
+            this._menu_panel_target = new RenderTarget2D(GraphicsDevice, 1450, 950);
+            this.menu_panel = new MenuPanel(this);
+            this._menu_area = new Rectangle(0, 0, 1450, 950);
+
+            this.game_stats = new GameStats(this);
             this.airplanes = new List<Airplane>();
             this.infostripes = new List<InfoStripe>();
             this.airplane_logic = new AirplaneLogic(this);
@@ -97,16 +111,47 @@ namespace ATC_Game
 
         protected override void Update(GameTime game_time)
         {
+            switch (this.game_state)
+            {
+                case GameState.Game:
+                    UpdateGame(game_time);
+                    break;
+                case GameState.Menu:
+                    UpdateMenu();
+                    break;
+                case GameState.Pause:
+                default:
+                    break;
+            }
+            this.mouse = Mouse.GetState();
+            base.Update(game_time);
+        }
+
+        /// <summary>
+        /// Update manu events.
+        /// </summary>
+        private void UpdateMenu ()
+        {
+            this.menu_panel.Update();
+        }
+
+        /// <summary>
+        /// Update game events.
+        /// </summary>
+        /// <param name="game_time">game time</param>
+        private void UpdateGame(GameTime game_time)
+        {
+            this.game_stats.Update(game_time);
             this.airplane_logic.UpdateAirplanes(game_time);
             UpdateScrollablePanel();
             UpdateGameArea(game_time);
             UpdateControlPanel(game_time);
             UpdateInfoPanel(game_time);
-            base.Update(game_time);
+            UpdateHUDPanel();
         }
 
         /// <summary>
-        /// Update displayed touch_down_position of plane stripe panel
+        /// UpdateGame displayed touch_down_position of plane stripe panel
         /// </summary>
         private void UpdateScrollablePanel ()
         {
@@ -123,7 +168,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update events states in the game panel.
+        /// UpdateGame events states in the game panel.
         /// </summary>
         private void UpdateGameArea (GameTime game_time)
         {
@@ -133,11 +178,10 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update airplane active/deactive state.
+        /// UpdateGame airplane active/deactive state.
         /// </summary>
         private void UpdateAirplaneActiveState ()
         {
-            this.mouse = Mouse.GetState();
             for (int i = 0; i < this.airplanes.Count; i++)
             //foreach (Airplane plane in this.airplanes)
             {
@@ -164,7 +208,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update airports animations in the game area.
+        /// UpdateGame airports animations in the game area.
         /// </summary>
         private void UpdateAirports (GameTime game_time)
         {
@@ -173,20 +217,20 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update waypoint and landing point events and animations in the game area.
+        /// UpdateGame waypoint and landing point events and animations in the game area.
         /// </summary>
         private void UpdateWaypoints()
         {
             // all_waypoints
             foreach (Waypoint wp in this.map_generator.all_waypoints)
                 wp.UpdateState();
-            // landing points
+            // landing _points
             foreach (LandingWaypoint lwp in this.map_generator.all_landpoints)
                 lwp.UpdateState();
         }
 
         /// <summary>
-        /// Update event states in the control panel
+        /// UpdateGame event states in the control panel
         /// </summary>
         private void UpdateControlPanel(GameTime game_time)
         {
@@ -194,7 +238,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update events in the object info panel.
+        /// UpdateGame events in the object info panel.
         /// </summary>
         /// <param name="game_time"></param>
         private void UpdateInfoPanel (GameTime game_time)
@@ -202,7 +246,56 @@ namespace ATC_Game
             this.info_panel.Update(game_time);
         }
 
-        protected override void Draw(GameTime gameTime)
+        /// <summary>
+        /// UpdateGame events in the menu panel content
+        /// </summary>
+        private void UpdateHUDPanel ()
+        {
+            this.HUD_panel.Update();
+        }
+
+        protected override void Draw(GameTime game_time)
+        {
+            switch (this.game_state)
+            {
+                case GameState.Game:
+                case GameState.Pause:
+                    DrawGame(game_time);
+                    break;
+                case GameState.Menu:
+                default:
+                    DrawMenu(game_time);
+                    break;
+            }
+            base.Draw(game_time);
+        }
+
+        /// <summary>
+        /// Draw menu canvas
+        /// </summary>
+        /// <param name="game_time">game time</param>
+        private void DrawMenu(GameTime game_time)
+        {
+            GraphicsDevice.SetRenderTarget(this._menu_panel_target);
+            GraphicsDevice.Clear(this._bg_color);
+            this._spriteBatch.Begin();
+            this.menu_panel.Draw(this._spriteBatch);
+            this._spriteBatch.End();
+
+            GraphicsDevice.SetRenderTarget(null);
+            this._spriteBatch.Begin();
+            this._spriteBatch.Draw(this._menu_panel_target, this._menu_area, this._bg_color);
+            this._spriteBatch.End();
+
+            base.Draw(game_time);
+
+        }
+
+        /// <summary>
+        /// Draw game canvas.
+        /// </summary>
+        /// <param name="gameTime"></param>
+        private void DrawGame(GameTime gameTime)
         {
             GraphicsDevice.Clear(this._bg_color);
 
@@ -218,6 +311,10 @@ namespace ATC_Game
             GraphicsDevice.Clear(this._bg_color);
             DrawControlArea();
 
+            GraphicsDevice.SetRenderTarget(this._HUD_render_target);
+            GraphicsDevice.Clear(this._bg_color);
+            DrawHUDArea();
+
             GraphicsDevice.SetRenderTarget(this._object_info_target);
             GraphicsDevice.Clear(this._bg_color);
             DrawInfoPanel();
@@ -225,7 +322,6 @@ namespace ATC_Game
             GraphicsDevice.SetRenderTarget(null);
             DrawMainLayout();
 
-            base.Draw(gameTime);
         }
 
         /// <summary>
@@ -239,6 +335,7 @@ namespace ATC_Game
             this._spriteBatch.Draw(this._strips_render_target, this._plane_stripes_area, scroll_offset, this._bg_color);
             this._spriteBatch.Draw(this._control_render_target, this._control_area, this._bg_color);
             this._spriteBatch.Draw(this._object_info_target, this._info_area, this._bg_color);
+            this._spriteBatch.Draw(this._HUD_render_target, this._HUD_area, this._bg_color);
             this._spriteBatch.End();
         }
 
@@ -284,6 +381,16 @@ namespace ATC_Game
         {
             this._spriteBatch.Begin();
             this.info_panel.Draw(this._spriteBatch);
+            this._spriteBatch.End();
+        }
+
+        /// <summary>
+        /// Draw a HUD panel area.
+        /// </summary>
+        private void DrawHUDArea ()
+        {
+            this._spriteBatch.Begin();
+            this.HUD_panel.Draw(this._spriteBatch);
             this._spriteBatch.End();
         }
 

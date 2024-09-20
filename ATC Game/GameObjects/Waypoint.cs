@@ -68,7 +68,7 @@ namespace ATC_Game.GameObjects
         }
 
         /// <summary>
-        /// Update click event state of the landing waypoint.
+        /// UpdateGame click event state of the landing waypoint.
         /// </summary>
         public virtual void UpdateState()
         {

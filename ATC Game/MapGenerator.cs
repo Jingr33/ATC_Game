@@ -99,7 +99,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Add element to a landing points list.
+        /// Add element to a landing _points list.
         /// </summary>
         /// <param name="LWP">one landing point</param>
         public void LoadLandpoints ()

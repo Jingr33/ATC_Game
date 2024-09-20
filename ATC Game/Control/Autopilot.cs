@@ -31,9 +31,9 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Update methods for autopilot. Start operation of it is setted.
+        /// UpdateGame methods for autopilot. Start operation of it is setted.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         public void Update(GameTime game_time)
         {
             switch (this.operation)
@@ -57,7 +57,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// Autopilot control of takeOff maneuver.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         private void TakeOff(GameTime game_time)
         {
             this._time += (float)game_time.ElapsedGameTime.TotalSeconds;
@@ -156,7 +156,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// Autopilot control of landing maneuver.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         private void Landing(GameTime game_time)
         {
             this._time += (float)game_time.ElapsedGameTime.TotalSeconds;
@@ -176,7 +176,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Maintain or update a heding of the airplane in time to direct plane to the land_runway.
+        /// Maintain or update a heding of the airplane in _time to direct plane to the land_runway.
         /// </summary>
         /// <param name="airplane_pos">touch_down_position of the airplane</param>
         /// <param name="rwy_pos">touch_down_position of the airport land_runway</param>
@@ -188,7 +188,7 @@ namespace ATC_Game.Control
         /// <summary>
         /// MAintain and decrease speed of airplane before touch down and brake the airplane on ground.
         /// </summary>
-        /// <param name="time">game time from last speed change</param>
+        /// <param name="time">game _time from last speed change</param>
         /// <param name="distance">distance from the land_runway treshold</param>
         /// <param name="in_air">if the airplane id in the air (true) or already on ground (false)</param>
         private void ControlLandingSpeed(float time, float distance, bool in_air)
@@ -205,7 +205,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Control an airplane altitude and decrease it in time.
+        /// Control an airplane altitude and decrease it in _time.
         /// </summary>
         /// <param name="distance">distance from a treshold of the land_runway</param>
         private void ControlLandingAltitude(float distance)

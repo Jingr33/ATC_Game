@@ -103,9 +103,9 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update events in the object info panel.
+        /// UpdateGame events in the object info panel.
         /// </summary>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         public void Update(GameTime game_time)
         {
             GenerateTabs();
@@ -114,7 +114,7 @@ namespace ATC_Game
         }
 
         /// <summary>
-        /// Update airport and airplane objects in the panel.
+        /// UpdateGame airport and airplane objects in the panel.
         /// </summary>
         /// <param name="game_time"></param>
         private void GenerateTabs()

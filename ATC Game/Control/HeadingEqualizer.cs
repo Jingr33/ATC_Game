@@ -26,10 +26,6 @@ namespace ATC_Game.Control
         private float _actual_x_pos;
         private float _actual_y_pos;
         private float _time;
-
-        public List<Texture2D> texture;
-        public List<Vector2> posit;
-
         public HeadingEqualizer(Airplane airplane)
         {
             _airplane = airplane;
@@ -38,16 +34,13 @@ namespace ATC_Game.Control
             _actual_x_pos = _airplane.center_position.X;
             _actual_y_pos = _airplane.center_position.Y;
             this._time = 0;
-
-            this.texture = new List<Texture2D>();
-            this.posit = new List<Vector2>();
         }
 
         /// <summary>
         /// Equalize a desired and actual actual_head of a plane. Create all trajectory of a turn.
         /// </summary>
         /// <param name="desire_heading">desired actual_head for straight flight of the airpolane to the destination wyapoint.</param>
-        /// <param name="game_time"> game time</param>
+        /// <param name="game_time"> game _time</param>
         public void Equalize(int desire_heading)
         {
             this.desired_heading = desire_heading;
@@ -80,11 +73,11 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Change heading of the airplane in time to lead it to the its land_runway.
+        /// Change heading of the airplane in _time to lead it to the its land_runway.
         /// </summary>
         /// <param name="airplane_pos">actual touch_down_position of the airplane</param>
         /// <param name="rwy_pos">touch_down_position of the treshold of the land_runway</param>
-        /// <param name="game_time">game time</param>
+        /// <param name="game_time">game _time</param>
         public void LeadToRunway (Vector2 airplane_pos, Vector2 rwy_pos, GameTime game_time)
         {
             this._time += (float)game_time.ElapsedGameTime.TotalSeconds;
@@ -172,7 +165,7 @@ namespace ATC_Game.Control
             float turn_radius = CalcRadiusOfTurn(heading_step); // RADIUS of final turn
             (Vector2 final_center_pos, bool is_left_turn) = FindCenterPosOfTurn(turn_radius, LWP);
             Vector2 turn_point = FindFinalTurnPoint(LWP, turn_radius, heading_step, final_center_pos, is_left_turn); // final start turn act_position of final turn
-            // points of the trajectory
+            // _points of the trajectory
             this.desired_heading = HeadingToWP(new Vector2(LWP.position.X - 50, LWP.position.Y - 50)); // desired actual_head is setted to the final turn start act_position
             GenToWPTrajectoryAsync(turn_point, heading_step); // generate first part of trajectory
             this.desired_heading = LWP.runway.heading; // the final turn start act_position is setted to the land_runway actual_head
@@ -207,7 +200,7 @@ namespace ATC_Game.Control
         }
 
         /// <summary>
-        /// Generate async all points of trajectory of a turn of the airplane.
+        /// Generate async all _points of trajectory of a turn of the airplane.
         /// </summary>
         /// <param name="heading_step">one actual_head change</param>
         private void GenerateTrajectoryAsync(float heading_step = 0.02f)
@@ -289,11 +282,11 @@ namespace ATC_Game.Control
         {
             //Vector2 one_direc_step = General.GetDirection(heading_step);
             //Vector2 two_direc_step = General.GetDirection(heading_step * 2);
-            //// three points for definition of circle
+            //// three _points for definition of circle
             //Vector2 x1 = new Vector2(0, 0);
             //Vector2 x2 = new Vector2(one_direc_step.X, one_direc_step.Y);
             //Vector2 x3 = new Vector2(two_direc_step.X, two_direc_step.Y) * 2;
-            //// calculation of guidelines of normal of sections between individual points
+            //// calculation of guidelines of normal of sections between individual _points
             //float gl1 = (x2.Y - x1.Y) / (x2.X - x1.X);
             //float gl2 = (x3.Y - x2.Y) / (x3.X - x2.X);
             //// calculation of a center touch_down_position of a turn circle
@@ -325,7 +318,7 @@ namespace ATC_Game.Control
                 Vector2 turn_point1 = CalcOneFinalTurnPoint(LWP, heading1, turn_radius, final_center_pos, is_left_final);
                 Vector2 turn_point2 = CalcOneFinalTurnPoint(LWP, heading2, turn_radius, final_center_pos, is_left_final);
 
-                // if these are the right points to ending the first turn check
+                // if these are the right _points to ending the first turn check
                 if (IsHeadingToThePoint(turn_point1, position1, heading1))
                     return turn_point1;
                 else if (IsHeadingToThePoint(turn_point2, position2, heading2))
@@ -501,10 +494,10 @@ namespace ATC_Game.Control
 
         //    for (int a = 0; a < 100; a++)
         //    {
-        //        // inner points
+        //        // inner _points
         //        P1 = P0 + D0 * turn_intens;
         //        P2 = P3 - D3 * turn_intens;
-        //        // some points on the curve
+        //        // some _points on the curve
         //        List<Vector2> curve_points = new List<Vector2>();
         //        for (int t = 0; t < 100; t++)
         //            curve_points.Add(BezierCurvePoint(t, P0, P1, P2, P3));
@@ -512,7 +505,7 @@ namespace ATC_Game.Control
         //        List<Vector2> derivates = new List<Vector2>();
         //        for (int i = 1; i < curve_points.Count; i++)
         //            derivates.Add(curve_points[i] - curve_points[i - 1]);
-        //        // calculation of curvatures of the points
+        //        // calculation of curvatures of the _points
         //        List<float> curvatures = new List<float>();
         //        for (int j = 1; j < derivates.Count; j++)
         //        {

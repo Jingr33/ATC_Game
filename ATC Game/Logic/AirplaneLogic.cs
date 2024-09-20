@@ -58,7 +58,7 @@ namespace ATC_Game.Logic
 
 
         /// <summary>
-        /// Update state and atributttes of all airplanes in the game.
+        /// UpdateGame state and atributttes of all airplanes in the game.
         /// </summary>
         /// <param name="game_time">game _time</param>
         private void UpdateAllAirplanes (GameTime game_time)
@@ -70,7 +70,7 @@ namespace ATC_Game.Logic
         }
 
         /// <summary>
-        /// Update all arrival alerts states.
+        /// UpdateGame all arrival alerts states.
         /// </summary>
         private void UpdateArrivalAlerts(GameTime game_time)
         {
